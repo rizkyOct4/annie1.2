@@ -1,0 +1,15 @@
+// ? PRIVATE FOLDER !!!
+
+- untuk memisahkan UI logic disini
+
+
+
+// ? ini untuk DATABASE PRISMA
+# Prisma CLI untuk migration & generate
+npm install prisma --save-dev  
+
+# Prisma Client (library runtime yang dipakai di kode)
+pnpm install @prisma/client
+
+# Driver database sesuai yang kamu pakai (Postgres contoh)
+npm install pg

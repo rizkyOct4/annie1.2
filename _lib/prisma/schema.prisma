@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  iu                                                                                     Int                               @id
+  first_name                                                                             String                            @db.VarChar(50)
+  last_name                                                                              String                            @db.VarChar(50)
+  email                                                                                  String                            @unique @db.VarChar(255)
+  password                                                                               String                            @db.VarChar(255)
+  role                                                                                   user_role?                        @default(guest)
+  public_id                                                                              String?                           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at                                                                             DateTime?                         @default(now()) @db.Timestamp(6)
+  users_description                                                                      users_description?
+  users_product                                                                          users_product[]
+  users_product_image_bookmark                                                           users_product_image_bookmark[]
+  users_product_image_comment_users_product_image_comment_tar_iu_receiverTousers         users_product_image_comment[]     @relation("users_product_image_comment_tar_iu_receiverTousers")
+  users_product_image_comment_users_product_image_comment_tar_iu_senderTousers           users_product_image_comment[]     @relation("users_product_image_comment_tar_iu_senderTousers")
+  users_product_image_sub_comment_users_product_image_sub_comment_tar_iu_receiverTousers users_product_image_sub_comment[] @relation("users_product_image_sub_comment_tar_iu_receiverTousers")
+  users_product_image_sub_comment_users_product_image_sub_comment_tar_iu_senderTousers   users_product_image_sub_comment[] @relation("users_product_image_sub_comment_tar_iu_senderTousers")
+  users_product_image_vote_users_product_image_vote_tar_iu_receiverTousers               users_product_image_vote[]        @relation("users_product_image_vote_tar_iu_receiverTousers")
+  users_product_image_vote_users_product_image_vote_tar_iu_senderTousers                 users_product_image_vote[]        @relation("users_product_image_vote_tar_iu_senderTousers")
+  users_product_image_followers_sender                                                   users_followers[]                 @relation("users_sender")
+  users_product_image_followers_receiver                                                 users_followers[]                 @relation("users_receiver")
+}
+
+model users_description {
+  tar_iu         Int          @unique
+  iu_description Int          @id
+  username       String       @db.VarChar(50)
+  biodata        String?
+  gender         user_gender? @default(alien)
+  phone_number   Int?         @default(0)
+  location       String?      @db.VarChar(100)
+  picture        String       @db.VarChar(255)
+  social_link    String[]     @db.VarChar(255)
+  update_at      DateTime?    @default(now()) @db.Timestamp(6)
+  users          users        @relation(fields: [tar_iu], references: [iu], onDelete: Cascade)
+}
+
+model users_followers {
+  tar_iu_sender     Int           
+  tar_iu_receiver   Int           
+  iu_follower       Int           @id
+  created_at        DateTime?     @default(now()) @db.Timestamp(6)
+  users_sender      users         @relation("users_sender", fields: [tar_iu_sender], references: [iu], onDelete: Cascade)
+  users_receiver    users         @relation("users_receiver", fields: [tar_iu_receiver], references: [iu], onDelete: Cascade)
+
+  @@unique([tar_iu_sender, tar_iu_receiver])
+}
+
+model users_product {
+  tar_iu                       Int
+  iu_product                   Int                            @id
+  type                         type_product?
+  folder_name                  String                         @db.VarChar(255)
+  status                       Boolean?                       @default(true)
+  created_at                   DateTime?                      @default(now()) @db.Timestamp(6)
+  users                        users                          @relation(fields: [tar_iu], references: [iu], onDelete: Cascade)
+  users_product_image          users_product_image?
+  users_product_video          users_product_video?
+  users_product_image_bookmark users_product_image_bookmark[]
+  users_product_image_vote     users_product_image_vote[]
+}
+
+model users_product_image {
+  tar_iu_product Int           @unique
+  description    String        @db.VarChar(255)
+  image_name     String        @db.VarChar(255)
+  url            String        @db.VarChar(255)
+  hashtag        String[]      @db.VarChar(255)
+  category       String[]      @db.VarChar(255)
+  users_product  users_product @relation(fields: [tar_iu_product], references: [iu_product], onDelete: Cascade)
+}
+
+model users_product_image_bookmark {
+  tar_iu_user    Int
+  tar_iu_product Int
+  iu_bookmark    Int           @id
+  status         Boolean?      @default(false)
+  users_product  users_product @relation(fields: [tar_iu_product], references: [iu_product], onDelete: Cascade)
+  users          users         @relation(fields: [tar_iu_user], references: [iu], onDelete: Cascade)
+}
+
+model users_product_image_comment {
+  tar_iu_sender                                            Int
+  tar_iu_receiver                                          Int
+  iu_comment                                               Int                               @id
+  text                                                     String
+  created_at                                               DateTime?                         @default(now()) @db.Timestamp(6)
+  users_users_product_image_comment_tar_iu_receiverTousers users                             @relation("users_product_image_comment_tar_iu_receiverTousers", fields: [tar_iu_receiver], references: [iu], onDelete: Cascade)
+  users_users_product_image_comment_tar_iu_senderTousers   users                             @relation("users_product_image_comment_tar_iu_senderTousers", fields: [tar_iu_sender], references: [iu], onDelete: Cascade)
+  users_product_image_sub_comment                          users_product_image_sub_comment[]
+}
+
+model users_product_image_sub_comment {
+  tar_iu_comment                                               Int
+  tar_iu_sender                                                Int
+  tar_iu_receiver                                              Int
+  iu_sub_comment                                               Int                         @id
+  text                                                         String
+  created_at                                                   DateTime?                   @default(now()) @db.Timestamp(6)
+  users_product_image_comment                                  users_product_image_comment @relation(fields: [tar_iu_comment], references: [iu_comment], onDelete: Cascade)
+  users_users_product_image_sub_comment_tar_iu_receiverTousers users                       @relation("users_product_image_sub_comment_tar_iu_receiverTousers", fields: [tar_iu_receiver], references: [iu], onDelete: Cascade)
+  users_users_product_image_sub_comment_tar_iu_senderTousers   users                       @relation("users_product_image_sub_comment_tar_iu_senderTousers", fields: [tar_iu_sender], references: [iu], onDelete: Cascade)
+}
+
+model users_product_image_vote {
+  tar_iu_sender                                         Int
+  tar_iu_receiver                                       Int
+  tar_iu_product                                        Int
+  iu_vote                                               Int           @id
+  like                                                  Int           @default(0)
+  dislike                                               Int           @default(0)
+  status                                                Boolean?      @default(false)
+  created_at                                            DateTime?     @default(now()) @db.Timestamp(6)
+  users_product                                         users_product @relation(fields: [tar_iu_product], references: [iu_product], onDelete: Cascade)
+  users_users_product_image_vote_tar_iu_receiverTousers users         @relation("users_product_image_vote_tar_iu_receiverTousers", fields: [tar_iu_receiver], references: [iu], onDelete: Cascade)
+  users_users_product_image_vote_tar_iu_senderTousers   users         @relation("users_product_image_vote_tar_iu_senderTousers", fields: [tar_iu_sender], references: [iu], onDelete: Cascade)
+}
+
+
+model users_product_video {
+  tar_iu_product  Int             @unique
+  description     String          @db.VarChar(255)
+  video_name      String          @db.VarChar(255)
+  url             String          @db.VarChar(255)
+  thumbnail_url   String          @db.VarChar(255)
+  duration        Int            
+  hashtag         String[]        @db.VarChar(255)
+  category        String[]        @db.VarChar(255)
+
+  users_product   users_product   @relation(fields: [tar_iu_product], references: [iu_product], onDelete: Cascade)
+
+  @@unique([tar_iu_product, video_name])
+}
+
+enum type_product {
+  photo
+  video
+}
+
+enum user_gender {
+  male
+  female
+  alien
+}
+
+enum user_role {
+  admin
+  creator
+  guest
+}

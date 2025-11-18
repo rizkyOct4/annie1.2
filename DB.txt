@@ -1,0 +1,184 @@
+\c prototype3
+
+// const LazyLogin = dynamic(() => import("./Login"), {
+//   loading: () => <p>Loading…</p>,
+// });
+
+
+// ? install prisma
+# Prisma CLI untuk migration & generate
+pnpm install prisma --save-dev  
+
+# Prisma Client (library runtime yang dipakai di kode)
+pnpm install @prisma/client  
+
+# Driver database sesuai yang kamu pakai (Postgres contoh)
+pnpm install pg
+
+
+1. pnpx prisma init
+2.
+pnpm add -D prisma
+pnpm add @prisma/client
+pnpm add pg
+
+
+// ? update => migrate dev.  pnpx prisma db pull --force
+
+// ? tarik db => pnpx prisma db pull
+
+// !! LAST => pnpx prisma validate
+
+pnpm prisma migrate dev --name init_users_table => MIGRATION !!
+pnpm prisma migrate reset => reset semua ini DB !!!!
+
+!!! => pnpm prisma db push => pakai ini !!!!!
+
+
+// ?  ALTER TABLE product_image_vote ADD COLUMN id_unique_piv SERIAL PRIMARY KEY;
+// ? drop id => ALTER TABLE product_image_hashtag ALTER COLUMN id_unique_pih DROP DEFAULT;
+
+
+Jenis relasi	di Parent	di Child	Penjelasan
+One-to-many	@id (cukup satu)	foreign key tanpa @unique	Contoh: user → banyak gambar
+One-to-one	@id	foreign key dengan @unique	Contoh: user → satu profil detail
+Many-to-many	@id	pakai tabel penghubung dengan composite key (@@id([...]))	Contoh: user ↔️ user (followers)
+
+@@id([tar_iu_sender, tar_iu_receiver])
+👉 menjadikan kombinasi sender dan receiver sebagai primary key unik (tidak bisa follow dua kali user yang sama).
+
+
+// ? Kalau kamu mau baca body (untuk POST/PUT), pakai await req.json():
+export async function POST(req: Request) {
+  const body = await req.json();
+  // body.email, body.password ...
+}
+
+// ?
+Query string: /users/api?id=123
+→ di route.ts kamu harus parse sendiri dengan new URL(req.url):
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get("id")
+  return Response.json({ id })
+}
+
+// ?
+Dynamic route segment: /users/[id]/api
+→ di app/users/[id]/api/route.ts kamu bisa langsung baca params dari context yang Next.js kirim:
+
+// app/users/[id]/api/route.ts
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  // ini params.id hasil dari [id]
+  const userId = params.id
+  // …
+  return Response.json({ userId })
+}
+
+
+// !!! axios lebih cocok dipakai di client component atau di luar Next.js (misalnya di script Node biasa).
+
+
+
+ARRAY[...]::varchar[] // => ex: ARRAY[${Prisma.join(hashtag)}]::varchar[],
+
+
+
+
+/// ?? ====== 
+Di client browser, fetch('/videography/api') akan otomatis jadi absolute URL http://localhost:3000/videography/api.
+Di server (Node.js), fetch() butuh URL absolut (http://…) atau new URL().
+Path relatif (/videography/api) dianggap invalid.
+
+
+
+// ? 
+:: => ini mencocokkan (type data) dari prisma ke postres !!!
+
+
+
+// ? 
+SPA
+Client side (useEffect, onClick dsb)
+credentials: 'include' ketika fetching !!!
+
+SSR
+import { cookies } from "next/headers";
+const cookieHeader = cookies().toString();
+  const res = await fetch(`${baseUrl}/category/${path}/api`, {
+    headers: {
+      Cookie: cookieHeader, // forward cookie user
+    },
+  });
+
+
+
+ALTER TABLE users
+ADD COLUMN public_id UUID DEFAULT gen_random_uuid() UNIQUE; => 
+
+
+prisma.$executeRaw => untuk execute, 
+prisma.$queryRaw => untuk selected
+
+
+ role       | user_role                   |           |          | 'guest'::user_role
+ created_at | timestamp without time zone |           |          | CURRENT_TIMESTAMP
+ public_id  | uuid                        |           |          | gen_random_uuid(),
+ 
+ ^^^^^^^^^ untuk kolom tabel datas, role kalau enum pakai typenya juga => ${role}::user_role
+
+ untuk created_at + public_id automatic !!!
+
+
+ model users {
+  id_unique                                                                    Int                         @id
+  first_name                                                                   String                      @db.VarChar(50)
+  last_name                                                                    String                      @db.VarChar(50)
+  email                                                                        String                      @unique @db.VarChar(255)
+  password                                                                     String                      @unique @db.VarChar(255)
+  role                                                                         user_role?                  @default(guest)
+  created_at                                                                   DateTime?                   @default(now()) @db.Timestamp(6)
+  public_id                                                                    String?                     @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  product_image_bookmark                                                       product_image_bookmark[]
+  product_image_categories                                                     product_image_categories[]
+  product_image_comment                                                        product_image_comment[]
+  product_image_hashtag                                                        product_image_hashtag[]
+  product_image_sub_comment_product_image_sub_comment_ref_id_u_receiverTousers product_image_sub_comment[] @relation("product_image_sub_comment_ref_id_u_receiverTousers")
+  product_image_sub_comment_product_image_sub_comment_ref_id_u_senderTousers   product_image_sub_comment[] @relation("product_image_sub_comment_ref_id_u_senderTousers")
+  product_image_vote_product_image_vote_ref_id_u_receiverTousers               product_image_vote[]        @relation("product_image_vote_ref_id_u_receiverTousers")
+  product_image_vote_product_image_vote_ref_id_u_senderTousers                 product_image_vote[]        @relation("product_image_vote_ref_id_u_senderTousers")
+  users_description                                                            users_description[]
+  users_discussion                                                             users_discussion[]
+  users_discussion_archive                                                     users_discussion_archive[]
+  users_discussion_comment                                                     users_discussion_comment[]
+  users_email_users_email_ref_id_u_receiverTousers                             users_email[]               @relation("users_email_ref_id_u_receiverTousers")
+  users_email_users_email_ref_id_u_senderTousers                               users_email[]               @relation("users_email_ref_id_u_senderTousers")
+  users_email_status                                                           users_email_status[]
+  users_followers_users_followers_ref_id_u_receiverTousers                     users_followers[]           @relation("users_followers_ref_id_u_receiverTousers")
+  users_followers_users_followers_ref_id_u_senderTousers                       users_followers[]           @relation("users_followers_ref_id_u_senderTousers")
+  users_product                                                                users_product[]
+  users_report                                                                 users_report[]
+  users_report_discussion_users_report_discussion_ref_id_u_receiverTousers     users_report_discussion[]   @relation("users_report_discussion_ref_id_u_receiverTousers")
+  users_report_discussion_users_report_discussion_ref_id_u_senderTousers       users_report_discussion[]   @relation("users_report_discussion_ref_id_u_senderTousers")
+  users_report_image_users_report_image_ref_id_u_receiverTousers               users_report_image[]        @relation("users_report_image_ref_id_u_receiverTousers")
+  users_report_image_users_report_image_ref_id_u_senderTousers                 users_report_image[]        @relation("users_report_image_ref_id_u_senderTousers")
+  users_social_link                                                            users_social_link[]
+  users_static                                                                 users_static[]
+}
+
+
+✅ Pilihan Operator Array di PostgreSQL
+Operator	Arti	Contoh
+= ANY(array_column)	Apakah nilai tertentu ada di array	'Photography' = ANY(upi.category)
+@>	Apakah array mengandung nilai lain	upi.category @> ARRAY['Photography']
+<@	Apakah array termasuk dalam array lain	upi.category <@ ARRAY['Photography', 'Food']
+&&	Apakah dua array memiliki elemen yang beririsan	upi.category && ARRAY['Photography', 'Food']
+
+
+// URL CONFIG PATH ======================
+Client (membentuk URL)	encodeURIComponent	Supaya spasi & karakter khusus aman di URL
+Server (membaca URL)	decodeURIComponent	Supaya balik ke bentuk aslinya (“Behind The Scenes”)

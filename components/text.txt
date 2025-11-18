@@ -1,0 +1,1 @@
+letak semua component kau disini !!! pisahkan dari route !!!

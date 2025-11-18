@@ -1,0 +1,9 @@
+1. kenapa di @pararel harus ada defaultnya ?
+2. liat interceptnya, bukannya seharusnya (..)[id] ? kenapa cuma (.)[id] aja ?? (apa modal ga dihitung jadi 1 folder ????)  
+3. kenapa di @pararel bagian page.tsx, default.tsx kosong ke2nya ??? *edit => OPTIONAL !!! HATI" PNGGUNAANNYAA !!! TRICKY !!!
+4. (.)intercept  => harus didalam => @pararel
+5. [dinamic route] => nama bisa bebas!! ga cuma slug aja !!! kondisikan besok kedepannya !!!    
+
+
+
+WWWWWWWWWWWWHHHHHHHHHHHHHHHHHHYYYYYYYYYYYYYYYYYYYYYYY !!!!!!!!!!!!!!!!???????
