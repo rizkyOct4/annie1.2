@@ -14,17 +14,17 @@ export interface FolderListToggle {
 }
 
 export interface IsRenderComponent {
+  isOpen: boolean;
   iuProduct: number | null;
   value: string;
 }
 
 const FolderList = () => {
-  const { listFolderData, openFolder, setOpenFolder } =
-    useContext(creatorContext);
-
-  const currentPath = usePathname()
+  const { listFolderData, folderNamePath } = useContext(creatorContext);
+  const currentPath = usePathname();
 
   const [isRender, setIsRender] = useState<IsRenderComponent>({
+    isOpen: false,
     iuProduct: null,
     value: "",
   });
@@ -33,26 +33,26 @@ const FolderList = () => {
     (actionType: string, folderName: string) => {
       switch (actionType) {
         case "open": {
-          setOpenFolder({
+          setIsRender((prev) => ({
+            ...prev,
             isOpen: true,
-            isFolder: folderName,
-          });
+          }));
           const newUrl = `${currentPath}?folder-name=${folderName}`;
           history.pushState({}, "", newUrl);
           break;
         }
         case "close": {
-          setOpenFolder({
+          setIsRender((prev) => ({
+            ...prev,
             isOpen: false,
-            isFolder: "",
-          });
+          }));
           const newUrl = `${currentPath}`;
           history.pushState({}, "", newUrl);
           break;
         }
       }
     },
-    [setOpenFolder, currentPath]
+    [currentPath]
   );
 
   const renderComponent = useCallback(() => {
@@ -103,8 +103,7 @@ const FolderList = () => {
                         {f.totalProduct}
                       </h1>
                     </div>
-                    {openFolder.isOpen &&
-                    openFolder.isFolder === f.folderName ? (
+                    {isRender.isOpen && folderNamePath === f.folderName ? (
                       <button onClick={() => handleAction("close", "")}>
                         <IoMdClose />
                       </button>
@@ -116,7 +115,7 @@ const FolderList = () => {
                       </button>
                     )}
                   </div>
-                  {openFolder.isFolder === f.folderName && (
+                  {folderNamePath === f.folderName && (
                     <ItemsList
                       folderName={f.folderName}
                       setIsRender={setIsRender}

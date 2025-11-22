@@ -3,15 +3,13 @@
 import { creatorContext } from "@/app/context";
 import { useContext, memo } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 
 const ItemDescription = () => {
-  const { descriptionItemFolderData } = useContext(creatorContext);
-  const id = useSearchParams().get("id");
+  const { descriptionItemFolderData, idPath } = useContext(creatorContext);
 
   return (
     <>
-      {id && (
+      {idPath && (
         <div className="overlay">
           <div className="space-y-4 p-4 bg-neutral-50 rounded-2xl shadow-sm">
             {Array.isArray(descriptionItemFolderData) &&

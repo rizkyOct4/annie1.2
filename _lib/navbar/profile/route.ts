@@ -57,6 +57,12 @@ export const ItemFolder = async (
   limit: number,
   offset: number
 ) => {
+  // const result = {
+  //   folderName: folderName,
+  //   data: [] as any[],
+  //   hasMore: false
+  // }
+
   const query = await prisma.$queryRaw<
     ItemFolderType[]
   >`SELECT upi.tar_iu_product, upi.url
@@ -74,14 +80,14 @@ export const ItemFolder = async (
       FROM users_product
       WHERE folder_name = ${folderName}`;
 
-  const hasMore = offset + 10 < Number(queryCheck[0].amount);
+  const hasMore = offset + limit < Number(queryCheck[0].amount);
 
   const data = query.map((i) => ({
     tarIuProduct: i.tar_iu_product,
     url: i.url,
   }));
 
-  return { data, hasMore };
+  return {data, hasMore};
 };
 // ? ITEM DESCRIPTION
 export const ItemFolderDescription = async (

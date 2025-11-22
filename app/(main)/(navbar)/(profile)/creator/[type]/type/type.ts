@@ -13,6 +13,7 @@ export type ItemFolderType = {
   url: string;
 };
 export type OriginaItemFolderType = {
+  folderName: string;
   data: ItemFolderType[];
   hasMore: boolean;
 };

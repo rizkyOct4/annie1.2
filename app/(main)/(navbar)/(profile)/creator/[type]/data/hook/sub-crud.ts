@@ -25,8 +25,7 @@ const usePost = ({
 }) => {
   const queryClient = useQueryClient();
 
-  const URL = ROUTES_PROFILE.POST_IMAGE({
-    key: "photoPost",
+  const URL = ROUTES_PROFILE.CRUD_IMAGE({
     method: "post",
     type: "photo",
     path: type,
@@ -125,8 +124,7 @@ const usePut = ({
 }) => {
   const queryClient = useQueryClient();
 
-    const URL = ROUTES_PROFILE.PUT({
-    key: "putImage",
+  const URL = ROUTES_PROFILE.CRUD_IMAGE({
     method: "put",
     type: "photo",
     path: type,
@@ -146,39 +144,6 @@ const usePut = ({
 
       const prevDescriptionItemData =
         queryClient.getQueryData(keyDescriptionItem);
-
-      // queryClient.setQueryData<InfiniteData<OriginalListFolderType>>(
-      //   keyListFolder,
-      //   (oldData) => {
-      //     if (!oldData) return oldData;
-
-      //     return {
-      //       ...oldData,
-      //       pages: oldData?.pages.flatMap((page: any) => {
-      //         const isExist = page.data.some(
-      //           (i: { folderName: string }) =>
-      //             i.folderName === mutate.folderName
-      //         );
-      //         if (isExist) {
-      //           return page.data.map(
-      //             (i: { folderName: string; totalProduct: number }) =>
-      //               i.folderName === mutate.folderName
-      //                 ? { ...i, totalProduct: i.totalProduct + 1 }
-      //                 : i
-      //           );
-      //         } else {
-      //           return {
-      //             ...page,
-      //             data: [
-      //               ...page.data,
-      //               { folderName: mutate.folderName, totalProduct: 1 },
-      //             ],
-      //           };
-      //         }
-      //       }),
-      //     };
-      //   }
-      // );
 
       return { prevDescriptionItemData };
     },

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { memo, useCallback, useContext, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { creatorContext } from "@/app/context";
 import { IoMdOpen } from "react-icons/io";
 import { MdUpdate } from "react-icons/md";
@@ -37,11 +37,10 @@ const ItemsList = ({
   folderName: string;
   setIsRender: React.Dispatch<React.SetStateAction<IsRenderComponent>>;
 }) => {
-  const { itemFolderData, isLoadingItemFolderPhoto, setIuProduct } =
+  const { itemFolderData, isLoadingItemFolderPhoto, setIsIdDescription } =
     useContext(creatorContext);
 
   const pathname = usePathname();
-  const router = useRouter();
 
   const [isOpen, setIsOpen] = useState<ItemListState>({
     open: false,
@@ -58,40 +57,27 @@ const ItemsList = ({
             open: prev.iuProduct === tarIuProduct ? false : true,
             iuProduct: prev.iuProduct === tarIuProduct ? null : tarIuProduct,
           }));
-          setIuProduct(tarIuProduct);
+          setIsIdDescription((prev: any) =>
+            prev === tarIuProduct ? null : tarIuProduct
+          );
           break;
         }
         case "update": {
           setIsRender({
+            isOpen: true,
             iuProduct: tarIuProduct,
             value: value,
           });
           break;
         }
-        // case "update": {
-        //   setIsOpen((prev) => ({
-        //     ...prev,
-        //     value: value,
-        //   }));
-        //   break;
-        // }
         case "openDescription": {
           const newUrl = `${pathname}?folder-name=${folderName}&id=${tarIuProduct}`;
           history.pushState({}, "", newUrl);
           break;
-          // history.pushState()
-          // router.push(
-          //   `${pathname}?folder-name=${folderName}&id=${tarIuProduct}`
-          // );
-          // break;
-
-          // router.push(
-          //   `${pathname}?folder-name=${folderName}&id=${tarIuProduct}`
-          // );
         }
       }
     },
-    [folderName, pathname, setIsRender, setIuProduct]
+    [folderName, pathname, setIsRender, setIsIdDescription]
   );
 
   if (isLoadingItemFolderPhoto) return <SLoading />;
@@ -100,59 +86,61 @@ const ItemsList = ({
     <div className="w-full flex flex-wrap justify-start gap-5 my-4 h-[300px]">
       {Array.isArray(itemFolderData) &&
         itemFolderData.length > 0 &&
-        itemFolderData.map((i) => (
-          <div
-            key={i.tarIuProduct}
-            className="
+        itemFolderData.map(
+          (i: { tarIuProduct: number; url: string; title: string }) => (
+            <div
+              key={i.tarIuProduct}
+              className="
               relative flex flex-col overflow-hidden
               rounded-2xl w-[25%]
               bg-gradient-to-br from-gray-50 to-gray-100
               border border-gray-100 shadow-sm
         "
-          >
-            {/* Image wrapper */}
-            <div className="relative w-full h-full overflow-hidden">
-              <Image
-                src={i.url}
-                alt={i.title ?? "Image"}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute bottom-3 left-3 flex gap-2 flex-wrap">
-                <>
-                  <button
-                    className="w-9 h-9 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
-                    onClick={() => handleAction("toggle", i.tarIuProduct, "")}
-                  >
-                    {isOpen.iuProduct === i.tarIuProduct && isOpen.open ? (
-                      <IoMdOpen />
-                    ) : (
-                      <BiExit />
+            >
+              {/* Image wrapper */}
+              <div className="relative w-full h-full overflow-hidden">
+                <Image
+                  src={i.url}
+                  alt={i.title ?? "Image"}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute bottom-3 left-3 flex gap-2 flex-wrap">
+                  <>
+                    <button
+                      className="w-9 h-9 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
+                      onClick={() => handleAction("toggle", i.tarIuProduct, "")}
+                    >
+                      {isOpen.iuProduct === i.tarIuProduct && isOpen.open ? (
+                        <IoMdOpen />
+                      ) : (
+                        <BiExit />
+                      )}
+                    </button>
+                    {isOpen.open && isOpen.iuProduct === i.tarIuProduct && (
+                      <>
+                        {btnList.map((btn, idx) => (
+                          <button
+                            key={idx}
+                            className="w-9 h-9 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
+                            onClick={() =>
+                              handleAction(btn.name, i.tarIuProduct, btn.name)
+                            }
+                            title={btn.title}
+                          >
+                            {btn.icon}
+                          </button>
+                        ))}
+                      </>
                     )}
-                  </button>
-                  {isOpen.open && isOpen.iuProduct === i.tarIuProduct && (
-                    <>
-                      {btnList.map((btn, idx) => (
-                        <button
-                          key={idx}
-                          className="w-9 h-9 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
-                          onClick={() =>
-                            handleAction(btn.name, i.tarIuProduct, btn.name)
-                          }
-                          title={btn.title}
-                        >
-                          {btn.icon}
-                        </button>
-                      ))}
-                    </>
-                  )}
-                </>
+                  </>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
     </div>
   );
 };
 
-export default ItemsList;
+export default memo(ItemsList);

@@ -6,7 +6,7 @@ import {
   keepPreviousData,
   useInfiniteQuery,
 } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type {
   ListFolderType,
   ItemFolderType,
@@ -14,16 +14,12 @@ import type {
   ItemFolderDescriptionType,
 } from "../../type/type";
 import axios from "axios";
-import { useSearchParams, useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { ROUTES_PROFILE } from "@/app/(main)/(navbar)/(profile)/creator/[type]/config";
 import { usePost, usePut } from "./sub-crud";
 
 const useCreatorButton = (publicId: string) => {
-  // ? url
-  const { type } = useParams<{ type: string }>();
-
   const [typeBtn, setTypeBtn] = useState<string>("");
-  // const [iuProduct, setIuProduct] = useState<number>();
 
   // * LIST POST FOLDER
   const { data: listPostFolder, isLoading: isLoadingListPost } = useQuery({
@@ -42,33 +38,10 @@ const useCreatorButton = (publicId: string) => {
     retry: false,
   });
 
-  // // * UPDATE PHOTO DATA
-  // const { data: UpdatePhoto, isLoading: isLoadingUpdatePhoto } = useQuery({
-  //   queryKey: ["keyUpdatePhoto", publicId, iuProduct],
-  //   queryFn: async () => {
-  //     const URL = ROUTES_PROFILE.GET_BTN({
-  //       key: "updatePhoto",
-  //       path: type,
-  //       iuProduct: iuProduct,
-  //     });
-  //     const { data } = await axios.get(URL);
-  //     return data;
-  //   },
-  //   enabled: !!iuProduct,
-  //   staleTime: 1000 * 60 * 1,
-  //   gcTime: 1000 * 60 * 60,
-  //   placeholderData: keepPreviousData,
-  //   refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
-  //   refetchOnMount: false,
-  //   retry: false,
-  // });
-
   const ListPostFolderData: ListPostFolderType[] = useMemo(
     () => listPostFolder,
     [listPostFolder]
   );
-
-  // const UpdatePhotoData = useMemo(() => UpdatePhoto ?? [], [UpdatePhoto]);
 
   return {
     listPostFolder,
@@ -84,17 +57,10 @@ const useCreatorButton = (publicId: string) => {
 };
 
 const useCreatorPhoto = (publicId: string) => {
-  const queryClient = useQueryClient();
   const { type } = useParams<{ type: string }>();
-  const [iuProduct, setIuProduct] = useState<number>();
-
-
-  const [openFolder, setOpenFolder] = useState({
-    isOpen: false,
-    isFolder: "",
-  });
-
-  const id = useSearchParams().get("id") ?? "";
+  const folderNamePath = useSearchParams().get("folder-name");
+  const [isIdDescription, setIsIdDescription] = useState(null);
+  const idPath = useSearchParams().get("id");
 
   // * List Folder
   const {
@@ -136,16 +102,16 @@ const useCreatorPhoto = (publicId: string) => {
     // hasNextPage,
     // isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["keyItemFolderPhoto", publicId, type, openFolder.isFolder],
+    queryKey: ["keyItemFolderPhoto", publicId, type, folderNamePath],
     queryFn: async ({ pageParam = 1 }) => {
       const URL = ROUTES_PROFILE.GET({
         typeConfig: "folderName",
         type: type,
-        folderName: openFolder.isFolder,
+        folderName: folderNamePath,
         pageParam: pageParam,
       });
       const { data } = await axios.get(URL, {
-        params: { folderName: openFolder.isFolder },
+        params: { folderName: folderNamePath },
       });
       return data;
     },
@@ -157,7 +123,7 @@ const useCreatorPhoto = (publicId: string) => {
     staleTime: 1000 * 60 * 3,
     gcTime: 1000 * 60 * 60,
     initialPageParam: 1,
-    enabled: !!openFolder.isFolder,
+    enabled: !!folderNamePath,
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
     refetchOnMount: false, // "always" => refetch jika stale saja
@@ -167,19 +133,24 @@ const useCreatorPhoto = (publicId: string) => {
 
   // * Description item
   const { data: descriptionItemFolderPhoto } = useQuery({
-    queryKey: ["keyDescriptionItemFolder", publicId, openFolder.isFolder, id],
+    queryKey: [
+      "keyDescriptionItemFolder",
+      publicId,
+      folderNamePath,
+      isIdDescription,
+    ],
     queryFn: async () => {
       const URL = ROUTES_PROFILE.GET({
         typeConfig: "id",
         type: type,
-        folderName: openFolder.isFolder,
-        id: id,
+        folderName: folderNamePath,
+        id: isIdDescription,
       });
       const { data } = await axios.get(URL);
       return data;
     },
     staleTime: 1000 * 60 * 5,
-    enabled: !!id,
+    enabled: !!isIdDescription,
     gcTime: 1000 * 60 * 60, // Cache data akan disimpan selama 1 jam
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
@@ -210,34 +181,43 @@ const useCreatorPhoto = (publicId: string) => {
 
   // *** SUB ========================================= ***
   const keyListFolder = ["keyListFolderPhoto", publicId, type];
-  const keyItemFolder = [
-    "keyItemFolderPhoto",
-    publicId,
-    type,
-    openFolder.isFolder,
-  ];
+  const keyItemFolder = ["keyItemFolderPhoto", publicId, type, folderNamePath];
   const keyDescriptionItem = [
     "keyDescriptionItemFolder",
     publicId,
-    openFolder.isFolder,
-    id,
+    folderNamePath,
+    isIdDescription,
   ];
 
   const { postPhoto } = usePost({ keyListFolder, keyItemFolder, type });
   const { putPhoto } = usePut({ keyDescriptionItem, type });
 
+  // * DATA =====
   const listFolderData = useMemo(
     () => listFolderPhoto?.pages.flatMap((page) => page.data ?? []),
     [listFolderPhoto?.pages]
   );
   const itemFolderData = useMemo(
-    () => itemFolderPhoto?.pages.flatMap((page) => page.data ?? []),
+    () => itemFolderPhoto?.pages.flatMap((page) => page.data) ?? [],
     [itemFolderPhoto?.pages]
   );
+  // const itemFolderData = useMemo(
+  //   () =>
+  //     itemFolderPhoto?.pages.flatMap((page) => ({
+  //       folderName: page.folderName,
+  //       data: page.data,
+  //     })) ?? [],
+  //   [itemFolderPhoto?.pages]
+  // );
   const descriptionItemFolderData = useMemo(
     () => descriptionItemFolderPhoto ?? [],
     [descriptionItemFolderPhoto]
   );
+
+  console.log(descriptionItemFolderData)
+  // const queryClient = useQueryClient();
+
+  // console.log(queryClient.getQueryCache().getAll());
 
   return {
     listFolderData,
@@ -247,27 +227,26 @@ const useCreatorPhoto = (publicId: string) => {
 
     // ? ====
     itemFolderData,
-    openFolder,
-    setOpenFolder,
     isLoadingItemFolderPhoto,
 
     // ? === DESCRIPTION ===
     descriptionItemFolderData,
-    setIuProduct,
+    // setIuProduct,
     // listFolderData,
     // itemFolderData,
     // descriptionItemFolderData,
 
     // * SUB - PHOTO ===
     postPhoto,
+    putPhoto,
+
+    // * PATH ===
+    folderNamePath,
+    idPath,
+
+    // * STATE ===
+    setIsIdDescription,
   };
 };
 
 export { useCreatorPhoto, useCreatorButton };
-
-
-
-// todo KONDISIKAN BESOK SAMA KAU !! GANTI SAMA KAU DESCRIPSI CUMA 1 !! ROUTENYA CUMA 1
-// TODO UPDATE SEKALIAN !! DIKIT LAGI ITU !! 
-// todo FIX UR FKING CODE  !! ITS FKING MESS !! THE STATE LIKE SHIITTTT !! FIXIT !!
-//todo 1 CLICK 1 DATA 2 COMPONENT USE IT !! UPDATE + DESCRIPTION

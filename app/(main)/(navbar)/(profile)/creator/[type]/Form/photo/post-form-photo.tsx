@@ -86,8 +86,9 @@ const PhotoPostForm = ({
         folderName: values.folderName,
         createdAt: LocalISOTime(),
       };
-      await postPhoto(payload);
-      setIsOpen({ open: false, type: "" });
+      // await postPhoto(payload);
+      // setIsOpen({ open: false, type: "" });
+      console.log(payload)
     } catch (error) {
       console.error(error);
     }
@@ -276,7 +277,7 @@ const PhotoPostForm = ({
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
 export default PhotoPostForm;

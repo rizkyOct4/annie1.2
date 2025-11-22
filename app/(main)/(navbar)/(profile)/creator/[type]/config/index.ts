@@ -13,7 +13,7 @@ export const ROUTES_PROFILE = {
     type?: string;
     folderName?: any;
     pageParam?: number;
-    id?: string;
+    id?: string | null;
   }) => {
     const limit = 10;
     const folderNameLimit = 4;
@@ -40,7 +40,7 @@ export const ROUTES_PROFILE = {
     iuProduct,
   }: {
     key: string;
-    path?: string,
+    path?: string;
     typeBtn?: string;
     iuProduct?: number;
   }) => {
@@ -49,29 +49,24 @@ export const ROUTES_PROFILE = {
       case "video": {
         return `${BASE_URL}/creator/${key}/api/get-button?type-btn=${typeBtn}`;
       }
-      case "updatePhoto": {
-        return `${BASE_URL}/creator/${path}/api/get-button?iu-product=${iuProduct}`;
-      }
       default:
         return "";
     }
   },
   // * ======
-  POST_IMAGE: ({
-    key,
+  CRUD_IMAGE: ({
     method,
     type,
     path,
   }: {
-    key: string;
-    method: string;
-    type: "photo" | "video";
+    method: "post" | "put";
+    type: "photo";
     path: string;
   }) => {
-    switch (key) {
-      case "photoPost":
-      case "videoPost": {
-        return `${BASE_URL}/creator/${path}/api/post-button?method=${method}&type=${type}`;
+    switch (method) {
+      case "post":
+      case "put": {
+        return `${BASE_URL}/creator/${path}/api/crud-image?method=${method}&type=${type}`;
       }
       default:
         return "";
@@ -96,5 +91,5 @@ export const ROUTES_PROFILE = {
       default:
         return "";
     }
-  }
+  },
 };
