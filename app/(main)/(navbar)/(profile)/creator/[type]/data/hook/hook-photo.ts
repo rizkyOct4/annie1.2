@@ -98,9 +98,9 @@ const useCreatorPhoto = (publicId: string) => {
   const {
     data: itemFolderPhoto,
     isLoading: isLoadingItemFolderPhoto,
-    // fetchNextPage,
-    // hasNextPage,
-    // isFetchingNextPage,
+    fetchNextPage: fetchNextPageItemFolder,
+    hasNextPage: isHasPageItemFolder,
+    isFetchingNextPage: isFetchingNextPageItemFolder,
   } = useInfiniteQuery({
     queryKey: ["keyItemFolderPhoto", publicId, type, folderNamePath],
     queryFn: async ({ pageParam = 1 }) => {
@@ -190,7 +190,7 @@ const useCreatorPhoto = (publicId: string) => {
   ];
 
   const { postPhoto } = usePost({ keyListFolder, keyItemFolder, type });
-  const { putPhoto } = usePut({ keyDescriptionItem, type });
+  const { putPhoto } = usePut({ keyDescriptionItem, keyItemFolder, type });
 
   // * DATA =====
   const listFolderData = useMemo(
@@ -209,12 +209,15 @@ const useCreatorPhoto = (publicId: string) => {
   //     })) ?? [],
   //   [itemFolderPhoto?.pages]
   // );
-  const descriptionItemFolderData = useMemo(
+  const descriptionItemFolderData: ItemFolderDescriptionType[] = useMemo(
     () => descriptionItemFolderPhoto ?? [],
     [descriptionItemFolderPhoto]
   );
 
-  console.log(descriptionItemFolderData)
+  console.log(itemFolderPhoto);
+  // console.log(itemFolderData)
+  // console.log(descriptionItemFolderData)
+
   // const queryClient = useQueryClient();
 
   // console.log(queryClient.getQueryCache().getAll());
@@ -225,9 +228,12 @@ const useCreatorPhoto = (publicId: string) => {
     hasNextPage,
     isFetchingNextPage,
 
-    // ? ====
+    // ? === ITEM FOLDER ===
     itemFolderData,
     isLoadingItemFolderPhoto,
+    fetchNextPageItemFolder,
+    isHasPageItemFolder,
+    isFetchingNextPageItemFolder,
 
     // ? === DESCRIPTION ===
     descriptionItemFolderData,

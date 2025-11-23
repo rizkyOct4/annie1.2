@@ -58,7 +58,6 @@ const PhotoPostForm = ({
     setValue,
     getValues,
     watch,
-    trigger,
   } = useForm<PostFormSchema>({
     resolver: zodResolver(zPostFormSchema),
     mode: "onChange",
@@ -80,14 +79,14 @@ const PhotoPostForm = ({
         description: values.description,
         imageName: values.imageName,
         imagePath: values.imagePath,
-        hashtags: values.hashtag,
-        categories: values.category,
+        hashtag: values.hashtag,
+        category: values.category,
         type: "photo",
         folderName: values.folderName,
         createdAt: LocalISOTime(),
       };
-      // await postPhoto(payload);
-      // setIsOpen({ open: false, type: "" });
+      await postPhoto(payload);
+      setIsOpen({ open: false, type: "" });
       console.log(payload)
     } catch (error) {
       console.error(error);
@@ -238,7 +237,7 @@ const PhotoPostForm = ({
                         key={i.name}
                         type="button"
                         onClick={() => {
-                          const current = getValues("category");
+                          const current = watch("category");
                           if (current.includes(i.name)) {
                             setValue(
                               "category",
@@ -249,8 +248,6 @@ const PhotoPostForm = ({
                             setValue("category", [...current, i.name], {
                               shouldValidate: true,
                             });
-                          } else {
-                            trigger("category");
                           }
                         }}
                         className={`px-3 py-1 rounded-full text-sm border transition-colors ${

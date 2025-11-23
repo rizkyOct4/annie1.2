@@ -33,3 +33,17 @@ export type ItemFolderDescriptionType = {
 export type ListPostFolderType = {
   folderName: string;
 };
+
+// * CRUD
+export type PutImageSchema = {
+  iuProduct: number;
+  publicId: number;
+  description: string;
+  imageName: string;
+  imagePath: string;
+  prevImage: string;
+  hashtag: string[];
+  category: string[];
+  type: string;
+  createdAt: Date;
+};

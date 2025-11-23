@@ -5,8 +5,8 @@ import ItemsList from "./items-list";
 import { creatorContext } from "@/app/context";
 import { IoMdOpen } from "react-icons/io";
 import { IoMdClose } from "react-icons/io";
-import FormPutPhoto from "./Form/photo/put-form-photo";
 import { usePathname } from "next/navigation";
+import FormPutPhoto from "./Form/photo/put-form-photo";
 
 export interface FolderListToggle {
   open: boolean;
@@ -131,4 +131,4 @@ const FolderList = () => {
   );
 };
 
-export default memo(FolderList);
+export default FolderList;

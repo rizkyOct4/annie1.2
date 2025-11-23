@@ -10,7 +10,7 @@ import { zPutFormSchema } from "./schema";
 import { z } from "zod";
 import { ForbiddenRegex } from "@/_util/Regex";
 import { IsRenderComponent } from "../../folder-list";
-import { SLoading } from "@/_util/Spinner-loading";
+import type { PutImageSchema } from "../../type/type";
 
 type PutFormSchema = z.infer<typeof zPutFormSchema>;
 
@@ -46,59 +46,55 @@ const FormPutPhoto = ({
     setValue,
     getValues,
     watch,
-    trigger,
     reset,
   } = useForm<PutFormSchema>({
     resolver: zodResolver(zPutFormSchema),
     mode: "onChange",
     defaultValues: {
-      imageName: descriptionItemFolderData[0].imageName || "",
-      imagePath: descriptionItemFolderData[0].url || "",
-      // folderName: descriptionItemFolderData[0].folderName,
-      hashtag: descriptionItemFolderData[0].hashtag || [],
-      category: descriptionItemFolderData[0].category || [],
-      description: descriptionItemFolderData[0].description || "",
+      imageName: "",
+      imagePath: "",
+      prevImage: "",
+      hashtag: [],
+      category: [],
+      description: "",
     },
   });
 
-  // useEffect(() => {
-  //   // ! INITIATE DATA cuma berlaku saat pertama kali mount ke component !! kalau data beda pastikan RESET !!!
-  //   if (descriptionItemFolderData) {
-  //     reset({
-  //       imageName: descriptionItemFolderData[0].imageName || "",
-  //       imagePath: descriptionItemFolderData[0].url || "",
-  //       // folderName: descriptionItemFolderData[0].folderName,
-  //       hashtag: descriptionItemFolderData[0].hashtag || [],
-  //       category: descriptionItemFolderData[0].category || [],
-  //       description: descriptionItemFolderData[0].description || "",
-  //     });
-  //   }
-  // }, [descriptionItemFolderData, reset]);
+  useEffect(() => {
+    // ! INITIATE DATA cuma berlaku saat pertama kali mount ke component !! kalau data beda pastikan RESET !!!
+    if (descriptionItemFolderData) {
+      reset({
+        imageName: descriptionItemFolderData[0].imageName || "",
+        imagePath: descriptionItemFolderData[0].url || "",
+        prevImage: descriptionItemFolderData[0].url || "",
+        hashtag: descriptionItemFolderData[0].hashtag || [],
+        category: descriptionItemFolderData[0].category || [],
+        description: descriptionItemFolderData[0].description || "",
+      });
+    }
+  }, [descriptionItemFolderData, reset]);
 
   const submit = handleSubmit(async (values) => {
     try {
-      // const payload = {
-      //   iuProduct: descriptionItemFolderData[0].tarIuProduct,
-      //   publicId: publicId,
-      //   description: values.description,
-      //   imageName: values.imageName,
-      //   imagePath: values.imagePath,
-      //   prevImage: descriptionItemFolderData[0].url,
-      //   hashtags: values.hashtag,
-      //   categories: values.category,
-      //   type: "photo",
-      //   // folderName: values.folderName,
-      //   createdAt: LocalISOTime(),
-      // };
-      console.log("test");
-      // await putPhoto(payload);
+      const payload: PutImageSchema = {
+        iuProduct: descriptionItemFolderData[0].tarIuProduct,
+        publicId: publicId,
+        description: values.description,
+        imageName: values.imageName,
+        imagePath: values.imagePath,
+        prevImage: descriptionItemFolderData[0].url,
+        hashtag: values.hashtag,
+        category: values.category,
+        type: "photo",
+        createdAt: LocalISOTime(),
+      };
+      await putPhoto(payload);
       setIsRender({ isOpen: false, iuProduct: null, value: "" });
     } catch (error) {
       console.error(error);
     }
   });
 
-  // console.log(descriptionItemFolderData[0].tarIuProduct)
   return (
     <div className="overlay">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-3xl p-6 relative">
@@ -119,9 +115,9 @@ const FormPutPhoto = ({
           <div className="flex flex-col md:flex-row gap-6">
             {/* // * Left side */}
             <div className="flex-1 flex flex-col gap-4">
-              {getValues("imagePath") && (
+              {watch("imagePath") && (
                 <Image
-                  src={getValues("imagePath")}
+                  src={watch("imagePath")}
                   alt="Preview"
                   width={160}
                   height={140}
@@ -233,7 +229,7 @@ const FormPutPhoto = ({
                         key={i.name}
                         type="button"
                         onClick={() => {
-                          const current = getValues("category");
+                          const current = watch("category");
                           if (current.includes(i.name)) {
                             setValue(
                               "category",
@@ -244,8 +240,6 @@ const FormPutPhoto = ({
                             setValue("category", [...current, i.name], {
                               shouldValidate: true,
                             });
-                          } else {
-                            trigger("category");
                           }
                         }}
                         className={`px-3 py-1 rounded-full text-sm border transition-colors ${
@@ -265,7 +259,6 @@ const FormPutPhoto = ({
 
           <button
             type="submit"
-            onClick={() => console.log("test")}
             className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
             Submit
@@ -277,6 +270,3 @@ const FormPutPhoto = ({
 };
 
 export default FormPutPhoto;
-
-
-// todo BUG INI !! TAH APA GA TAUU !!

@@ -170,8 +170,8 @@ export const PostDb = async ({
   publicId,
   description,
   webpName,
-  hashtags,
-  categories,
+  hashtag,
+  category,
   type,
   folderName,
   cloudUrl,
@@ -181,8 +181,8 @@ export const PostDb = async ({
   publicId: string;
   description: string;
   webpName: string;
-  hashtags: string[];
-  categories: string[];
+  hashtag: string[];
+  category: string[];
   type: string;
   folderName: string;
   cloudUrl: string;
@@ -203,7 +203,7 @@ export const PostDb = async ({
       await tx.$executeRaw`
         INSERT INTO users_product_image 
         (tar_iu_product, description, image_name, url, hashtag, category)
-        VALUES (${iuProduct}, ${description}, ${webpName}, ${cloudUrl}, ${hashtags}::varchar[], ${categories}::varchar[])`;
+        VALUES (${iuProduct}, ${description}, ${webpName}, ${cloudUrl}, ${hashtag}::varchar[], ${category}::varchar[])`;
     });
   } catch (err: any) {
     throw new Error(err);

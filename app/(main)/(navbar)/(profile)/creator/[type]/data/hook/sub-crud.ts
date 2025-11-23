@@ -13,6 +13,7 @@ import type {
   OriginaItemFolderType,
 } from "../../type/type";
 import { showToast } from "@/_util/Toast";
+import { ItemFolderDescriptionType } from "../../type/type";
 
 const usePost = ({
   keyListFolder,
@@ -58,12 +59,14 @@ const usePost = ({
                   i.folderName === mutate.folderName
               );
               if (isExist) {
-                return page.data.map(
-                  (i: { folderName: string; totalProduct: number }) =>
+                return {
+                  ...page,
+                  data: page.data.map((i: { folderName: string; totalProduct: number }) =>
                     i.folderName === mutate.folderName
                       ? { ...i, totalProduct: i.totalProduct + 1 }
                       : i
-                );
+                  ),
+                };
               } else {
                 return {
                   ...page,
@@ -82,7 +85,6 @@ const usePost = ({
     },
     onSuccess: (response) => {
       const { data } = response.data;
-      console.log(data);
       showToast({ type: "loading", fallback: false });
       queryClient.setQueryData<InfiniteData<OriginaItemFolderType>>(
         keyItemFolder,
@@ -95,7 +97,7 @@ const usePost = ({
               ...page,
               data: [
                 ...page.data,
-                { tarIuProduct: data.tarIuProduct, url: data.url },
+                { tarIuProduct: data[0].tarIuProduct, url: data[0].url },
               ],
             })),
           };
@@ -117,9 +119,11 @@ const usePost = ({
 
 const usePut = ({
   keyDescriptionItem,
+  keyItemFolder,
   type,
 }: {
   keyDescriptionItem: any[];
+  keyItemFolder: any[];
   type: string;
 }) => {
   const queryClient = useQueryClient();
@@ -132,10 +136,10 @@ const usePut = ({
 
   const { mutateAsync: putPhoto } = useMutation({
     mutationFn: async (data) =>
-      await axios.post(URL, data, {
+      await axios.put(URL, data, {
         withCredentials: true, // kalau perlu cookie/session
       }),
-    onMutate: async (mutate) => {
+    onMutate: async () => {
       showToast({ type: "loading", fallback: true });
 
       await queryClient.cancelQueries({
@@ -147,36 +151,62 @@ const usePut = ({
 
       return { prevDescriptionItemData };
     },
-    // onSuccess: (response) => {
-    //   const { data } = response.data;
-    //   console.log(data);
-    //   showToast({ type: "loading", fallback: false });
-    //   queryClient.setQueryData<InfiniteData<OriginaItemFolderType>>(
-    //     keyItemFolder,
-    //     (oldData) => {
-    //       if (!oldData) return oldData;
+    onSuccess: (response) => {
+      const { data } = response.data;
 
-    //       return {
-    //         ...oldData,
-    //         pages: oldData?.pages.flatMap((page) => ({
-    //           ...page,
-    //           data: [
-    //             ...page.data,
-    //             { tarIuProduct: data.tarIuProduct, url: data.url },
-    //           ],
-    //         })),
-    //       };
-    //     }
-    //   );
-    // },
-    // onError: (error, _variables, context) => {
-    //   showToast({ type: "loading", fallback: false });
-    //   showToast({ type: "error", fallback: error });
-    //   console.error(error);
-    //   // if (context?.prevListFolderData) {
-    //     queryClient.setQueryData(keyListFolder, context.prevListFolderData);
-    //   }
-    // },
+      // ? DESCTIPTION
+      queryClient.setQueryData<ItemFolderDescriptionType[]>(
+        keyDescriptionItem,
+        (oldData) => {
+          if (!oldData) return [];
+
+          return oldData.map((i) => ({
+            ...i,
+            description: data[0].description,
+            hashtag: data[0].hashtag,
+            category: data[0].category,
+            url: data[0].url,
+            createdAt: data[0].createdAt,
+          }));
+        }
+      );
+
+      // ? ITEMS FOLDER
+      queryClient.setQueryData<InfiniteData<OriginaItemFolderType>>(
+        keyItemFolder,
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData?.pages.flatMap((page: any) => ({
+              ...page,
+              data: page.data.map((s: { tarIuProduct: number }) =>
+                s.tarIuProduct === data[0].tarIuProduct
+                  ? {
+                      ...s,
+                      url: data[0].url,
+                    }
+                  : s
+              ),
+            })),
+          };
+        }
+      );
+
+      showToast({ type: "loading", fallback: false });
+    },
+    onError: (error, _variables, context) => {
+      showToast({ type: "loading", fallback: false });
+      showToast({ type: "error", fallback: error });
+      console.error(error);
+      if (context?.prevDescriptionItemData) {
+        queryClient.setQueryData(
+          keyDescriptionItem,
+          context.prevDescriptionItemData
+        );
+      }
+    },
   });
 
   return { putPhoto };

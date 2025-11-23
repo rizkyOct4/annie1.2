@@ -69,8 +69,3 @@ const CreatorsCard = ({ url }: { url: string }) => {
 };
 
 export default CreatorsCard;
-
-// todo besok kondisikan sama kau ini untuk scrool + hook + useRef
-// todo ROUTE KAU BELUM PAS LAGI !!! KONDISIKAN LAGI SAMA KAU BESOK !! BUAT PERFCT!!
-// todo INFINITEQUERY KAU kondisikan lagi !!! liat gimana di hook kau !!!
-//todo OFFSET FILTER DATA DB !!!

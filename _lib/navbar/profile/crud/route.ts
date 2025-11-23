@@ -47,7 +47,7 @@ export const GetUpdateImage = async (iuProduct: number) => {
 };
 
 // ? PUT IMAGE
-export const PutCloudinary = ({
+export const PutCloudinary = async ({
   publicId,
   iuProduct,
   webpName,
@@ -60,69 +60,57 @@ export const PutCloudinary = ({
   imagePath: string;
   prevImage: string;
 }) => {
-  try {
-    return prisma.$transaction(async (tx) => {
-      const queryCheck = await tx.$queryRaw<{ url: string }[]>`
-        SELECT url
-        FROM users_product_image
-        WHERE tar_iu_product = ${iuProduct}
-      `;
+  if (!imagePath.startsWith("data:image")) {
+    return prevImage;
+  } else {
+    // ? Check Cloudinary
+    // --- 1. Decode base64 jadi buffer ---
+    const [header, base64Data] = imagePath.split(",", 2);
+    const imageBuffer = Buffer.from(base64Data, "base64");
 
-      if (queryCheck[0].url === prevImage) {
-        return;
-      } else {
-        // ? Check Cloudinary
-        // --- 1. Decode base64 jadi buffer ---
-        const [header, base64Data] = imagePath.split(",", 2);
-        const imageBuffer = Buffer.from(base64Data, "base64");
+    // --- 2. Resize + convert ke WEBP pakai sharp ---
+    const processedImage = await sharp(imageBuffer)
+      .resize(800, 800, { fit: "inside" }) // max 800x800
+      .webp({ quality: 85 }) // convert ke WEBP
+      .toBuffer();
 
-        // --- 2. Resize + convert ke WEBP pakai sharp ---
-        const processedImage = await sharp(imageBuffer)
-          .resize(800, 800, { fit: "inside" }) // max 800x800
-          .webp({ quality: 85 }) // convert ke WEBP
-          .toBuffer();
-
-        // --- 3. Upload ke Cloudinary ---
-        const result = await new Promise<any>((resolve, reject) => {
-          cloudinary.uploader
-            .upload_stream(
-              {
-                folder: `usersProduct/${publicId}/`,
-                public_id: webpName, // hapus ekstensi lama
-                resource_type: "image",
-                format: "webp",
-              },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result);
-              }
-            )
-            .end(processedImage); // isi stream dengan buffer hasil sharp
-        });
-
-        return result.secure_url;
-      }
+    // --- 3. Upload ke Cloudinary ---
+    const result = await new Promise<any>((resolve, reject) => {
+      cloudinary.uploader
+        .upload_stream(
+          {
+            folder: `usersProduct/${publicId}/`,
+            public_id: webpName, // hapus ekstensi lama
+            resource_type: "image",
+            format: "webp",
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        )
+        .end(processedImage); // isi stream dengan buffer hasil sharp
     });
-  } catch (err: any) {
-    throw new Error(err);
+
+    return result.secure_url;
   }
 };
 
 export const PutImage = ({
   iuProduct,
   description,
-  imageName,
+  webpName,
   url,
-  hashtags,
-  categories,
+  hashtag,
+  category,
   createdAt,
 }: {
   iuProduct: number;
   description: string;
-  imageName: string;
+  webpName: string;
   url: string;
-  hashtags: string[];
-  categories: string[];
+  hashtag: string[];
+  category: string[];
   createdAt: Date;
 }) => {
   try {
@@ -130,13 +118,13 @@ export const PutImage = ({
       // ? users_product DB
       await tx.$queryRaw`
         UPDATE users_product
-        SET created_at = ${createdAt}
+        SET created_at = ${createdAt}::timestamp
         WHERE iu_product = ${iuProduct};
       `;
 
       await tx.$queryRaw`
         UPDATE users_product_image
-        SET description = ${description}, image_name = ${imageName}, url = ${url}, hashtag = ${hashtags}, category = ${categories}
+        SET description = ${description}, image_name = ${webpName}, url = ${url}, hashtag = ${hashtag}::varchar[], category = ${category}::varchar[]
         WHERE tar_iu_product = ${iuProduct}
         `;
     });
