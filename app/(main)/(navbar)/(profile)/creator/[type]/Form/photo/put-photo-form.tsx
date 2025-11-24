@@ -1,30 +1,18 @@
 "use client";
 
-import { RandomId, LocalISOTime } from "@/_util/GenerateData";
+import { LocalISOTime } from "@/_util/GenerateData";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useCallback, useContext } from "react";
+import { useContext, useEffect } from "react";
 import { creatorContext } from "@/app/context";
-import { zPostFormSchema } from "./schema";
-import { ToggleStateType } from "../../type/interface";
+import { zPutFormSchema } from "./schema";
 import { z } from "zod";
 import { ForbiddenRegex } from "@/_util/Regex";
+import { IsRenderComponent } from "../../../folder-list";
+import type { PutImageSchema } from "../../type/type";
 
-type PostFormSchema = z.infer<typeof zPostFormSchema>;
-
-export type PhotoPostType = {
-  iuProduct: number;
-  publicId: string;
-  description: string;
-  imageName: string;
-  imagePath: string;
-  hashtags: string[];
-  categories: string[];
-  type: string;
-  folderName: string;
-  createdAt: Date;
-};
+type PutFormSchema = z.infer<typeof zPutFormSchema>;
 
 const categories = [
   { name: "Photography", icon: "📸" },
@@ -43,12 +31,12 @@ const categories = [
   { name: "Behind The Scenes", icon: "🔧" },
 ];
 
-const PhotoPostForm = ({
-  setIsOpen,
+const PutPhotoForm = ({
+  setIsRender,
 }: {
-  setIsOpen: React.Dispatch<React.SetStateAction<ToggleStateType>>;
+  setIsRender: React.Dispatch<React.SetStateAction<IsRenderComponent>>;
 }) => {
-  const { ListPostFolderData, isLoadingListPost, publicId, postPhoto } =
+  const { descriptionItemFolderData, putPhoto, publicId } =
     useContext(creatorContext);
 
   const {
@@ -58,36 +46,50 @@ const PhotoPostForm = ({
     setValue,
     getValues,
     watch,
-  } = useForm<PostFormSchema>({
-    resolver: zodResolver(zPostFormSchema),
+    reset,
+  } = useForm<PutFormSchema>({
+    resolver: zodResolver(zPutFormSchema),
     mode: "onChange",
     defaultValues: {
       imageName: "",
       imagePath: "",
-      folderName: "",
+      prevImage: "",
       hashtag: [],
       category: [],
       description: "",
     },
   });
 
+  useEffect(() => {
+    // ! INITIATE DATA cuma berlaku saat pertama kali mount ke component !! kalau data beda pastikan RESET !!!
+    if (descriptionItemFolderData) {
+      reset({
+        imageName: descriptionItemFolderData[0].imageName || "",
+        imagePath: descriptionItemFolderData[0].url || "",
+        prevImage: descriptionItemFolderData[0].url || "",
+        hashtag: descriptionItemFolderData[0].hashtag || [],
+        category: descriptionItemFolderData[0].category || [],
+        description: descriptionItemFolderData[0].description || "",
+      });
+    }
+  }, [descriptionItemFolderData, reset]);
+
   const submit = handleSubmit(async (values) => {
     try {
-      const payload: PhotoPostType = {
-        iuProduct: RandomId(),
+      const payload: PutImageSchema = {
+        iuProduct: descriptionItemFolderData[0].tarIuProduct,
         publicId: publicId,
         description: values.description,
         imageName: values.imageName,
         imagePath: values.imagePath,
+        prevImage: descriptionItemFolderData[0].url,
         hashtag: values.hashtag,
         category: values.category,
         type: "photo",
-        folderName: values.folderName,
         createdAt: LocalISOTime(),
       };
-      await postPhoto(payload);
-      setIsOpen({ open: false, type: "" });
-      console.log(payload)
+      await putPhoto(payload);
+      setIsRender({ isOpen: false, iuProduct: null, value: "" });
     } catch (error) {
       console.error(error);
     }
@@ -99,21 +101,23 @@ const PhotoPostForm = ({
         {/* Close button */}
         <button
           type="button"
-          onClick={() => setIsOpen({ open: false, type: "" })}
+          onClick={() =>
+            setIsRender({ isOpen: false, iuProduct: null, value: "" })
+          }
           className="absolute top-4 right-4 text-2xl leading-none text-gray-800 hover:text-black hover:cursor-pointer"
         >
           &times;
         </button>
 
-        <h2 className="text-2xl font-semibold mb-6 text-black">Upload Photo</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-black">Update Photo</h2>
 
         <form className="flex flex-col gap-6" onSubmit={submit}>
           <div className="flex flex-col md:flex-row gap-6">
             {/* // * Left side */}
             <div className="flex-1 flex flex-col gap-4">
-              {getValues("imagePath") && (
+              {watch("imagePath") && (
                 <Image
-                  src={getValues("imagePath")}
+                  src={watch("imagePath")}
                   alt="Preview"
                   width={160}
                   height={140}
@@ -141,7 +145,6 @@ const PhotoPostForm = ({
                     }
                   }}
                   className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  required
                 />
               </label>
 
@@ -162,17 +165,6 @@ const PhotoPostForm = ({
 
             {/* // * Right side */}
             <div className="flex-1 flex flex-col gap-4">
-              {/* Folder */}
-              <label className="flex flex-col text-sm text-black">
-                Folder
-                <input
-                  type="text"
-                  placeholder={watch("folderName")}
-                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  {...register("folderName")}
-                />
-              </label>
-
               {/* Hashtags */}
               <label className="flex flex-col text-sm text-black">
                 Hashtags
@@ -274,7 +266,7 @@ const PhotoPostForm = ({
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PhotoPostForm;
+export default PutPhotoForm;

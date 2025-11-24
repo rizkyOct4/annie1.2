@@ -17,6 +17,52 @@ import axios from "axios";
 import { useParams, useSearchParams } from "next/navigation";
 import { ROUTES_PROFILE } from "@/app/(main)/(navbar)/(profile)/creator/[type]/config";
 import { usePost, usePut } from "./sub-crud";
+import { ROUTES_LIST_FOLDER } from "../../config/list-folder";
+
+const useListFolder = (publicId: string) => {
+  const { type } = useParams<{ type: string }>();
+
+  const {
+    data: listFolderPhoto,
+    fetchNextPage: FNPListFolderPhoto,
+    hasNextPage: HNPListFolderPhoto,
+    isFetchingNextPage: IFNPListFolderPhoto,
+  } = useInfiniteQuery({
+    queryKey: ["keyListFolderPhoto", publicId, type],
+    queryFn: async ({ pageParam = 1 }) => {
+      const { data } = await axios.get(
+        ROUTES_LIST_FOLDER.GET({
+          typeConfig: "listFolderPhoto",
+          path: type,
+          pageParam: pageParam,
+        })
+      );
+      return data;
+    },
+    // ? ketika melakukan fetchNextPage maka akan memanggil queryFn kembali
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage?.hasMore ? allPages.length + 1 : undefined;
+    },
+    staleTime: 1000 * 60 * 3,
+    gcTime: 1000 * 60 * 60,
+    initialPageParam: 1,
+    enabled: !!type,
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
+    refetchOnMount: false, // "always" => refetch jika stale saja
+    retry: false,
+  });
+
+  console.log(listFolderPhoto)
+
+  return {
+    // * LIST FOLDER PHOTO
+    listFolderPhoto,
+    FNPListFolderPhoto,
+    HNPListFolderPhoto,
+    IFNPListFolderPhoto,
+  };
+};
 
 const useCreatorButton = (publicId: string) => {
   const [typeBtn, setTypeBtn] = useState<string>("");
@@ -255,4 +301,4 @@ const useCreatorPhoto = (publicId: string) => {
   };
 };
 
-export { useCreatorPhoto, useCreatorButton };
+export { useListFolder, useCreatorPhoto, useCreatorButton };

@@ -66,6 +66,11 @@ model users_product {
   users_product_video          users_product_video?
   users_product_image_bookmark users_product_image_bookmark[]
   users_product_image_vote     users_product_image_vote[]
+
+  @@index([tar_iu], name: "idx_tar_iu")
+  @@index([created_at], name: "idx_created_at")
+  @@index([folder_name], name: "idx_folder_name")
+  @@index([tar_iu, created_at], name: "idx_tar_iu_created_at")
 }
 
 model users_product_image {

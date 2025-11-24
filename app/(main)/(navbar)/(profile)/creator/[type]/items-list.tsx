@@ -62,7 +62,7 @@ const ItemsList = ({
 
   // ? setup observer
   const { ref: lastItemRef, inView } = useInView({
-    threshold: 0.5, // ! trigger ketika 20% elemen terlihat
+    threshold: 0.2, // ! trigger ketika 20% elemen terlihat
     root,
   });
 
@@ -71,10 +71,10 @@ const ItemsList = ({
       fetchNextPageItemFolder();
     setRoot(containerRef.current);
   }, [
-    inView,
     isHasPageItemFolder,
     fetchNextPageItemFolder,
     isFetchingNextPageItemFolder,
+    inView,
   ]);
 
   const pathname = usePathname();
@@ -125,13 +125,13 @@ const ItemsList = ({
       {Array.isArray(itemFolderData) &&
         itemFolderData.length > 0 &&
         itemFolderData.map(
-          (i: { tarIuProduct: number; url: string; title: string }) => {
-            const isLast = i.tarIuProduct === itemFolderData.length - 1;
+          (i: { tarIuProduct: number; url: string; title: string }, idx) => {
+            const isLast = idx === itemFolderData.length - 1;
             return (
               <div
-                key={i.tarIuProduct}
+                key={idx}
                 ref={isLast ? lastItemRef : null}
-                className="relative flex flex-col w-[22%] h-[260px] rounded-2xl overflow-hidden border border-gray-100 shadow-sm bg-gradient-to-br from-gray-50 to-gray-100"
+                className="relative flex flex-col w-[22%] h-[260px] rounded-2xl overflow-hidden border border-gray-100 "
               >
                 {/* Image wrapper */}
                 <div className="relative w-full md:h-64 lg:h-72">
@@ -146,7 +146,7 @@ const ItemsList = ({
                   <div className="absolute bottom-3 flex flex-wrap gap-2 px-4">
                     {/* Toggle button */}
                     <button
-                      className="w-9 h-9 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
+                      className="w-9 h-9 rounded-xl bg-white/80 border border-gray-200 text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
                       onClick={() => handleAction("toggle", i.tarIuProduct, "")}
                     >
                       {isOpen.iuProduct === i.tarIuProduct && isOpen.open ? (
@@ -162,7 +162,7 @@ const ItemsList = ({
                       btnList.map((btn, idx) => (
                         <button
                           key={idx}
-                          className="w-9 h-9 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-sm text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
+                          className="w-9 h-9 rounded-xl bg-white/80 border border-gray-200 text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
                           onClick={() =>
                             handleAction(btn.name, i.tarIuProduct, btn.name)
                           }
@@ -189,5 +189,3 @@ const ItemsList = ({
 };
 
 export default memo(ItemsList);
-
-// todo INI BELUM FIX, KONDISIKAN BESOK SAMA KAU INI !! RENDERINGNYA KETIKA DI SCROOL PUN BERMASLAH !! GIX IT !! 

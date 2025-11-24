@@ -1,72 +1,93 @@
 "use client";
 
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { zPostVideoFormSchema } from "./schema";
 import { RandomId, LocalISOTime } from "@/_util/GenerateData";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
+import { useCallback, useContext } from "react";
+import { creatorContext } from "@/app/context";
+import { zPostFormSchema } from "./schema";
+import { ToggleStateType } from "../../type/interface";
+import { z } from "zod";
 import { ForbiddenRegex } from "@/_util/Regex";
-import { StateBtn } from "../../nav-dashboard";
 
-type PostVideoFormSchema = z.infer<typeof zPostVideoFormSchema>;
+type PostFormSchema = z.infer<typeof zPostFormSchema>;
 
-const videoCategories: string[] = [
-  "Art & Design",
-  "Animation",
-  "Music",
-  "Gaming",
-  "Education",
-  "Tutorial",
-  "Vlog",
-  "Lifestyle",
-  "Comedy",
-  "Technology",
-  "Sports",
-  "Travel",
-  "Food & Cooking",
-  "Fitness",
-  "Fashion & Beauty",
-  "News & Politics",
-  "Science",
-  "Photography",
-  "DIY & Crafts",
-  "Movies & Entertainment",
+export type PhotoPostType = {
+  iuProduct: number;
+  publicId: string;
+  description: string;
+  imageName: string;
+  imagePath: string;
+  hashtags: string[];
+  categories: string[];
+  type: string;
+  folderName: string;
+  createdAt: Date;
+};
+
+const categories = [
+  { name: "Photography", icon: "📸" },
+  { name: "Videography", icon: "🎥" },
+  { name: "Digital Art", icon: "🎨" },
+  { name: "Architecture", icon: "🏙️" },
+  { name: "Fashion", icon: "👗" },
+  { name: "Nature", icon: "🌿" },
+  { name: "Food & Drink", icon: "🍳" },
+  { name: "Automotive", icon: "🚗" },
+  { name: "Astrophotography", icon: "🌌" },
+  { name: "Mobile Shots", icon: "📱" },
+  { name: "Travel", icon: "🧳" },
+  { name: "Creative Concepts", icon: "🎭" },
+  { name: "Lifestyle & People", icon: "👶" },
+  { name: "Behind The Scenes", icon: "🔧" },
 ];
 
-const PostFormVideo = ({
-  setIsOpen,
+const PostPhotoForm = ({
+  setIsRender,
 }: {
-  setIsOpen: React.Dispatch<React.SetStateAction<StateBtn>>;
+  setIsRender: React.Dispatch<React.SetStateAction<ToggleStateType>>;
 }) => {
-  const { register, handleSubmit, formState, setValue, getValues, watch } =
-    useForm<PostVideoFormSchema>({
-      resolver: zodResolver(zPostVideoFormSchema),
-      mode: "onChange",
-      defaultValues: {
-        videoName: "",
-        videoFile: null,
-        folderName: "",
-        hashtag: [],
-        category: [],
-      },
-    });
+  const { ListPostFolderData, isLoadingListPost, publicId, postPhoto } =
+    useContext(creatorContext);
+
+  const {
+    register,
+    handleSubmit,
+    formState,
+    setValue,
+    getValues,
+    watch,
+  } = useForm<PostFormSchema>({
+    resolver: zodResolver(zPostFormSchema),
+    mode: "onChange",
+    defaultValues: {
+      imageName: "",
+      imagePath: "",
+      folderName: "",
+      hashtag: [],
+      category: [],
+      description: "",
+    },
+  });
 
   const submit = handleSubmit(async (values) => {
     try {
-      const postVideo = {
+      const payload: PhotoPostType = {
         iuProduct: RandomId(),
-        // publicId: publicId,
+        publicId: publicId,
         description: values.description,
-        videoName: values.videoFile?.name,
-        videoFile: values.videoFile,
-        hashtags: values.hashtag,
-        categories: values.category,
-        type: "video",
+        imageName: values.imageName,
+        imagePath: values.imagePath,
+        hashtag: values.hashtag,
+        category: values.category,
+        type: "photo",
         folderName: values.folderName,
         createdAt: LocalISOTime(),
       };
-      console.log(postVideo);
+      await postPhoto(payload);
+      setIsRender({ open: false, type: "" });
+      console.log(payload)
     } catch (error) {
       console.error(error);
     }
@@ -78,30 +99,47 @@ const PostFormVideo = ({
         {/* Close button */}
         <button
           type="button"
-          onClick={() => setIsOpen({ open: false, type: "" })}
+          onClick={() => setIsRender({ open: false, type: "" })}
           className="absolute top-4 right-4 text-2xl leading-none text-gray-800 hover:text-black hover:cursor-pointer"
         >
           &times;
         </button>
 
-        <h2 className="text-2xl font-semibold mb-6 text-black">Upload Video</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-black">Upload Photo</h2>
 
         <form className="flex flex-col gap-6" onSubmit={submit}>
           <div className="flex flex-col md:flex-row gap-6">
-            {/* Left side */}
+            {/* // * Left side */}
             <div className="flex-1 flex flex-col gap-4">
-              <label className="flex flex-col text-sm text-black">
-                Video File
+              {getValues("imagePath") && (
+                <Image
+                  src={getValues("imagePath")}
+                  alt="Preview"
+                  width={160}
+                  height={140}
+                  className="object-cover rounded-xl"
+                />
+              )}
+              <label className="flex flex-col text-sm text-black w-full">
+                Upload Photo
                 <input
                   type="file"
-                  accept="video/*"
-                  onChange={(e) =>
-                    setValue(
-                      "videoFile",
-                      e.target.files ? e.target.files[0] : null,
-                      { shouldValidate: true }
-                    )
-                  }
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setValue("imageName", file.name, {
+                          shouldValidate: true,
+                        });
+                        setValue("imagePath", reader.result as string, {
+                          shouldValidate: true,
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
                   className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                   required
                 />
@@ -122,8 +160,9 @@ const PostFormVideo = ({
               )}
             </div>
 
-            {/* Right side */}
+            {/* // * Right side */}
             <div className="flex-1 flex flex-col gap-4">
+              {/* Folder */}
               <label className="flex flex-col text-sm text-black">
                 Folder
                 <input
@@ -133,18 +172,14 @@ const PostFormVideo = ({
                   {...register("folderName")}
                 />
               </label>
-              {formState.errors.folderName && (
-                <p className="text-red-600 text-sm">
-                  {formState.errors.folderName.message}
-                </p>
-              )}
 
+              {/* Hashtags */}
               <label className="flex flex-col text-sm text-black">
                 Hashtags
                 <input
                   type="text"
-                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                   placeholder="Type and press Enter..."
+                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
                   onKeyDown={(e) => {
                     const input = e.currentTarget.value
                       .trim()
@@ -164,6 +199,7 @@ const PostFormVideo = ({
                     }
                   }}
                 />
+                <input type="hidden" {...register("hashtag")} />
               </label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {getValues("hashtag").map((i) => (
@@ -175,7 +211,7 @@ const PostFormVideo = ({
                     <button
                       type="button"
                       onClick={() => {
-                        const values = watch("hashtag");
+                        const values = getValues("hashtag");
                         setValue(
                           "hashtag",
                           values.filter((v) => v !== i),
@@ -190,25 +226,26 @@ const PostFormVideo = ({
                 ))}
               </div>
 
+              {/* Categories */}
               <label className="flex flex-col text-sm text-black gap-2">
                 Category
                 <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
-                  {videoCategories.map((i, idx) => {
-                    const selected = getValues("category").includes(i);
+                  {categories.map((i) => {
+                    const selected = getValues("category").includes(i.name);
                     return (
                       <button
-                        key={idx}
+                        key={i.name}
                         type="button"
                         onClick={() => {
                           const current = watch("category");
-                          if (current.includes(i)) {
+                          if (current.includes(i.name)) {
                             setValue(
                               "category",
-                              current.filter((f) => f !== i),
+                              current.filter((v) => v !== i.name),
                               { shouldValidate: true }
                             );
                           } else if (current.length < 3) {
-                            setValue("category", [...current, i], {
+                            setValue("category", [...current, i.name], {
                               shouldValidate: true,
                             });
                           }
@@ -219,7 +256,7 @@ const PostFormVideo = ({
                             : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
                         }`}
                       >
-                        {i}
+                        {i.icon} {i.name}
                       </button>
                     );
                   })}
@@ -232,12 +269,12 @@ const PostFormVideo = ({
             type="submit"
             className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
-            Upload
+            Submit
           </button>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PostFormVideo;
+export default PostPhotoForm;

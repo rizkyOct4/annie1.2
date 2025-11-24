@@ -76,14 +76,19 @@ const SSRInfiniteQuery = async ({
 
       switch (path) {
         // * NAVBAR
-        case "photo": {
-          URL = config({
-            typeConfig: typeConfig,
-            type: path,
-            pageParam: pageParam,
-          });
+        case "photo":
+          switch (typeConfig) {
+            case "listFolderPhoto": {
+              URL = config({
+                typeConfig: typeConfig,
+                type: path,
+                pageParam: pageParam,
+              });
+              break;
+            }
+          }
           break;
-        }
+
         // * SIDEBAR
         case "creators": {
           URL = config({

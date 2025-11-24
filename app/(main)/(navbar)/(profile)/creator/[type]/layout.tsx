@@ -1,18 +1,23 @@
-import Dashboard from "./nav-dashboard";
 import CreatorContext from "./data/context";
 
 const layout = ({
-  children,
-  modal,
+  dashboard,
+  content,
+  list,
 }: {
-  children: React.ReactNode;
-  modal: React.ReactNode;
+  dashboard: React.ReactNode;
+  content: React.ReactNode;
+  list: React.ReactNode;
 }) => {
   return (
     <CreatorContext>
-      <Dashboard />
-      {children}
-      {modal}
+      <main className="w-full">
+        <section>{dashboard}</section>
+        <section className="flex w-full">
+          <div className="w-[20%]">{list}</div>
+          <div className="w-[80%]">{content}</div>
+        </section>
+      </main>
     </CreatorContext>
   );
 };

@@ -1,95 +1,72 @@
 "use client";
 
-import { LocalISOTime } from "@/_util/GenerateData";
+import React from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
-import { useContext, useEffect } from "react";
-import { creatorContext } from "@/app/context";
-import { zPutFormSchema } from "./schema";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { zPostVideoFormSchema } from "./schema";
+import { RandomId, LocalISOTime } from "@/_util/GenerateData";
 import { ForbiddenRegex } from "@/_util/Regex";
-import { IsRenderComponent } from "../../folder-list";
-import type { PutImageSchema } from "../../type/type";
+import { IDashboard } from "../../type/dashboard/interface";
 
-type PutFormSchema = z.infer<typeof zPutFormSchema>;
+type PostVideoFormSchema = z.infer<typeof zPostVideoFormSchema>;
 
-const categories = [
-  { name: "Photography", icon: "📸" },
-  { name: "Videography", icon: "🎥" },
-  { name: "Digital Art", icon: "🎨" },
-  { name: "Architecture", icon: "🏙️" },
-  { name: "Fashion", icon: "👗" },
-  { name: "Nature", icon: "🌿" },
-  { name: "Food & Drink", icon: "🍳" },
-  { name: "Automotive", icon: "🚗" },
-  { name: "Astrophotography", icon: "🌌" },
-  { name: "Mobile Shots", icon: "📱" },
-  { name: "Travel", icon: "🧳" },
-  { name: "Creative Concepts", icon: "🎭" },
-  { name: "Lifestyle & People", icon: "👶" },
-  { name: "Behind The Scenes", icon: "🔧" },
+const videoCategories: string[] = [
+  "Art & Design",
+  "Animation",
+  "Music",
+  "Gaming",
+  "Education",
+  "Tutorial",
+  "Vlog",
+  "Lifestyle",
+  "Comedy",
+  "Technology",
+  "Sports",
+  "Travel",
+  "Food & Cooking",
+  "Fitness",
+  "Fashion & Beauty",
+  "News & Politics",
+  "Science",
+  "Photography",
+  "DIY & Crafts",
+  "Movies & Entertainment",
 ];
 
-const FormPutPhoto = ({
+const PostVideoForm = ({
   setIsRender,
 }: {
-  setIsRender: React.Dispatch<React.SetStateAction<IsRenderComponent>>;
+  setIsRender: React.Dispatch<React.SetStateAction<IDashboard>>;
 }) => {
-  const { descriptionItemFolderData, putPhoto, publicId } =
-    useContext(creatorContext);
-
-  const {
-    register,
-    handleSubmit,
-    formState,
-    setValue,
-    getValues,
-    watch,
-    reset,
-  } = useForm<PutFormSchema>({
-    resolver: zodResolver(zPutFormSchema),
-    mode: "onChange",
-    defaultValues: {
-      imageName: "",
-      imagePath: "",
-      prevImage: "",
-      hashtag: [],
-      category: [],
-      description: "",
-    },
-  });
-
-  useEffect(() => {
-    // ! INITIATE DATA cuma berlaku saat pertama kali mount ke component !! kalau data beda pastikan RESET !!!
-    if (descriptionItemFolderData) {
-      reset({
-        imageName: descriptionItemFolderData[0].imageName || "",
-        imagePath: descriptionItemFolderData[0].url || "",
-        prevImage: descriptionItemFolderData[0].url || "",
-        hashtag: descriptionItemFolderData[0].hashtag || [],
-        category: descriptionItemFolderData[0].category || [],
-        description: descriptionItemFolderData[0].description || "",
-      });
-    }
-  }, [descriptionItemFolderData, reset]);
+  const { register, handleSubmit, formState, setValue, getValues, watch } =
+    useForm<PostVideoFormSchema>({
+      resolver: zodResolver(zPostVideoFormSchema),
+      mode: "onChange",
+      defaultValues: {
+        videoName: "",
+        videoFile: null,
+        folderName: "",
+        hashtag: [],
+        category: [],
+      },
+    });
 
   const submit = handleSubmit(async (values) => {
     try {
-      const payload: PutImageSchema = {
-        iuProduct: descriptionItemFolderData[0].tarIuProduct,
-        publicId: publicId,
+      const postVideo = {
+        iuProduct: RandomId(),
+        // publicId: publicId,
         description: values.description,
-        imageName: values.imageName,
-        imagePath: values.imagePath,
-        prevImage: descriptionItemFolderData[0].url,
-        hashtag: values.hashtag,
-        category: values.category,
-        type: "photo",
+        videoName: values.videoFile?.name,
+        videoFile: values.videoFile,
+        hashtags: values.hashtag,
+        categories: values.category,
+        type: "video",
+        folderName: values.folderName,
         createdAt: LocalISOTime(),
       };
-      await putPhoto(payload);
-      setIsRender({ isOpen: false, iuProduct: null, value: "" });
+      console.log(postVideo);
     } catch (error) {
       console.error(error);
     }
@@ -101,50 +78,32 @@ const FormPutPhoto = ({
         {/* Close button */}
         <button
           type="button"
-          onClick={() =>
-            setIsRender({ isOpen: false, iuProduct: null, value: "" })
-          }
+          onClick={() => setIsRender({ open: false, type: "" })}
           className="absolute top-4 right-4 text-2xl leading-none text-gray-800 hover:text-black hover:cursor-pointer"
         >
           &times;
         </button>
 
-        <h2 className="text-2xl font-semibold mb-6 text-black">Update Photo</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-black">Upload Video</h2>
 
         <form className="flex flex-col gap-6" onSubmit={submit}>
           <div className="flex flex-col md:flex-row gap-6">
-            {/* // * Left side */}
+            {/* Left side */}
             <div className="flex-1 flex flex-col gap-4">
-              {watch("imagePath") && (
-                <Image
-                  src={watch("imagePath")}
-                  alt="Preview"
-                  width={160}
-                  height={140}
-                  className="object-cover rounded-xl"
-                />
-              )}
-              <label className="flex flex-col text-sm text-black w-full">
-                Upload Photo
+              <label className="flex flex-col text-sm text-black">
+                Video File
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setValue("imageName", file.name, {
-                          shouldValidate: true,
-                        });
-                        setValue("imagePath", reader.result as string, {
-                          shouldValidate: true,
-                        });
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
+                  accept="video/*"
+                  onChange={(e) =>
+                    setValue(
+                      "videoFile",
+                      e.target.files ? e.target.files[0] : null,
+                      { shouldValidate: true }
+                    )
+                  }
                   className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  required
                 />
               </label>
 
@@ -163,15 +122,29 @@ const FormPutPhoto = ({
               )}
             </div>
 
-            {/* // * Right side */}
+            {/* Right side */}
             <div className="flex-1 flex flex-col gap-4">
-              {/* Hashtags */}
+              <label className="flex flex-col text-sm text-black">
+                Folder
+                <input
+                  type="text"
+                  placeholder={watch("folderName")}
+                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  {...register("folderName")}
+                />
+              </label>
+              {formState.errors.folderName && (
+                <p className="text-red-600 text-sm">
+                  {formState.errors.folderName.message}
+                </p>
+              )}
+
               <label className="flex flex-col text-sm text-black">
                 Hashtags
                 <input
                   type="text"
-                  placeholder="Type and press Enter..."
                   className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Type and press Enter..."
                   onKeyDown={(e) => {
                     const input = e.currentTarget.value
                       .trim()
@@ -191,7 +164,6 @@ const FormPutPhoto = ({
                     }
                   }}
                 />
-                <input type="hidden" {...register("hashtag")} />
               </label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {getValues("hashtag").map((i) => (
@@ -203,7 +175,7 @@ const FormPutPhoto = ({
                     <button
                       type="button"
                       onClick={() => {
-                        const values = getValues("hashtag");
+                        const values = watch("hashtag");
                         setValue(
                           "hashtag",
                           values.filter((v) => v !== i),
@@ -218,26 +190,25 @@ const FormPutPhoto = ({
                 ))}
               </div>
 
-              {/* Categories */}
               <label className="flex flex-col text-sm text-black gap-2">
                 Category
                 <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
-                  {categories.map((i) => {
-                    const selected = getValues("category").includes(i.name);
+                  {videoCategories.map((i, idx) => {
+                    const selected = getValues("category").includes(i);
                     return (
                       <button
-                        key={i.name}
+                        key={idx}
                         type="button"
                         onClick={() => {
                           const current = watch("category");
-                          if (current.includes(i.name)) {
+                          if (current.includes(i)) {
                             setValue(
                               "category",
-                              current.filter((v) => v !== i.name),
+                              current.filter((f) => f !== i),
                               { shouldValidate: true }
                             );
                           } else if (current.length < 3) {
-                            setValue("category", [...current, i.name], {
+                            setValue("category", [...current, i], {
                               shouldValidate: true,
                             });
                           }
@@ -248,7 +219,7 @@ const FormPutPhoto = ({
                             : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
                         }`}
                       >
-                        {i.icon} {i.name}
+                        {i}
                       </button>
                     );
                   })}
@@ -261,7 +232,7 @@ const FormPutPhoto = ({
             type="submit"
             className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
           >
-            Submit
+            Upload
           </button>
         </form>
       </div>
@@ -269,4 +240,4 @@ const FormPutPhoto = ({
   );
 };
 
-export default FormPutPhoto;
+export default PostVideoForm;

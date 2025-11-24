@@ -16,7 +16,7 @@ export const ROUTES_PROFILE = {
     id?: string | null;
   }) => {
     const limit = 10;
-    const folderNameLimit = 5;
+    const folderNameLimit = 4;
 
     switch (typeConfig) {
       case "type":

@@ -6,7 +6,7 @@ import { creatorContext } from "@/app/context";
 import { IoMdOpen } from "react-icons/io";
 import { IoMdClose } from "react-icons/io";
 import { usePathname } from "next/navigation";
-import FormPutPhoto from "./Form/photo/put-form-photo";
+import PutPhotoForm from "./form/photo/put-photo-form";
 
 export interface FolderListToggle {
   open: boolean;
@@ -58,7 +58,7 @@ const FolderList = () => {
   const renderComponent = useCallback(() => {
     switch (isRender.value) {
       case "update": {
-        return <FormPutPhoto setIsRender={setIsRender} />;
+        return <PutPhotoForm setIsRender={setIsRender} />;
       }
     }
   }, [isRender]);
@@ -66,10 +66,7 @@ const FolderList = () => {
   return (
     <>
       <div className="w-[100%] flex">
-        <div className="w-[6%] flex flex-start">
-          <h1>Filter here</h1>
-        </div>
-        <div className="flex flex-col gap-4 w-[94%]">
+        <div className="flex flex-col gap-4 w-[100%]">
           {Array.isArray(listFolderData) &&
             listFolderData.length > 0 &&
             listFolderData.map((f) => (
