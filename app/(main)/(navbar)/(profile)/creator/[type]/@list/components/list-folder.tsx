@@ -1,15 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { ChevronDown } from "lucide-react";
-
-const years = [
-  { year: 2023, months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"] },
-  { year: 2022, months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"] },
-  { year: 2021, months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"] },
-];
+import { creatorContext } from "@/app/context";
 
 const ListFolder = () => {
+  const { listFolderData2 } = useContext(creatorContext);
+  // console.log(listFolderData2.map((i) => i.year));
+
+  const month = [
+    { name: "january", num: 1 },
+    { name: "february", num: 2 },
+    { name: "march", num: 3 },
+    { name: "april", num: 4 },
+    { name: "may", num: 5 },
+    { name: "june", num: 6 },
+    { name: "july", num: 7 },
+    { name: "august", num: 8 },
+    { name: "september", num: 9 },
+    { name: "october", num: 10 },
+    { name: "november", num: 11 },
+    { name: "december", num: 12 },
+  ];
+
+  // const list = listFolderData2.map((i: any) => ({
+  //   year: i.year,
+  //   month: i.month,
+  //   folder: i.folders.map((f: any) => f.folder_name),
+  // }));
+
+  // console.log(list);
+
+  const years =
+    Array.isArray(listFolderData2) &&
+    listFolderData2.map((i) => ({
+      year: i.year,
+      months: month.map((m) => m.num === i.month),
+      folder: i.folders,
+    }));
+
+  console.log(years);
+
   const [openYear, setOpenYear] = useState<number | null>(null);
 
   const toggleYear = (year: number) => {
@@ -54,3 +85,6 @@ const ListFolder = () => {
 };
 
 export default ListFolder;
+
+
+// todo KAU TUNTASKAN BESOK INI ! DIKIT LAGI !! FETCHING JUGA BERSIHKAN !!

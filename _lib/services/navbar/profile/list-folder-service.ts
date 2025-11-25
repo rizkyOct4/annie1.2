@@ -11,36 +11,50 @@ export const ListFolderPhoto = async ({
   limit: number;
   offset: number;
 }) => {
-  const query = await prisma.$queryRaw`
+  const data = await prisma.$queryRaw`
         SELECT
-            y.year,
-            m.month,
+            y.year::int,
+            m.month::int,
             COALESCE(
                 json_agg(
                     jsonb_build_object(
                         'folder_name', up.folder_name,
-                        'amount_item', up.item_count
+                        'amount_item', up.item_count::int
                     )
                 ) FILTER (WHERE up.folder_name IS NOT NULL), '[]'::json
             ) AS folders
         FROM 
-            generate_series(2025, 2025) AS y(year)
+            generate_series(2025, 2025 + ${limit}) AS y(year)
         CROSS JOIN 
             generate_series(1,12) AS m(month)
-        LEFT JOIN (
+        JOIN (
             SELECT 
-                EXTRACT(YEAR FROM up.created_at) AS year,
-                EXTRACT(MONTH FROM up.created_at) AS month,
+                EXTRACT(YEAR FROM up.created_at)::int AS year,
+                EXTRACT(MONTH FROM up.created_at)::int AS month,
                 up.folder_name,
-                COUNT(up.folder_name) AS item_count
+                COUNT(up.folder_name)::int AS item_count
             FROM users_product up
-            JOIN users u ON up.tar_iu = u.iu
+            JOIN users u ON (up.tar_iu = u.iu)
             WHERE u.public_id = ${publicId}::uuid AND up.type = ${pathUrl}::type_product
             GROUP BY year, month, folder_name
         ) AS up ON up.year = y.year AND up.month = m.month
         GROUP BY y.year, m.month
         ORDER BY y.year, m.month
         `;
+
+  const queryCheck = await prisma.$queryRaw<{ year: number }[]>`
+        SELECT
+            EXTRACT(YEAR FROM up.created_at)::int AS year
+        FROM users_product up
+        JOIN users u ON (u.iu = up.tar_iu)
+        WHERE u.public_id = ${publicId}::uuid AND up.type = ${pathUrl}::type_product
+        GROUP BY EXTRACT(YEAR FROM up.created_at)
+    `;
+
+  const hasMore =
+    Number(queryCheck[0].year) + limit < Number(queryCheck[0].year);
+
+  return { data, hasMore };
 
   // ! 1 QUERY DUMMY + 1 LAGI SUB QUERY ASLI -> DIGABUNGKAN MENJADI 1 !!! PELAJARI LAGI SAMA KAU QUERY NI !!!
 
@@ -68,11 +82,8 @@ export const ListFolderPhoto = async ({
   // ? JOIN users → filter user tertentu
 
   // ? GROUP BY y.year, m.month, up.folder_name → wajib karena ada COUNT
-
-  return;
 };
 
-
 // todo PERBAIKI SEMUA DI PROFILE !!
-// TODO LOGIC SERVER -> SERVICES 
-// TODO REF/TAR DARI CHILD -> PARENT -> BUAT INDEX -> FAST QUERY !!!! 
+// TODO LOGIC SERVER -> SERVICES
+// TODO REF/TAR DARI CHILD -> PARENT -> BUAT INDEX -> FAST QUERY !!!!

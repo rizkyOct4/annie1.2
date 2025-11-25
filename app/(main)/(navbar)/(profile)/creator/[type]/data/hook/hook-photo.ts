@@ -29,16 +29,17 @@ const useListFolder = (publicId: string) => {
     isFetchingNextPage: IFNPListFolderPhoto,
   } = useInfiniteQuery({
     queryKey: ["keyListFolderPhoto", publicId, type],
-    queryFn: async ({ pageParam = 1 }) => {
-      const { data } = await axios.get(
-        ROUTES_LIST_FOLDER.GET({
-          typeConfig: "listFolderPhoto",
-          path: type,
-          pageParam: pageParam,
-        })
-      );
-      return data;
-    },
+    // queryFn: async ({ pageParam = 1 }) => {
+    //   const { data } = await axios.get(
+    //     ROUTES_LIST_FOLDER.GET({
+    //       typeConfig: "listFolderPhoto",
+    //       path: type,
+    //       pageParam: pageParam,
+    //     })
+    //   );
+    //   return data;
+    // },
+    queryFn: undefined,
     // ? ketika melakukan fetchNextPage maka akan memanggil queryFn kembali
     getNextPageParam: (lastPage, allPages) => {
       return lastPage?.hasMore ? allPages.length + 1 : undefined;
@@ -53,11 +54,16 @@ const useListFolder = (publicId: string) => {
     retry: false,
   });
 
+  const listFolderData2 = useMemo(
+    () => listFolderPhoto?.pages.flatMap((page) => page?.data ?? []),
+    [listFolderPhoto?.pages]
+  );
+
   console.log(listFolderPhoto)
 
   return {
     // * LIST FOLDER PHOTO
-    listFolderPhoto,
+    listFolderData2,
     FNPListFolderPhoto,
     HNPListFolderPhoto,
     IFNPListFolderPhoto,
@@ -115,7 +121,7 @@ const useCreatorPhoto = (publicId: string) => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["keyListFolderPhoto", publicId, type],
+    queryKey: ["keyListFolderPhot", publicId, type],
     queryFn: async ({ pageParam = 1 }) => {
       const { data } = await axios.get(
         ROUTES_PROFILE.GET({
@@ -204,27 +210,6 @@ const useCreatorPhoto = (publicId: string) => {
     retry: false,
   });
 
-  //   // * UPDATE PHOTO DATA
-  // const { data: UpdatePhoto, isLoading: isLoadingUpdatePhoto } = useQuery({
-  //   queryKey: ["keyUpdatePhoto", publicId, iuProduct],
-  //   queryFn: async () => {
-  //     const URL = ROUTES_PROFILE.GET_BTN({
-  //       key: "updatePhoto",
-  //       path: type,
-  //       iuProduct: iuProduct,
-  //     });
-  //     const { data } = await axios.get(URL);
-  //     return data;
-  //   },
-  //   enabled: !!iuProduct,
-  //   staleTime: 1000 * 60 * 1,
-  //   gcTime: 1000 * 60 * 60,
-  //   placeholderData: keepPreviousData,
-  //   refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
-  //   refetchOnMount: false,
-  //   retry: false,
-  // });
-
   // *** SUB ========================================= ***
   const keyListFolder = ["keyListFolderPhoto", publicId, type];
   const keyItemFolder = ["keyItemFolderPhoto", publicId, type, folderNamePath];
@@ -260,7 +245,7 @@ const useCreatorPhoto = (publicId: string) => {
     [descriptionItemFolderPhoto]
   );
 
-  console.log(itemFolderPhoto);
+  // console.log(itemFolderPhoto);
   // console.log(itemFolderData)
   // console.log(descriptionItemFolderData)
 

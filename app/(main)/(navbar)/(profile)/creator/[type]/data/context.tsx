@@ -4,7 +4,7 @@ import { creatorContext } from "@/app/context";
 import { profileContext } from "@/app/context";
 import { useListFolder, useCreatorPhoto, useCreatorButton } from "./hook/hook-photo";
 import { ReactNode, useContext } from "react";
-import { useCreatorVideo } from "./hook/hook-video";
+// import { useCreatorVideo } from "./hook/hook-video";
 
 interface CreatorContextProps {
   children: ReactNode;
@@ -16,13 +16,13 @@ const CreatorContext: React.FC<CreatorContextProps> = ({ children }) => {
 
   const listFolder = useListFolder(publicId)
   const photo = useCreatorPhoto(publicId);
-  const video = useCreatorVideo(publicId);
+  // const video = useCreatorVideo(publicId);
   const z = useCreatorButton(publicId);
 
   const value = {
     ...listFolder,
     ...photo,
-    ...video,
+    // ...video,
     ...z,
     publicId,
   };

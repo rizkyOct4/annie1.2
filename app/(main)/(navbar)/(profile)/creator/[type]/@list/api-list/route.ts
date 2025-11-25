@@ -16,7 +16,8 @@ export async function GET(
     const offset = (section - 1) * limit;
 
     if (pathUrl) {
-      await ListFolderPhoto({ publicId, pathUrl, limit, offset });
+      const result = await ListFolderPhoto({ publicId, pathUrl, limit, offset });
+      return NextResponse.json(result);
     }
   } catch (err: any) {
     return NextResponse.json({ message: err.message }, { status: 500 });

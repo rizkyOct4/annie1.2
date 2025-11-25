@@ -68,7 +68,6 @@ const SSRInfiniteQuery = async ({
   queryClient: QueryClient;
 }) => {
   const cookieHeader = (await cookies()).toString();
-
   return await queryClient.prefetchInfiniteQuery({
     queryKey,
     queryFn: async ({ pageParam = 1 }) => {
@@ -81,7 +80,7 @@ const SSRInfiniteQuery = async ({
             case "listFolderPhoto": {
               URL = config({
                 typeConfig: typeConfig,
-                type: path,
+                path: path,
                 pageParam: pageParam,
               });
               break;
