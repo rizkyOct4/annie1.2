@@ -9,7 +9,9 @@ import React, {
 } from "react";
 import { creatorContext } from "@/app/context";
 // import { usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChartSpline, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 // import PutPhotoForm from "./form/photo/put-photo-form";
 import ItemsList from "./items-list";
 import { TListItemFolderPhoto } from "../../type/content/type";
@@ -25,9 +27,22 @@ export interface IsRenderComponent {
   value: string;
 }
 
-const ListItemPhoto = ({ data }: { data: TListItemFolderPhoto[] }) => {
+const listBtn = [
+  { name: `Stats`, icon: <ChartSpline size={18} />, value: "stats" },
+  { name: "", icon: <ChevronDown size={18} />, value: "toggle" },
+];
+
+const ListItemPhoto = ({
+  data,
+  currentPath,
+}: {
+  data: TListItemFolderPhoto[];
+  currentPath: string;
+}) => {
   const { folderNamePath, stateFolder, setStateFolder, itemFolderPhotoData } =
     useContext(creatorContext);
+  const router = useRouter();
+
   //   const currentPath = usePathname();
 
   //   const [isRender, setIsRender] = useState<IsRenderComponent>({
@@ -47,36 +62,19 @@ const ListItemPhoto = ({ data }: { data: TListItemFolderPhoto[] }) => {
           }));
           break;
         }
+        case "stats": {
+          router.push(
+            `/creator/${currentPath}/stats?folder-name=${folderName}`
+          );
+          // router.push(
+          //   `/creator/${currentPath}/stats?folder-name=${folderName}`
+          // );
+          break;
+        }
       }
     },
-    [setStateFolder]
+    [setStateFolder, router, currentPath]
   );
-
-  //   const handleAction = useCallback(
-  //     (actionType: string, folderName: string) => {
-  //       switch (actionType) {
-  //         case "open": {
-  //           setIsRender((prev) => ({
-  //             ...prev,
-  //             isOpen: true,
-  //           }));
-  //           const newUrl = `${currentPath}?folder-name=${folderName}`;
-  //           history.pushState({}, "", newUrl);
-  //           break;
-  //         }
-  //         case "close": {
-  //           setIsRender((prev) => ({
-  //             ...prev,
-  //             isOpen: false,
-  //           }));
-  //           const newUrl = `${currentPath}`;
-  //           history.pushState({}, "", newUrl);
-  //           break;
-  //         }
-  //       }
-  //     },
-  //     [currentPath]
-  //   );
 
   //   const renderComponent = useCallback(() => {
   //     switch (isRender.value) {
@@ -129,7 +127,7 @@ const ListItemPhoto = ({ data }: { data: TListItemFolderPhoto[] }) => {
                     </div>
 
                     {/* Toggle Button */}
-                    <button
+                    {/* <button
                       onClick={() => handleAction("toggle", f.folderName)}
                       className="text-gray-600 hover:text-gray-800 transition-colors"
                     >
@@ -142,7 +140,31 @@ const ListItemPhoto = ({ data }: { data: TListItemFolderPhoto[] }) => {
                             : "rotate-0"
                         }`}
                       />
-                    </button>
+                    </button> */}
+                    <div className="flex gap-2">
+                      {listBtn.map((btn) => (
+                        <button
+                          key={btn.value}
+                          onClick={() =>
+                            handleAction(btn.value, f.folderName || "")
+                          }
+                          className={`flex items-center gap-1 px-3 py-2 transition-transform
+            ${
+              btn.value === "toggle" &&
+              stateFolder.isOpen &&
+              stateFolder.isFolder === f.folderName
+                ? "rotate-180"
+                : "rotate-0"
+            }`}
+                          title={btn.name}
+                        >
+                          {btn.icon}
+                          <span className="text-sm font-medium">
+                            {btn.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   {stateFolder.isFolder === f.folderName && (
                     <ItemsList

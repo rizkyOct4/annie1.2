@@ -27,12 +27,13 @@ pnpm add pg
 
 // ? tarik db => pnpx prisma db pull
 
-// !! LAST => pnpx prisma validate
 
 pnpm prisma migrate dev --name init_users_table => MIGRATION !!
 pnpm prisma migrate reset => reset semua ini DB !!!!
 
 !!! => pnpm prisma db push => pakai ini !!!!!
+// !! LAST => pnpm prisma validate
+
 
 
 // ?  ALTER TABLE product_image_vote ADD COLUMN id_unique_piv SERIAL PRIMARY KEY;

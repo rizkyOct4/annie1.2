@@ -13,19 +13,17 @@ import { usePathname } from "next/navigation";
 import { creatorContext } from "@/app/context";
 import { IoMdOpen } from "react-icons/io";
 import { MdUpdate } from "react-icons/md";
-import { Delete } from "lucide-react";
 import { BiExit } from "react-icons/bi";
 import { MdDescription } from "react-icons/md";
-import { Move3DIcon } from "lucide-react";
 import { SLoading } from "@/_util/Spinner-loading";
 import { IsRenderComponent } from "./folder-list";
 import { useInView } from "react-intersection-observer";
 import { TItemFolderPhoto } from "../../type/content/type";
+import OptionBtn from "./options/option-btn";
+import { MdCheck, MdClose } from "react-icons/md";
 
 const btnList = [
   { name: "update", icon: <MdUpdate />, title: "Update" },
-  { name: "move", icon: <Move3DIcon />, title: "Move" },
-  { name: "delete", icon: <Delete />, title: "Delete" },
   {
     name: "openDescription",
     icon: <MdDescription />,
@@ -39,12 +37,19 @@ export interface ItemListState {
   value?: string;
 }
 
+export interface ItemListStateNav {
+  isOpen: boolean;
+  iuProduct: number[];
+  type: string;
+  targetFolder: string;
+}
+
 const ItemsList = ({
   data,
   folderName,
   setStateFolder,
 }: {
-  data: TItemFolderPhoto[]
+  data: TItemFolderPhoto[];
   folderName: string;
   setStateFolder: React.Dispatch<React.SetStateAction<any>>;
 }) => {
@@ -56,13 +61,10 @@ const ItemsList = ({
     isFetchingNextPageItemFolder,
   } = useContext(creatorContext);
 
-
   // ? 🔹 ref untuk container scrollable
   const containerRef = useRef<HTMLDivElement | null>(null);
-
   // ? 🔹 karena root belum ada saat render pertama, set setelah mount
   const [root, setRoot] = useState<Element | null>(null);
-
   // ? setup observer
   const { ref: lastItemRef, inView } = useInView({
     threshold: 0.2, // ! trigger ketika 20% elemen terlihat
@@ -82,15 +84,35 @@ const ItemsList = ({
 
   const pathname = usePathname();
 
+  // ? Items State
   const [isOpen, setIsOpen] = useState<ItemListState>({
     open: false,
     iuProduct: null,
     value: "",
   });
 
+  // ? Navigation State
+  const [isOpenNav, setIsOpenNav] = useState<ItemListStateNav>({
+    isOpen: true,
+    iuProduct: [],
+    type: "",
+    targetFolder: "",
+  });
+
   const handleAction = useCallback(
-    (actionType: string, tarIuProduct: number, value: string) => {
+    (actionType: string, tarIuProduct: number, value?: string) => {
       switch (actionType) {
+        // ? Item Nav Action
+        case "navAction": {
+          setIsOpenNav((prev: any) => ({
+            ...prev,
+            iuProduct: prev.iuProduct.includes(tarIuProduct)
+              ? prev.iuProduct.filter((f: number) => f !== tarIuProduct)
+              : [...prev.iuProduct, tarIuProduct],
+          }));
+          break;
+        }
+        // ? Item Action
         case "toggle": {
           setIsOpen((prev) => ({
             ...prev,
@@ -121,14 +143,17 @@ const ItemsList = ({
   );
 
   return (
-    <div
-      ref={containerRef}
-      className="flex justify-center flex-wrap gap-5 w-full my-4 max-h-[400px] overflow-y-auto"
-    >
-      {Array.isArray(data) &&
-        data.length > 0 &&
-        data.map(
-          (i: { tarIuProduct: number; url: string }, idx) => {
+    <>
+      {isOpenNav && (
+        <OptionBtn isOpenNav={isOpenNav} setIsOpenNav={setIsOpenNav} />
+      )}
+      <div
+        ref={containerRef}
+        className="relative flex justify-center flex-wrap gap-5 w-full my-4 max-h-[400px] overflow-y-auto"
+      >
+        {Array.isArray(data) &&
+          data.length > 0 &&
+          data.map((i: { tarIuProduct: number; url: string }, idx) => {
             const isLast = idx === data.length - 1;
             return (
               <div
@@ -144,6 +169,26 @@ const ItemsList = ({
                     fill
                     className="object-cover"
                   />
+                  {isOpenNav.type !== "" && (
+                    <button
+                      onClick={() =>
+                        handleAction("navAction", i.tarIuProduct)
+                      }
+                      className={`absolute top-3 left-3 flex items-center justify-center w-9 h-9 rounded-md border transition-colors
+                        ${
+                          isOpenNav?.iuProduct.includes(i.tarIuProduct)
+                            ? "bg-green-500 border-green-500 text-white"
+                            : "bg-white border-gray-300 text-gray-700"
+                        }
+                        hover:bg-green-100 active:scale-95`}
+                    >
+                      {isOpenNav?.iuProduct.includes(i.tarIuProduct) ? (
+                        <MdCheck size={20} />
+                      ) : (
+                        <MdClose size={20} />
+                      )}
+                    </button>
+                  )}
 
                   {/* Buttons overlay */}
                   <div className="absolute bottom-3 flex flex-wrap gap-2 px-4">
@@ -178,9 +223,9 @@ const ItemsList = ({
                 </div>
               </div>
             );
-          }
-        )}
-    </div>
+          })}
+      </div>
+    </>
   );
 };
 

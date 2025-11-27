@@ -69,6 +69,7 @@ model users_product {
 
   @@index([tar_iu], name: "idx_tar_iu")
   @@index([created_at], name: "idx_created_at")
+  @@index([type], name: "idx_type")
   @@index([folder_name], name: "idx_folder_name")
   @@index([tar_iu, created_at], name: "idx_tar_iu_created_at")
 }

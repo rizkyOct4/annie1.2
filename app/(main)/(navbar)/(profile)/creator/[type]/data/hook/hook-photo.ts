@@ -166,6 +166,8 @@ const useItemFolder = (publicId: string) => {
     [itemFolderPhoto?.pages]
   );
 
+  // console.log(itemFolderPhotoData)
+
   return {
     // ? STATE
     stateFolder,
@@ -175,6 +177,38 @@ const useItemFolder = (publicId: string) => {
     itemFolderPhotoData,
   };
 };
+
+const useItemDescription = (publicId: string) => {
+
+
+    // * Description item
+  // const { data: descriptionItemFolderPhoto } = useQuery({
+  //   queryKey: [
+  //     "keyDescriptionItemFolder",
+  //     publicId,
+  //     folderNamePath,
+  //     isIdDescription,
+  //   ],
+  //   queryFn: async () => {
+  //     const URL = ROUTES_PROFILE.GET({
+  //       typeConfig: "id",
+  //       type: type,
+  //       folderName: folderNamePath,
+  //       id: isIdDescription,
+  //     });
+  //     const { data } = await axios.get(URL);
+  //     return data;
+  //   },
+  //   staleTime: 1000 * 60 * 5,
+  //   enabled: !!isIdDescription,
+  //   gcTime: 1000 * 60 * 60, // Cache data akan disimpan selama 1 jam
+  //   placeholderData: keepPreviousData,
+  //   refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
+  //   refetchOnMount: false,
+  //   retry: false,
+  // });
+  return
+}
 
 // ? ===============
 
@@ -374,7 +408,7 @@ const useCreatorPhoto = (publicId: string) => {
     isFetchingNextPageItemFolder,
 
     // ? === DESCRIPTION ===
-    descriptionItemFolderData,
+    // descriptionItemFolderData,
     // setIuProduct,
     // listFolderData,
     // itemFolderData,
