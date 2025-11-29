@@ -171,16 +171,13 @@ const ItemsList = ({
                   />
                   {isOpenNav.type !== "" && (
                     <button
-                      onClick={() =>
-                        handleAction("navAction", i.tarIuProduct)
-                      }
-                      className={`absolute top-3 left-3 flex items-center justify-center w-9 h-9 rounded-md border transition-colors
+                      onClick={() => handleAction("navAction", i.tarIuProduct)}
+                      className={`absolute top-3 left-3 flex items-center justify-center w-9 h-9 rounded-xl transition-colors
                         ${
                           isOpenNav?.iuProduct.includes(i.tarIuProduct)
-                            ? "bg-green-500 border-green-500 text-white"
-                            : "bg-white border-gray-300 text-gray-700"
-                        }
-                        hover:bg-green-100 active:scale-95`}
+                            ? "bg-black/80 text-white"
+                            : "bg-white/80 text-gray-700"
+                        }`}
                     >
                       {isOpenNav?.iuProduct.includes(i.tarIuProduct) ? (
                         <MdCheck size={20} />
@@ -194,7 +191,7 @@ const ItemsList = ({
                   <div className="absolute bottom-3 flex flex-wrap gap-2 px-4">
                     {/* Toggle button */}
                     <button
-                      className="w-9 h-9 rounded-xl bg-white/80 border border-gray-200 text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
+                      className="w-9 h-9 rounded-xl bg-white/80 border border-gray-200 text-gray-700 flex-center"
                       onClick={() => handleAction("toggle", i.tarIuProduct, "")}
                     >
                       {isOpen.iuProduct === i.tarIuProduct && isOpen.open ? (
@@ -210,7 +207,7 @@ const ItemsList = ({
                       btnList.map((btn, idx) => (
                         <button
                           key={idx}
-                          className="w-9 h-9 rounded-xl bg-white/80 border border-gray-200 text-gray-700 flex justify-center items-center hover:bg-white hover:text-black"
+                          className="text-sm font-medium text-gray-600 w-9 h-9 rounded-xl bg-white/80 border border-gray-200 flex-center hover:bg-white hover:text-black"
                           onClick={() =>
                             handleAction(btn.name, i.tarIuProduct, btn.name)
                           }

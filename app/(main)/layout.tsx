@@ -16,10 +16,5 @@ export default function MainLayout({
   );
 }
 
-// ? Di Next.js App Router:
-// ? layout.tsx itu seperti komponen wrapper, tapi tidak unmount/remount setiap kali halaman berpindah.
-// ? Selama kamu tetap berada dalam segment group yang sama ((main)/), layout tetap dipertahankan dan hanya children (halaman) yang berubah.
-
 // ? 【EDM Relax #4】Chill & Focus Lo-Fi EDM 🎧 Background Music for Study, Work & Everyday Moments
 
-// ? kondisikan lagi besok sama kau untuk path" lainnya, masih error !!!

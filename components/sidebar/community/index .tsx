@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 "use client";
 
 import { memo } from "react";

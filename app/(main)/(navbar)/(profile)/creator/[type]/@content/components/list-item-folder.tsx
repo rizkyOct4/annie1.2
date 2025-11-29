@@ -28,8 +28,16 @@ export interface IsRenderComponent {
 }
 
 const listBtn = [
-  { name: `Stats`, icon: <ChartSpline size={18} />, value: "stats" },
-  { name: "", icon: <ChevronDown size={18} />, value: "toggle" },
+  {
+    name: `Stats`,
+    icon: <ChartSpline size={18} className="text-gray-600" />,
+    value: "stats",
+  },
+  {
+    name: "",
+    icon: <ChevronDown size={18} className="text-gray-600" />,
+    value: "toggle",
+  },
 ];
 
 const ListItemPhoto = ({
@@ -86,7 +94,7 @@ const ListItemPhoto = ({
 
   return (
     <>
-      <div className="w-full flex p-4">
+      <div className="w-full flex pl-4">
         <div className="flex flex-col gap-2 w-full">
           {Array.isArray(data) &&
             data.length > 0 &&
@@ -98,7 +106,7 @@ const ListItemPhoto = ({
                 <>
                   <div className="flex items-center gap-3">
                     {/* Icon */}
-                    <div className="w-9 h-9 flex items-center justify-center rounded-md bg-gray-100">
+                    <div className="w-9 h-9 flex items-center justify-center rounded-md bg-gray-100 border border-gray-200">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
@@ -121,7 +129,7 @@ const ListItemPhoto = ({
                         {f.folderName}
                       </span>
 
-                      <span className="text-xs text-gray-600 bg-gray-100 px-2 py-[2px] rounded border border-gray-200">
+                      <span className="text-sm font-medium text-gray-600 bg-gray-100 px-2 py-[4px] rounded border border-gray-200">
                         {f.amountItem}
                       </span>
                     </div>
@@ -141,14 +149,14 @@ const ListItemPhoto = ({
                         }`}
                       />
                     </button> */}
-                    <div className="flex gap-2">
+                    <div className="flex bg-gray-100 rounded-md border border-gray-200 overflow-hidden">
                       {listBtn.map((btn) => (
                         <button
                           key={btn.value}
                           onClick={() =>
                             handleAction(btn.value, f.folderName || "")
                           }
-                          className={`flex items-center gap-1 px-3 py-2 transition-transform
+                          className={`border-x-2 border-gray-200 flex items-center px-4 py-2 transition-transform
             ${
               btn.value === "toggle" &&
               stateFolder.isOpen &&
@@ -159,7 +167,7 @@ const ListItemPhoto = ({
                           title={btn.name}
                         >
                           {btn.icon}
-                          <span className="text-sm font-medium">
+                          <span className="text-sm font-medium text-gray-600">
                             {btn.name}
                           </span>
                         </button>

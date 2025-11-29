@@ -51,7 +51,7 @@ const PostingBtn = ({
         <button
           // onMouseEnter={() => handlePrefetch("video")}
           onClick={() => handleAction("Ov", "video")}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-black text-sm font-medium rounded-lg 
+          className="flex items-center gap-2 px-4 py-2 bg-black/80 text-white text-sm font-medium rounded-lg 
              border border-gray-300 hover:bg-gray-200 transition"
         >
           <Video size={18} />
@@ -61,7 +61,7 @@ const PostingBtn = ({
         <button
           // onMouseEnter={() => handlePrefetch("photo")}
           onClick={() => handleAction("Op", "photo")}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-black text-sm font-medium rounded-lg 
+          className="flex items-center gap-2 px-4 py-2 bg-black/80 text-white text-sm font-medium rounded-lg 
              border border-gray-300 hover:bg-gray-200 transition"
         >
           <ImageIcon size={18} />
@@ -74,7 +74,7 @@ const PostingBtn = ({
         onClick={() => handleAction("toggle", "")}
         className={`w-[55px] h-[55px] rounded-full flex items-center justify-center cursor-pointer transition-all duration-200 shadow-md
       ${
-        isRender.open ? "bg-red-600 rotate-45" : "bg-gray-900 hover:bg-gray-800"
+        isRender.open ? "bg-red-600 rotate-45" : "bg-black/80 hover:bg-gray-800"
       }`}
       >
         <Plus size={26} className="text-white" />

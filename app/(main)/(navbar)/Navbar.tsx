@@ -14,7 +14,7 @@ const Navbar = () => {
   const { data: getData } = useContext(profileContext);
   const role = getData?.role;
   const redirect = usePathname();
-  const router = useRouter()
+  const router = useRouter();
 
   const navbarList = [
     { name: "Homepage", icon: <IoHomeOutline />, link: "/homepage" },
@@ -27,7 +27,6 @@ const Navbar = () => {
       name: "Auth",
       icon: <IoIosLogIn />,
       link: `/auth?redirect=${encodeURIComponent(redirect)}`,
-
     },
   ];
 
@@ -36,81 +35,66 @@ const Navbar = () => {
     isOpenOption: false,
   });
 
-  // const handleAction = useCallback(
-  //   (e: React.SyntheticEvent, actionType: string) => {
-  //     e.preventDefault();
-  //     switch (actionType) {
-  //       case "option": {
-  //         setState((prev) => ({
-  //           isOpenNotification: false,
-  //           isOpenOption: prev.isOpenOption ? false : true,
-  //         }));
-  //         break;
-  //       }
-  //       case "notification": {
-  //         setState((prev) => ({
-  //           isOpenOption: false,
-  //           isOpenNotification: prev.isOpenNotification ? false : true,
-  //         }));
-  //         break;
-  //       }
-  //     }
-  //   },
-  //   []
-  // );
-
   return (
-    <div className="fixed top-0 left-0 right-0 w-full h-[80px] z-100 flex justify-between items-center py-4 px-8 border-b-[2px] border-b-[rgb(29,205,159)] bg-black">
-      <div className="text-white">Next Prototype</div>
-      <div className="flex items-center gap-6 relative">
-        <div>
-          <button
-            className="bg-red-500 flex justify-center items-center p-2 rounded-md"
-            // onClick={(e) => handleAction(e, "notification")}
-          >
-            <p className="text-2xl">
-              {state.isOpenNotification ? (
-                <AiOutlineFullscreenExit className="icon" />
-              ) : (
-                <IoMdNotificationsOutline className="icon" />
-              )}
-            </p>
-          </button>
-          {/* {state.isOpenNotification && <NavbarNotification />} */}
-        </div>
+    <div
+      className="fixed top-0 left-0 right-0 w-full h-[80px] z-[100] 
+                bg-black/80 border-white/10
+                flex justify-between items-center px-8 border-b-white border-b-2"
+    >
+      {/* Brand */}
+      <div className="text-white font-semibold text-lg tracking-wide">
+        Next Prototype
+      </div>
+
+      {/* Right Section */}
+      <div className="flex items-center gap-6">
+        {/* Notification Button */}
+        <button
+          className="p-2 rounded-md border border-white/20 bg-white/10 
+                 text-white hover:bg-white/20 hover:cursor-pointer transition"
+          // onClick={(e) => handleAction(e, "notification")}
+        >
+          <span className="text-xl">
+            {state.isOpenNotification ? (
+              <AiOutlineFullscreenExit />
+            ) : (
+              <IoMdNotificationsOutline />
+            )}
+          </span>
+        </button>
+        {/* {state.isOpenNotification && <NavbarNotification />} */}
+
+        {/* Dynamic Nav List */}
         {Array.isArray(navbarList) &&
           navbarList.map((i, index) => (
             <button
               key={index}
               onClick={() => router.push(i.link)}
-              className="flex justify-center items-center gap-1 bg-white text-black py-2 px-4 rounded-md"
+              className="flex items-center gap-2 
+                     px-4 py-2 rounded-md bg-white text-black 
+                     hover:bg-gray-200 transition hover:cursor-pointer"
             >
-              <span className="icon">{i.icon}</span>
+              <span className="text-lg">{i.icon}</span>
               {i.name}
             </button>
           ))}
-        {/* {!userData && (
-          <Link to="/register-login" className="nav-link-button">
-            <span>
-              <IoIosLogIn className="icon" />
-            </span>
-            Login
-          </Link>
-        )} */}
+
+        {/* Options */}
         <div className="relative">
           <button
-            className="flex justify-center items-center h-auto text-white"
+            className="text-white flex justify-center items-center p-2 
+                   rounded-md border border-white/20 bg-white/10 
+                   hover:bg-white/20 transition hover:cursor-pointer"
             // onClick={(e) => handleAction(e, "option")}
           >
             {state.isOpenOption ? (
-              <AiOutlineFullscreenExit className="icon" />
+              <AiOutlineFullscreenExit className="text-xl" />
             ) : (
-              <SlOptionsVertical className="icon" />
+              <SlOptionsVertical className="text-xl" />
             )}
           </button>
-          {/* {state.isOpenOption && (
-            <Options userData={userData} setState={setState} />
-          )} */}
+
+          {/* {state.isOpenOption && <Options />} */}
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 "use client";
-import { FolderClock, ArrowUp01, RefreshCcw} from "lucide-react";
-import { useEffect, useState } from "react";
+import { FolderClock, ArrowUp01, RefreshCcw } from "lucide-react";
 import { MdDriveFileMove, MdDelete } from "react-icons/md";
 
 const OptionBtn = ({
@@ -10,7 +9,6 @@ const OptionBtn = ({
   isOpenNav: any;
   setIsOpenNav: any;
 }) => {
-  // Dummy folder list
   const dummyFolders = [
     "Folder A",
     "Folder B",
@@ -27,12 +25,7 @@ const OptionBtn = ({
   ];
 
   const handleSubmit = (e: any) => {
-    e.preventDefault(); // prevent form refresh
-    // console.log("Move to:", folderName, "Option:", selectedOption);
-    // setFolderName("");
-    // setSelectedOption("");
-    // setShowInput(false);
-    console.log(isOpenNav);
+    e.preventDefault();
     setIsOpenNav({
       isOpen: true,
       iuProduct: [],
@@ -42,17 +35,10 @@ const OptionBtn = ({
   };
 
   return (
-    <div className="flex gap-2 mt-4 z-50 full">
-      {/* Move Button */}
+    <div className="flex gap-3 mt-4 z-50 relative">
       {listBtn.map((i, idx) => (
-        <div
-          key={idx}
-          className={`border-b-2 ${
-            isOpenNav.type === i.value
-              ? "border-b-black"
-              : "border-b-transparent"
-          } font-medium w-auto flex flex-col`}
-        >
+        <div key={idx} className="flex flex-col w-auto">
+          {/* Button */}
           <button
             onClick={() =>
               setIsOpenNav((prev: any) => ({
@@ -61,19 +47,30 @@ const OptionBtn = ({
                 type: prev.type === i.value ? "" : i.value,
               }))
             }
-            className="flex items-center gap-2 px-4 py-2 h-12 text-black"
+            className={`
+              flex items-center gap-2 px-4 py-2 rounded-md
+              text-sm font-medium
+              transition-colors
+              border border-transparent
+              ${
+                isOpenNav.type === i.value
+                  ? "bg-white/10 border-white/20"
+                  : "text-gray-400 hover:bg-white/5"
+              }
+            `}
           >
             {i.icon}
-            {i.name}
+            <span>{i.name}</span>
           </button>
 
+          {/* Dropdown */}
           {isOpenNav.type === i.value && (
             <form
               onSubmit={handleSubmit}
-              className="flex-center gap-2 flex-1 overflow-hidden"
+              className="z-60 bg-black/80 absolute top-[-60px] flex items-center gap-2 border-white/10 rounded-md text-white p-2"
             >
-              <div className="border rounded-md px-2.5">
-                <h4>{isOpenNav.iuProduct.length}</h4>
+              <div className="border rounded-md px-3 py-1 text-sm">
+                {isOpenNav.iuProduct.length}
               </div>
 
               {isOpenNav.type === "move" && (
@@ -85,21 +82,22 @@ const OptionBtn = ({
                       targetFolder: e.target.value,
                     }))
                   }
-                  className="px-3 py-2"
+                  className="px-3 py-2 rounded-md bg-white/10 border border-black/80 text-sm  focus:outline-none focus:ring-1 focus:ring-white/30"
                 >
-                  <option value="">Select folder</option>
+                  <option value="" className="text-black">
+                    Select folder
+                  </option>
                   {dummyFolders.map((folder, idx) => (
-                    <option key={idx} value={folder}>
+                    <option key={idx} value={folder} className="text-black">
                       {folder}
                     </option>
                   ))}
                 </select>
               )}
 
-              {/* Submit Button */}
               <button
                 type="submit"
-                className="px-4 py-2 bg-amber-400 text-white hover:bg-amber-500 transition-colors"
+                className="px-4 py-2 bg-black/80 text-white rounded-md text-sm transition-colors"
               >
                 Submit
               </button>
