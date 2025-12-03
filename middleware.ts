@@ -8,6 +8,7 @@ const middleware = async (req: NextRequest) => {
   const refreshToken = req.cookies.get("refresh_token")?.value;
   const pathname = req.nextUrl.pathname;
   const { role } = (await TokenHelper(accessToken)) || {};
+  // console.log('test')
 
   // * 1. Public Path
   const publicRes = PublicPath({ pathname, role, req });
@@ -38,3 +39,10 @@ export const config = {
     `/creators/:path*`,
   ],
 };
+
+
+//  * 085212635051 (bg dimas)
+
+// todo buat besok SAMA KAU SSG LAGI !!!
+// todo JANGAN SIBUK NAMBAH FITUR AJA KAU !! PERBAIKI MIDDLEWARE KAU SAMPAI FIX !!! BUAT SESIMPLE MUNGKIN
+// TODO withCredentials -> middleware kau besok kondisikan !! masih PR sama kau 

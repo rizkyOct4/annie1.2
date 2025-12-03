@@ -4,7 +4,7 @@ import { RandomId, LocalISOTime } from "@/_util/GenerateData";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useCallback, useContext } from "react";
+import { useCallback, useContext, memo, useState } from "react";
 import { creatorContext } from "@/app/context";
 import { zPostFormSchema } from "./schema";
 import { ToggleStateType } from "../../type/interface";
@@ -43,6 +43,14 @@ const categories = [
   { name: "Behind The Scenes", icon: "🔧" },
 ];
 
+const ListPostFolderDataDummy = [
+  { id: 1, name: "Travel Photos" },
+  { id: 2, name: "Food & Drinks" },
+  { id: 3, name: "Nature" },
+  { id: 4, name: "Work Projects" },
+  { id: 5, name: "Personal" },
+];
+
 const PostPhotoForm = ({
   setIsRender,
 }: {
@@ -51,25 +59,21 @@ const PostPhotoForm = ({
   const { ListPostFolderData, isLoadingListPost, publicId, postPhoto } =
     useContext(creatorContext);
 
-  const {
-    register,
-    handleSubmit,
-    formState,
-    setValue,
-    getValues,
-    watch,
-  } = useForm<PostFormSchema>({
-    resolver: zodResolver(zPostFormSchema),
-    mode: "onChange",
-    defaultValues: {
-      imageName: "",
-      imagePath: "",
-      folderName: "",
-      hashtag: [],
-      category: [],
-      description: "",
-    },
-  });
+  const { register, handleSubmit, formState, setValue, getValues, watch } =
+    useForm<PostFormSchema>({
+      resolver: zodResolver(zPostFormSchema),
+      mode: "onChange",
+      defaultValues: {
+        imageName: "",
+        imagePath: "",
+        folderName: "",
+        hashtag: [],
+        category: [],
+        description: "",
+      },
+    });
+
+  const [showDummyFolder, setShowDummyFolder] = useState(false);
 
   const submit = handleSubmit(async (values) => {
     try {
@@ -87,29 +91,29 @@ const PostPhotoForm = ({
       };
       await postPhoto(payload);
       setIsRender({ open: false, type: "" });
-      console.log(payload)
+      console.log(payload);
     } catch (error) {
       console.error(error);
     }
   });
 
   return (
-    <div className="overlay">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-3xl p-6 relative">
+    <div className="overlay backdrop-blur-sm z-70">
+      <div className="bg-black/80 text-white w-full max-w-3xl p-8 rounded-xl border border-white/10 relative">
         {/* Close button */}
         <button
           type="button"
           onClick={() => setIsRender({ open: false, type: "" })}
-          className="absolute top-4 right-4 text-2xl leading-none text-gray-800 hover:text-black hover:cursor-pointer"
+          className="absolute top-4 right-4 text-2xl leading-none text-white/80 hover:text-white"
         >
           &times;
         </button>
 
-        <h2 className="text-2xl font-semibold mb-6 text-black">Upload Photo</h2>
+        <h2 className="text-2xl font-bold mb-6">Upload Photo</h2>
 
         <form className="flex flex-col gap-6" onSubmit={submit}>
           <div className="flex flex-col md:flex-row gap-6">
-            {/* // * Left side */}
+            {/* Left side */}
             <div className="flex-1 flex flex-col gap-4">
               {getValues("imagePath") && (
                 <Image
@@ -117,10 +121,11 @@ const PostPhotoForm = ({
                   alt="Preview"
                   width={160}
                   height={140}
-                  className="object-cover rounded-xl"
+                  className="object-cover rounded-xl border border-white/20"
                 />
               )}
-              <label className="flex flex-col text-sm text-black w-full">
+
+              <label className="flex flex-col text-sm text-white/90 w-full">
                 Upload Photo
                 <input
                   type="file"
@@ -140,46 +145,75 @@ const PostPhotoForm = ({
                       reader.readAsDataURL(file);
                     }
                   }}
-                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="mt-1 p-2 rounded-md border border-white/20 bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   required
                 />
               </label>
 
-              <label className="flex flex-col text-sm text-black">
+              <label className="flex flex-col text-sm text-white/90">
                 Description
                 <textarea
                   {...register("description")}
-                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="mt-1 p-2 rounded-md border border-white/20 bg-white/10 text-white resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={5}
                 />
               </label>
               {formState.errors.description && (
-                <p className="text-red-600 text-sm">
+                <p className="text-red-500 text-xs">
                   {formState.errors.description.message}
                 </p>
               )}
             </div>
 
-            {/* // * Right side */}
+            {/* Right side */}
             <div className="flex-1 flex flex-col gap-4">
               {/* Folder */}
-              <label className="flex flex-col text-sm text-black">
-                Folder
-                <input
-                  type="text"
-                  placeholder={watch("folderName")}
-                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  {...register("folderName")}
-                />
-              </label>
+              <div className="flex flex-col w-full text-sm text-white/90 relative">
+                <label className="mb-1">Folder</label>
+                <div className="flex w-full rounded-md border border-white/20 bg-white/10 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500">
+                  {/* Input */}
+                  <input
+                    type="text"
+                    placeholder="Select folder..."
+                    className="flex-1 p-2 bg-transparent text-white outline-none"
+                  />
+
+                  {/* Tombol dropdown dummy */}
+                  <button
+                    type="button"
+                    className="px-3 bg-white/10 text-white hover:bg-white/20 transition"
+                    onClick={() => setShowDummyFolder(!showDummyFolder)}
+                  >
+                    &#x25BC;
+                  </button>
+                </div>
+
+                {/* Dropdown dummy */}
+                {showDummyFolder && (
+                  <div className="absolute top-full left-0 mt-1 w-full max-h-40 overflow-y-auto rounded-md border border-white/20 bg-black/80 z-10">
+                    {ListPostFolderDataDummy.map((folder) => (
+                      <div
+                        key={folder.id}
+                        className="px-3 py-2 text-white hover:bg-white/10 cursor-pointer"
+                        onClick={() => {
+                          console.log("Selected:", folder);
+                          setShowDummyFolder(false);
+                        }}
+                      >
+                        {folder.name}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Hashtags */}
-              <label className="flex flex-col text-sm text-black">
+              <label className="flex flex-col text-sm text-white/90">
                 Hashtags
                 <input
                   type="text"
                   placeholder="Type and press Enter..."
-                  className="mt-1 p-2 border border-gray-400 rounded-md text-black bg-gray-50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  className="mt-1 p-2 rounded-md border border-white/20 bg-white/10 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                   onKeyDown={(e) => {
                     const input = e.currentTarget.value
                       .trim()
@@ -201,11 +235,13 @@ const PostPhotoForm = ({
                 />
                 <input type="hidden" {...register("hashtag")} />
               </label>
-              <div className="flex flex-wrap gap-2 mt-2">
+
+              {/* Hashtag list */}
+              <div className="flex flex-wrap gap-2">
                 {getValues("hashtag").map((i) => (
                   <span
                     key={i}
-                    className="inline-flex items-center gap-1 bg-gray-200 px-2 py-1 rounded-md text-sm text-black"
+                    className="inline-flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full text-sm text-white border border-white/20 shadow-sm"
                   >
                     #{i}
                     <button
@@ -218,7 +254,7 @@ const PostPhotoForm = ({
                           { shouldValidate: true }
                         );
                       }}
-                      className="text-xs text-gray-700 hover:text-red-500"
+                      className="text-xs text-white/70 hover:text-red-500 transition"
                     >
                       &times;
                     </button>
@@ -227,7 +263,7 @@ const PostPhotoForm = ({
               </div>
 
               {/* Categories */}
-              <label className="flex flex-col text-sm text-black gap-2">
+              <label className="flex flex-col text-sm text-white/90 gap-2">
                 Category
                 <div className="flex flex-wrap gap-2 max-h-[200px] overflow-y-auto">
                   {categories.map((i) => {
@@ -252,8 +288,8 @@ const PostPhotoForm = ({
                         }}
                         className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                           selected
-                            ? "bg-blue-600 text-white border-blue-600"
-                            : "bg-gray-100 text-black border-gray-300 hover:bg-gray-200"
+                            ? "bg-blue-500 text-white border-blue-500"
+                            : "bg-white/10 text-white border-white/20 hover:bg-white/20"
                         }`}
                       >
                         {i.icon} {i.name}
@@ -267,14 +303,14 @@ const PostPhotoForm = ({
 
           <button
             type="submit"
-            className="bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="cursor-pointer bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-lg font-medium transition"
           >
             Submit
           </button>
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PostPhotoForm;
+export default memo(PostPhotoForm);

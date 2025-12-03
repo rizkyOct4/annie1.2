@@ -29,9 +29,9 @@ const page = async ({
     id,
   ];
   switch (currentPath) {
-    case "stats": {
-      break;
-    }
+    // case "stats": {
+    //   break;
+    // }
     case "description": {
       const config = ROUTES_CREATOR_PHOTO_PANEL.GET({
         typeConfig: "panelDescriptionPhoto",
@@ -47,7 +47,6 @@ const page = async ({
       });
     }
   }
-
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -66,3 +65,4 @@ export default page;
 
 // todo BACA ISG, SSG DLL !!! ISG KAU MASIH SALAH !!! IDK WHY !! FIXKAN BESOK !!!
 // todo SSG ++++ iasdiojoaslkdm
+// ! LIAT FETCH.ts !!!

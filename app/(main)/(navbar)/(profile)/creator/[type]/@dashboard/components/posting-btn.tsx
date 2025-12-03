@@ -49,20 +49,18 @@ const PostingBtn = ({
         }`}
       >
         <button
-          // onMouseEnter={() => handlePrefetch("video")}
           onClick={() => handleAction("Ov", "video")}
           className="flex items-center gap-2 px-4 py-2 bg-black/80 text-white text-sm font-medium rounded-lg 
-             border border-gray-300 hover:bg-gray-200 transition"
+             border border-gray-300 transition cursor-pointer"
         >
           <Video size={18} />
           Video
         </button>
 
         <button
-          // onMouseEnter={() => handlePrefetch("photo")}
           onClick={() => handleAction("Op", "photo")}
           className="flex items-center gap-2 px-4 py-2 bg-black/80 text-white text-sm font-medium rounded-lg 
-             border border-gray-300 hover:bg-gray-200 transition"
+             border border-gray-300 transition cursor-pointer"
         >
           <ImageIcon size={18} />
           Photo

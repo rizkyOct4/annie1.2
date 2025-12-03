@@ -5,7 +5,6 @@ import { GiPlagueDoctorProfile } from "react-icons/gi";
 import { IoHomeOutline } from "react-icons/io5";
 import { AiOutlineFullscreenExit } from "react-icons/ai";
 import { SlOptionsVertical } from "react-icons/sl";
-import { IoMdNotificationsOutline } from "react-icons/io";
 import { useState, useCallback, memo, useContext } from "react";
 import { profileContext } from "@/app/context";
 import { usePathname, useRouter } from "next/navigation";
@@ -37,8 +36,7 @@ const Navbar = () => {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 w-full h-[80px] z-[100] 
-                bg-black/80 border-white/10
+      className="fixed top-0 left-0 right-0 w-full h-[80px] z-[100] bg-black/80
                 flex justify-between items-center px-8 border-b-white border-b-2"
     >
       {/* Brand */}
@@ -48,21 +46,6 @@ const Navbar = () => {
 
       {/* Right Section */}
       <div className="flex items-center gap-6">
-        {/* Notification Button */}
-        <button
-          className="p-2 rounded-md border border-white/20 bg-white/10 
-                 text-white hover:bg-white/20 hover:cursor-pointer transition"
-          // onClick={(e) => handleAction(e, "notification")}
-        >
-          <span className="text-xl">
-            {state.isOpenNotification ? (
-              <AiOutlineFullscreenExit />
-            ) : (
-              <IoMdNotificationsOutline />
-            )}
-          </span>
-        </button>
-        {/* {state.isOpenNotification && <NavbarNotification />} */}
 
         {/* Dynamic Nav List */}
         {Array.isArray(navbarList) &&
@@ -71,8 +54,8 @@ const Navbar = () => {
               key={index}
               onClick={() => router.push(i.link)}
               className="flex items-center gap-2 
-                     px-4 py-2 rounded-md bg-white text-black 
-                     hover:bg-gray-200 transition hover:cursor-pointer"
+                      px-4 py-2 rounded-md bg-white text-black 
+                    hover:bg-gray-200 transition hover:cursor-pointer"
             >
               <span className="text-lg">{i.icon}</span>
               {i.name}
@@ -83,8 +66,8 @@ const Navbar = () => {
         <div className="relative">
           <button
             className="text-white flex justify-center items-center p-2 
-                   rounded-md border border-white/20 bg-white/10 
-                   hover:bg-white/20 transition hover:cursor-pointer"
+                  rounded-md border border-white/20 bg-white/10 
+                hover:bg-white/20 transition hover:cursor-pointer"
             // onClick={(e) => handleAction(e, "option")}
           >
             {state.isOpenOption ? (

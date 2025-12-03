@@ -42,7 +42,10 @@ const useListFolder = (publicId: string) => {
           typeConfig: "listFolderPhoto",
           path: type,
           pageParam: pageParam,
-        })
+        }),
+        {
+          withCredentials: true,
+        }
       );
       return data;
     },
@@ -99,7 +102,9 @@ const useListItemFolder = (publicId: string) => {
         year: stateContent.year,
         month: stateContent.month,
       });
-      const { data } = await axios.get(URL);
+      const { data } = await axios.get(URL, {
+        withCredentials: true,
+      });
       return data;
     },
 
@@ -155,7 +160,9 @@ const useItemFolder = (publicId: string) => {
         pageParam: pageParam,
         folderName: stateFolder.isFolder,
       });
-      const { data } = await axios.get(URL);
+      const { data } = await axios.get(URL, {
+        withCredentials: true,
+      });
       return data;
     },
 
@@ -195,8 +202,6 @@ const useItemFolder = (publicId: string) => {
 };
 
 const useItemDescription = (publicId: string) => {
-  const queryClient = useQueryClient();
-
   const { type, panel } = useParams<{ type: string; panel: string }>();
   const folderName = useSearchParams().get("folder-name") ?? "";
   const id = useSearchParams().get("id") ?? "";
@@ -204,24 +209,17 @@ const useItemDescription = (publicId: string) => {
   const { data: descriptionItemFolderPhoto } = useQuery({
     queryKey: ["keyDescriptionItemFolder", publicId, panel, folderName, id],
     queryFn: async () => {
-      const queryKey = [
-        "keyDescriptionItemFolder",
-        publicId,
-        panel,
-        folderName,
-        id,
-      ];
-      if (queryClient.getQueryData(queryKey)) {
-        const URL = ROUTES_CREATOR_PHOTO_PANEL.GET({
-          typeConfig: "panelDescriptionPhoto",
-          prevPath: type,
-          currentPath: panel,
-          folderName: folderName,
-          id: id,
-        });
-        const { data } = await axios.get(URL);
-        return data;
-      }
+      const URL = ROUTES_CREATOR_PHOTO_PANEL.GET({
+        typeConfig: "panelDescriptionPhoto",
+        prevPath: type,
+        currentPath: panel,
+        folderName: folderName,
+        id: id,
+      });
+      const { data } = await axios.get(URL, {
+        withCredentials: true,
+      });
+      return data;
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!panel && !!id,
@@ -231,14 +229,10 @@ const useItemDescription = (publicId: string) => {
     refetchOnMount: false,
     retry: false,
   });
-  const descriptionItemFolderData = useMemo(
+  const descriptionItemFolderData: TItemFolderDescription[] = useMemo(
     () => descriptionItemFolderPhoto ?? [],
     [descriptionItemFolderPhoto]
   );
-  // const descriptionItemFolderData: TItemFolderDescription[] = useMemo(
-  //   () => descriptionItemFolderPhoto ?? [],
-  //   [descriptionItemFolderPhoto]
-  // );
 
   return { descriptionItemFolderData };
 };
