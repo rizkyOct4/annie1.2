@@ -5,7 +5,7 @@ export const CONFIG_AUTH = (key?: string) => {
     case "register":
       return `${BASE_URL}/auth/api?key=${key}`;
     case "login":
-      return `${BASE_URL}/auth/api?key=${key}`;
+      return `${BASE_URL}/auth-option/api?key=${key}`;
     case "logout":
       return `${BASE_URL}/auth/api?key=${key}`;
     default:

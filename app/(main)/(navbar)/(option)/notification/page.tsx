@@ -1,6 +1,11 @@
+
+import TestNotification from "./test";
+
+
 const page = () => {
+
   return (
-    <div>Notification Page</div>
+    <TestNotification />
   )
 }
 

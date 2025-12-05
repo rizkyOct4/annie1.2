@@ -12,7 +12,7 @@ import { GiPlagueDoctorProfile } from "react-icons/gi";
 import { profileContext } from "@/app/context";
 import { usePathname, useRouter } from "next/navigation";
 import { memo, useContext, useCallback, useState } from "react";
-import { CONFIG_AUTH } from "../(option)/auth/config/config-auth";
+import { CONFIG_AUTH } from "../(option)/auth-option/config/config-auth";
 import axios from "axios";
 import { showToast } from "@/_util/Toast";
 
@@ -61,7 +61,7 @@ const Options = ({
       ) : (
         <FaSignOutAlt className="w-4 h-4" />
       ),
-      link: !publicId ? `/auth?redirect=${encodeURIComponent(pathname)}` : "/",
+      link: !publicId ? `/auth-option?redirect=${encodeURIComponent(pathname)}` : "/",
       actionType: !publicId ? "login" : "logout",
     },
   ];

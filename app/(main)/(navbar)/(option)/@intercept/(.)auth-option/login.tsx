@@ -9,12 +9,16 @@ import axios from "axios";
 import { profileContext } from "@/app/context";
 import { useContext } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { zLoginFormSchema } from "../../auth/schema";
-import { CONFIG_AUTH } from "../../auth/config/config-auth";
+import { zLoginFormSchema } from "../../auth-option/schema";
+import { CONFIG_AUTH } from "../../auth-option/config/config-auth";
+import { signIn, signOut, useSession } from "next-auth/react";
 
 type LoginFormSchema = z.infer<typeof zLoginFormSchema>;
 
-const thirdParty = [{ name: "G" }, { name: "Git" }];
+const thirdParty = [
+  { name: "G", value: "google" },
+  { name: "Git", value: "github" },
+];
 
 const Login = ({ setState }: { setState: (state: boolean) => void }) => {
   const router = useRouter();
@@ -92,7 +96,7 @@ const Login = ({ setState }: { setState: (state: boolean) => void }) => {
                        focus:ring-2 focus:ring-blue-500 transition"
                 type="email"
                 placeholder="m@example.com"
-                required
+                // required
                 {...register("email")}
               />
               {formState.errors.email && (
@@ -122,7 +126,7 @@ const Login = ({ setState }: { setState: (state: boolean) => void }) => {
                        p-2 text-white focus:bg-white/20 outline-none 
                        focus:ring-2 focus:ring-blue-500 transition"
                 type="password"
-                required
+                // required
                 {...register("password")}
               />
               {formState.errors.password && (
@@ -144,15 +148,15 @@ const Login = ({ setState }: { setState: (state: boolean) => void }) => {
             </motion.button>
 
             <div className="w-[30%] flex gap-2">
-              {thirdParty.map((i, idx) => (
+              {thirdParty.map((provider) => (
                 <motion.button
-                  key={idx}
-                  type="button"
-                  className="flex-1 p-2 text-white/90 hover:text-white 
-                         rounded-md border border-white/20 
-                         hover:bg-white/10 transition"
+                  key={provider.value}
+                  onClick={() =>
+                    signIn(provider.value, { redirectTo: redirect })
+                  }
+                  className="flex-1 p-2 text-white/90 hover:text-white rounded-md border border-white/20 hover:bg-white/10 transition"
                 >
-                  {i.name}
+                  {provider.name}
                 </motion.button>
               ))}
             </div>

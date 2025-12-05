@@ -107,4 +107,28 @@ export const Login = async ({
   };
 };
 
+export const LoginForAuthJs = async ({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) => {
+  const userCheck: UserCheckT[] =
+    await prisma.$queryRaw`SELECT iu, email, password, first_name, last_name, role, public_id, created_at FROM users WHERE email = ${email}`;
+
+  if (userCheck.length === 0) throw new Error("Invalid email or password");
+
+  const passwordMatch = await bcrypt.compare(password, userCheck[0].password);
+  if (!passwordMatch) throw new Error("Invalid email or password");
+
+  return {
+    publicId: userCheck[0].public_id,
+    email: userCheck[0].email,
+    name: `${userCheck[0].first_name} ${userCheck[0].last_name}`,
+    role: userCheck[0].role,
+    created_at: userCheck[0].created_at,
+  };
+};
+
 // pnpm add -D @types/jsonwebtoken @types/bcrypt

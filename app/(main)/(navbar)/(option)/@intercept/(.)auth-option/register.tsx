@@ -6,8 +6,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { showToast } from "@/_util/Toast";
 import { motion } from "framer-motion";
-import { zRegisterFormSchema } from "../../auth/schema";
-import { CONFIG_AUTH } from "../../auth/config/config-auth";
+import { zRegisterFormSchema } from "../../auth-option/schema";
+import { CONFIG_AUTH } from "../../auth-option/config/config-auth";
 
 type RegisterFormSchema = z.infer<typeof zRegisterFormSchema>;
 

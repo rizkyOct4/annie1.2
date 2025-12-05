@@ -1,4 +1,4 @@
-import ModalAuth from "../@intercept/(.)auth/modal";
+import ModalAuth from "../@intercept/(.)auth-option/modal";
 
 const page = () => {
   const currentPath = "auth";
