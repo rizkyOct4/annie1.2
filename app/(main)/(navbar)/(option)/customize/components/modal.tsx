@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image, Bio, SocialLink, OtherLabel } from "./label";
-import { customizeContext } from "@/app/context";
+import { customizeContext, profileContext } from "@/app/context";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ProfileSchema = z.object({
   username: z.string(),
@@ -30,6 +31,11 @@ export type ProfileFormData = z.infer<typeof ProfileSchema>;
 
 const ProfileCustomize = () => {
   const { customizeData } = useContext(customizeContext);
+  // const queryClient = useQueryClient();
+  // const { data: getData } = useContext(profileContext);
+  // const id = getData?.id;
+
+  // console.log(`TEST`,queryClient.getQueryData(["keyCustomize", id]));
 
   const {
     register,

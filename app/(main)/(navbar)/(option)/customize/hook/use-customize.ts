@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
 import { CONFIG_CUSTOMIZE } from "../config/config-customize";
 import axios from "axios";
 import { useMemo } from "react";
@@ -12,6 +12,8 @@ export const useCustomize = ({
   publicId: string;
   currentPath: string;
 }) => {
+  const queryClient = useQueryClient();
+
   const { data: fetchData } = useQuery({
     queryKey: ["keyCustomize", publicId],
     queryFn: async () => {

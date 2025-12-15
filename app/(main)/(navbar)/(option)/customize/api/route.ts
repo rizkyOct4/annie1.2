@@ -11,3 +11,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ message: err.message }, { status: 500 });
   }
 }
+
+//  Remove-Item -Force .\pnpm-lock.yaml
+// pnpm install -> pnpm dev

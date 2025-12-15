@@ -48,16 +48,14 @@ const SSRQueryPr = async ({
 }) => {
   const cookieHeader = (await cookies()).toString();
 
-  return await queryClient.prefetchQuery({
+  return queryClient.prefetchQuery({
     queryKey,
     queryFn: async () => {
       const URL = config;
-      const res = await fetch(URL, {
+      const res = fetch(URL, {
         headers: { Cookie: cookieHeader },
-        // next: { revalidate: 60 * 5 },
-        // cache: "force-cache",
       });
-      return res.json();
+      return (await res).json();
     },
   });
 };
@@ -145,4 +143,4 @@ const SSGQueryPr = async ({
   });
 };
 
-export { ISGQueryPr, SSRQueryPr, SSRInfiniteQueryPr, SSGQueryPr, NewQueryPath };
+export { ISGQueryPr, SSRQueryPr, SSRInfiniteQueryPr, SSGQueryPr };

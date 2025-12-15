@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import ProfileCustomize from "./components/modal";
 import { Suspense } from "react";
-import { RiTwitterLine, RiInstagramLine } from "react-icons/ri";
 import { SSRQueryPr } from "@/_util/model-fetch/private";
 import GetToken from "@/_lib/middleware/get-token";
 import { CONFIG_CUSTOMIZE } from "./config/config-customize";
@@ -17,22 +16,31 @@ const page = async () => {
   const { id } = await GetToken();
   const queryClient = getQueryClient();
 
+  // const isExist = !!queries[0]?.queryKey
+  // console.log("All queries:", queries[0].queryKey);
+
+  // if (!data) {
   await SSRQueryPr({
     queryKey: ["keyCustomize", id],
     config: CONFIG_CUSTOMIZE.GET({ typeConfig: "SSRgetCustomize" }),
     queryClient: queryClient,
   });
+  // }
+  // console.log(queryClient);
+  // const queries = queryClient.getQueryCache().getAll();
+
+  // console.log(queries);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {/* <Suspense
+      <Suspense
         fallback={
           <div className="w-full h-screen flex items-center justify-center text-gray-200">
             Loading profile...
           </div>
-        }> */}
-      <ProfileCustomize />
-      {/* </Suspense> */}
+        }>
+        <ProfileCustomize />
+      </Suspense>
     </HydrationBoundary>
   );
 };
@@ -41,5 +49,6 @@ export default page;
 
 
 
-// todo KAU CARI BESOK INI !! GIMANA  !!
-// todo perhatikan lagi sama kau besok queryProvider di layout !! 
+// ! SSR -> NO CACHE SERVER, JUST KEEP FETCHING EVERY USERS IN OUT !!
+// ! DEHYDRATE -> LITERALLY JUST SENDING DATA INTO CLIENT(BROWSER) !! THATS IT
+// ! PARENT PAGE KAU ! COBA BESOK FETCH TEMBAK LANGSUNG KE DB !!
