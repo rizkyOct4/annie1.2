@@ -1,9 +1,16 @@
 "use client";
 
-import { useQuery, keepPreviousData, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  keepPreviousData,
+} from "@tanstack/react-query";
 import { CONFIG_CUSTOMIZE } from "../config/config-customize";
 import axios from "axios";
 import { useMemo } from "react";
+import { TCustomizeData } from "../schema/schema-customize";
+
+// ? SUB
+import { useCustomizePost } from "./sub-customize";
 
 export const useCustomize = ({
   publicId,
@@ -12,8 +19,6 @@ export const useCustomize = ({
   publicId: string;
   currentPath: string;
 }) => {
-  const queryClient = useQueryClient();
-
   const { data: fetchData } = useQuery({
     queryKey: ["keyCustomize", publicId],
     queryFn: async () => {
@@ -33,10 +38,21 @@ export const useCustomize = ({
     retry: false,
   });
 
-  //   console.log(customizeData);
-  const customizeData = useMemo(() => fetchData ?? [], [fetchData]);
+  const { postCustomize } = useCustomizePost({
+    queryKey: ["keyCustomize", publicId],
+  });
 
-  //   console.log(`customize data:`, customizeData);
+  // ? RESULT DATA
+  const customizeData: TCustomizeData[] = useMemo(
+    () => fetchData ?? [],
+    [fetchData]
+  );
+  // console.log(`customize data:`, customizeData);
 
-  return { customizeData };
+  return {
+    customizeData,
+
+    // * SUB HOOK
+    postCustomize,
+  };
 };

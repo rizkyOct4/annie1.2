@@ -37,7 +37,7 @@ model users_description {
   phone_number   Int?         
   location       String?      
   picture        String?      
-  social_link    String[]     @default([])
+  social_link    Json?        @default("[]")
   update_at      DateTime?    @default(now()) @db.Timestamp(6)
   users          users        @relation(fields: [tar_iu], references: [iu], onDelete: Cascade)
 }

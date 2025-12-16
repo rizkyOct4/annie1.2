@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import ProfileCustomize from "./components/modal";
 import { Suspense } from "react";
-import { SSRQueryPr } from "@/_util/model-fetch/private";
 import GetToken from "@/_lib/middleware/get-token";
-import { CONFIG_CUSTOMIZE } from "./config/config-customize";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "@/app/get-query-client";
+import { GetCustomize } from "@/_lib/services/navbar/option/customize";
+import Loading from "./loading";
 
 export const metadata: Metadata = {
   title: "Profile Customize",
@@ -16,29 +16,14 @@ const page = async () => {
   const { id } = await GetToken();
   const queryClient = getQueryClient();
 
-  // const isExist = !!queries[0]?.queryKey
-  // console.log("All queries:", queries[0].queryKey);
-
-  // if (!data) {
-  await SSRQueryPr({
+  await queryClient.prefetchQuery({
     queryKey: ["keyCustomize", id],
-    config: CONFIG_CUSTOMIZE.GET({ typeConfig: "SSRgetCustomize" }),
-    queryClient: queryClient,
+    queryFn: () => GetCustomize({ publicId: id }),
   });
-  // }
-  // console.log(queryClient);
-  // const queries = queryClient.getQueryCache().getAll();
-
-  // console.log(queries);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense
-        fallback={
-          <div className="w-full h-screen flex items-center justify-center text-gray-200">
-            Loading profile...
-          </div>
-        }>
+      <Suspense fallback={<Loading />}>
         <ProfileCustomize />
       </Suspense>
     </HydrationBoundary>
@@ -46,8 +31,6 @@ const page = async () => {
 };
 
 export default page;
-
-
 
 // ! SSR -> NO CACHE SERVER, JUST KEEP FETCHING EVERY USERS IN OUT !!
 // ! DEHYDRATE -> LITERALLY JUST SENDING DATA INTO CLIENT(BROWSER) !! THATS IT

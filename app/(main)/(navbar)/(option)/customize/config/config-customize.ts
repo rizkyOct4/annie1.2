@@ -13,4 +13,13 @@ export const CONFIG_CUSTOMIZE = {
         return "";
     }
   },
+  POST: ({ typeConfig }: { typeConfig: string }) => {
+    switch (typeConfig) {
+      case "CSRPostCustomize": {
+        return `/customize/api`;
+      }
+      default:
+        return "";
+    }
+  },
 };

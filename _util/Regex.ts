@@ -2,6 +2,16 @@ export function ValidRegex() {
   const hashtagRegex = /^[a-zA-Z0-9_]+$/;
   return hashtagRegex;
 }
+
+export function NumberOnlyRegex() {
+  const numberRegex = /^[0-9]*$/;
+  return numberRegex;
+}
+// ? Aa-Zz 0-9 spasi dan input value ""
+export function AlphaNumSpaceRegex() {
+  const regex = /^[A-Za-z0-9 ]*$/;
+  return regex;
+}
 export function FormRegex() {
   const hashtagRegex = /^[a-zA-Z0-9_]*$/; // ? nilai kosong boleh
   return hashtagRegex;

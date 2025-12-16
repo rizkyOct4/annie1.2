@@ -11,13 +11,7 @@ import {
   FaGlobe,
 } from "react-icons/fa";
 
-export const Image = ({
-  setValue,
-  register,
-}: {
-  setValue: any;
-  register: any;
-}) => {
+export const Image = ({ setValue }: { setValue: any }) => {
   return (
     <div className="w-full flex items-center justify-start gap-4">
       <RiImageLine size={28} />
@@ -25,7 +19,6 @@ export const Image = ({
         <input
           type="file"
           accept="image/*"
-          // {...register("picture")}
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) {
@@ -137,7 +130,7 @@ export const SocialLink = ({
         <div
           key={s.platform}
           className="flex items-center gap-4 p-3 bg-black/30 hover:bg-black/40 transition-colors">
-          <span className="text-xl flex-shrink-0">{s.icon}</span>
+          <span className="text-xl shrink-0">{s.icon}</span>
 
           <div className="flex flex-col w-full">
             <input
@@ -165,26 +158,34 @@ export const OtherLabel = ({
   fieldKey,
   value,
   register,
+  errors,
 }: {
   fieldKey: string;
   value:
     | string
     | { platform?: string | undefined; link?: string | undefined }[];
   register: any;
+  errors: any;
 }) => {
   return (
     <div key={fieldKey} className="w-full">
       <label className="block font-semibold mb-2">
-        {fieldKey}
+        <span className="flex items-center gap-2">
+          {fieldKey}
+          {errors[fieldKey] && (
+            <p className="text-red-500 text-xs">{errors[fieldKey]?.message}</p>
+          )}
+        </span>
         <input
-          type="text"
+          type={fieldKey === "phoneNumber" ? "number" : "text"}
           defaultValue={value}
           {...register(fieldKey)}
-          className="
-                  w-full bg-black/30 border border-white/10 rounded-md px-3 py-2 
-                  text-gray-200 placeholder-gray-500
-                  focus:outline-none focus:ring-2 focus:ring-blue-500
-                "
+          className={`
+            w-full bg-black/30 border border-white/10 rounded-md px-3 py-2 
+            text-gray-200 placeholder-gray-500
+            focus:outline-none focus:ring-2 focus:ring-blue-500
+            ${fieldKey === "phoneNumber" ? "no-spin" : ""}
+            `}
         />
       </label>
     </div>

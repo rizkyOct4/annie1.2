@@ -59,6 +59,28 @@ const SSRQueryPr = async ({
     },
   });
 };
+// // * SSR
+// const DirectSSRQueryPr = async ({
+//   queryKey,
+//   fn,
+//   queryClient,
+// }: {
+//   queryKey: any[];
+//   fn: Function;
+//   queryClient: any;
+// }) => {
+//   const cookieHeader = (await cookies()).toString();
+
+//   return queryClient.prefetchQuery({
+//     queryKey,
+//     queryFn: async () => {
+//       const res = fetch(fn, {
+//         headers: { Cookie: cookieHeader },
+//       });
+//       return (await res).json();
+//     },
+//   });
+// };
 
 // * SSR Infinite
 const SSRInfiniteQueryPr = async ({
@@ -143,4 +165,10 @@ const SSGQueryPr = async ({
   });
 };
 
-export { ISGQueryPr, SSRQueryPr, SSRInfiniteQueryPr, SSGQueryPr };
+export {
+  ISGQueryPr,
+  SSRQueryPr,
+  // DirectSSRQueryPr,
+  SSRInfiniteQueryPr,
+  SSGQueryPr,
+};

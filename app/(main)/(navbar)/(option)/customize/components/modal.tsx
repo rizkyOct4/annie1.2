@@ -5,37 +5,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Image, Bio, SocialLink, OtherLabel } from "./label";
-import { customizeContext, profileContext } from "@/app/context";
-import { useQueryClient } from "@tanstack/react-query";
-
-const ProfileSchema = z.object({
-  username: z.string(),
-  biodata: z.string().optional(),
-  location: z.string().optional(),
-  socialLink: z
-    .array(
-      z.object({
-        platform: z.string().optional(),
-        link: z.string().optional(),
-      })
-    )
-    .transform((links) => links.filter((s) => s.link.trim() !== ""))
-    .optional(),
-  gender: z.string().optional(),
-  phoneNumber: z.string().max(12, "Max 12").optional(),
-  currentPicture: z.string().optional(),
-  picture: z.any().optional(),
-});
+import { customizeContext } from "@/app/context";
+import { ProfileSchema } from "../z-schema";
 
 export type ProfileFormData = z.infer<typeof ProfileSchema>;
 
 const ProfileCustomize = () => {
   const { customizeData } = useContext(customizeContext);
-  // const queryClient = useQueryClient();
-  // const { data: getData } = useContext(profileContext);
-  // const id = getData?.id;
-
-  // console.log(`TEST`,queryClient.getQueryData(["keyCustomize", id]));
 
   const {
     register,
@@ -46,34 +22,38 @@ const ProfileCustomize = () => {
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(ProfileSchema),
+    mode: "onChange",
     defaultValues: {
-      username: "",
-      biodata: "",
-      gender: "",
-      phoneNumber: "",
-      location: "",
-      currentPicture: "",
-      picture: "",
-      socialLink: [{ platform: "", link: "" }],
+      username: customizeData[0]?.username,
+      biodata: customizeData[0]?.biodata,
+      gender: customizeData[0]?.gender,
+      phoneNumber: customizeData[0]?.phoneNumber,
+      picture: customizeData[0]?.picture,
+      socialLink: customizeData[0]?.socialLink ?? [{ platform: "", link: "" }],
+      location: customizeData[0]?.location,
+      // socialLink:,
     },
   });
 
   // useEffect(() => console.log(errors), [errors]);
 
   const submit = handleSubmit(async (values: ProfileFormData) => {
-    console.log(values);
+    console.log({
+      ...values,
+      phoneNumber: Number(values.phoneNumber),
+    });
   });
 
   useEffect(() => {
     if (customizeData) {
       reset({
-        username: customizeData[0]?.username ?? "",
-        biodata: customizeData[0]?.biodata ?? "",
-        gender: customizeData[0]?.gender ?? "",
-        phoneNumber: customizeData[0]?.phoneNumber ?? "",
-        picture: customizeData[0]?.picture ?? "",
+        username: customizeData[0]?.username,
+        biodata: customizeData[0]?.biodata,
+        gender: customizeData[0]?.gender,
+        phoneNumber: customizeData[0]?.phoneNumber,
+        picture: customizeData[0]?.picture,
         socialLink: customizeData[0]?.socialLink ?? [],
-        location: customizeData[0]?.location ?? "",
+        location: customizeData[0]?.location,
       });
     }
   }, [customizeData, reset]);
@@ -113,11 +93,10 @@ const ProfileCustomize = () => {
                         fieldKey={key}
                         value={value}
                         register={register}
+                        errors={errors}
                       />
                     )}
-                    {key === "picture" && (
-                      <Image setValue={setValue} register={register} />
-                    )}
+                    {key === "picture" && <Image setValue={setValue} />}
                     {key === "biodata" && (
                       <Bio fieldKey={key} value={value} register={register} />
                     )}

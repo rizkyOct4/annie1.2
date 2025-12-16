@@ -26,13 +26,10 @@ const PublicPath = ({
     return NextResponse.next();
   }
 
-  // ? when have role then let in.
-  if (role) {
-    return NextResponse.next();
-  }
-
   if (!role && req.method !== "GET") {
     return NextResponse.redirect(new URL(`/auth`, req.url));
+  } else {
+    return NextResponse.next();
   }
 };
 
