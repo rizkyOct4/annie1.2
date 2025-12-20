@@ -1,5 +1,6 @@
 import { prisma } from "@/_lib/db";
 import { cacheLife, cacheTag } from "next/cache";
+import camelcaseKeys from "camelcase-keys";
 
 export const ListFolderPhoto = async ({
   id,
@@ -16,35 +17,15 @@ export const ListFolderPhoto = async ({
   cacheLife("minutes");
   cacheTag(`list-folders-${id}`);
 
-  const data = await prisma.$queryRaw`
-        SELECT
-            y.year::int,
-            m.month::int,
-            COALESCE(
-                json_agg(
-                    jsonb_build_object(
-                        'folder_name', up.folder_name,
-                        'amount_item', up.item_count::int
-                    )
-                ) FILTER (WHERE up.folder_name IS NOT NULL), '[]'::json
-            ) AS folders
-        FROM 
-            generate_series(2025, 2025 + ${limit}) AS y(year)
-        CROSS JOIN 
-            generate_series(1,12) AS m(month)
-        JOIN (
+  const query = await prisma.$queryRaw`
             SELECT 
                 EXTRACT(YEAR FROM up.created_at)::int AS year,
                 EXTRACT(MONTH FROM up.created_at)::int AS month,
-                up.folder_name,
-                COUNT(up.folder_name)::int AS item_count
+                COUNT(DISTINCT up.folder_name)::int AS total_product
             FROM users_product up
             JOIN users u ON (up.ref_id = u.id)
             WHERE u.id = ${id}::uuid AND up.type = ${pathUrl}::type_product
-            GROUP BY year, month, folder_name
-        ) AS up ON up.year = y.year AND up.month = m.month
-        GROUP BY y.year, m.month
-        ORDER BY y.year, m.month
+            GROUP BY year, month
         `;
 
   const queryCheck = await prisma.$queryRaw<{ year: number }[]>`
@@ -59,7 +40,9 @@ export const ListFolderPhoto = async ({
   const hasMore =
     Number(queryCheck[0].year) + limit < Number(queryCheck[0].year);
 
-  if (!data) return [];
+  if (!query) return [];
+
+  const data = camelcaseKeys(query);
 
   return { data, hasMore };
 
@@ -94,3 +77,32 @@ export const ListFolderPhoto = async ({
 // todo PERBAIKI SEMUA DI PROFILE !!
 // TODO LOGIC SERVER -> SERVICES
 // TODO REF/TAR DARI CHILD -> PARENT -> BUAT INDEX -> FAST QUERY !!!!
+
+// SELECT
+//     y.year::int,
+//     m.month::int,
+//     COALESCE(
+//         json_agg(
+//             jsonb_build_object(
+//                 'folder_name', up.folder_name,
+//                 'amount_item', up.item_count::int
+//             )
+//         ) FILTER (WHERE up.folder_name IS NOT NULL), '[]'::json
+//     ) AS folders
+// FROM
+//     generate_series(2025, 2025 + ${limit}) AS y(year)
+// CROSS JOIN
+//     generate_series(1,12) AS m(month)
+// JOIN (
+//     SELECT
+//         EXTRACT(YEAR FROM up.created_at)::int AS year,
+//         EXTRACT(MONTH FROM up.created_at)::int AS month,
+//         COUNT(DISTINCT up.folder_name)::int AS item_count
+//     FROM users_product up
+//     JOIN users u ON (up.ref_id = u.id)
+//     WHERE u.id = 'aba8d0ae-50e8-4363-8aea-04649ba7535e'::uuid AND up.type = 'photo'::type_product
+//     GROUP BY year, month
+// ) AS up ON up.year = y.year AND up.month = m.month
+// GROUP BY y.year, m.month
+// ORDER BY y.year, m.month
+// `;

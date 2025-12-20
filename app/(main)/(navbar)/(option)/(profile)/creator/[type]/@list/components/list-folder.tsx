@@ -79,7 +79,7 @@ const ListFolder = ({ currentPath }: { currentPath: string }) => {
                       onClick={(e) => handleAction(e, "year", openYear, i.num)}
                       className="w-full flex justify-between hover:text-white cursor-pointer transition">
                       <h4>{i.name}</h4>
-                      <h4>{item.month === i.num && item.folders.length}</h4>
+                      <h4>{item.month === i.num && item.totalProduct}</h4>
                     </button>
                   </div>
                 ))}

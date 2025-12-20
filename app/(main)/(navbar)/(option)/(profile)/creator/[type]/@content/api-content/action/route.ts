@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PutCloudinary, PutImage } from "@/_lib/services/navbar/option/profile/action/services-btn";
-import { ItemFolderDescription } from "@/_lib/navbar/profile/route";
+import {
+  PutCloudinary,
+  PutImage,
+} from "@/_lib/services/navbar/option/profile/action/services-btn";
+// import { ItemFolderDescription } from "@/_lib/navbar/profile/route";
 import GetToken from "@/_lib/middleware/get-token";
 import {
   PostImageProductCloudinary,
@@ -8,7 +11,7 @@ import {
   GetPostDb,
 } from "@/_lib/services/navbar/option/profile/services-post-image";
 import { revalidateTag } from "next/cache";
-
+import { GetUpdateImage } from "@/_lib/services/navbar/option/profile/action/services-btn";
 
 export async function GET(
   req: NextRequest,
@@ -32,8 +35,6 @@ export async function GET(
     return NextResponse.json({ message: err.message }, { status: 500 });
   }
 }
-
-
 
 export async function POST(req: NextRequest) {
   try {
@@ -80,8 +81,8 @@ export async function POST(req: NextRequest) {
       });
 
       revalidateTag(`list-folder-btn-${id}`, "max");
-      revalidateTag(`folders-photo-${id}`, "max");
-      revalidateTag(`item-folder-photo-${folderName}`, "max");
+      // revalidateTag(`folders-photo-${id}`, "max");
+      // revalidateTag(`item-folder-photo-${folderName}`, "max");
 
       return NextResponse.json({
         message: "New Post Success",
@@ -95,45 +96,47 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
+    const { id, name } = await GetToken();
+
     const method = req.nextUrl.searchParams.get("method");
     const typePut = req.nextUrl.searchParams.get("type");
 
     if (method === "put" && typePut === "photo") {
       const {
-        iuProduct,
-        publicId,
+        idProduct,
         description,
         imageName,
         imagePath,
         prevImage,
+        folderName,
         hashtag,
         category,
         type,
-        createdAt,
+        updatedAt,
       } = await req.json();
 
       const webpName = imageName.replace(/\.[^/.]+$/, "") + ".webp";
 
       // Update ke database
       const url = await PutCloudinary({
-        publicId,
-        iuProduct,
+        name,
         webpName,
         imagePath,
         prevImage,
       });
 
       await PutImage({
-        iuProduct,
+        idProduct,
         description,
         webpName,
         url,
+        folderName,
         hashtag,
         category,
-        createdAt,
+        updatedAt,
       });
 
-      const result = await ItemFolderDescription(iuProduct);
+      const result = await GetUpdateImage(id, idProduct);
 
       return NextResponse.json({
         message: "Update Success",

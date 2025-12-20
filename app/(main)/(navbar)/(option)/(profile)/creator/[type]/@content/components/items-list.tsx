@@ -15,12 +15,12 @@ import { IoMdOpen } from "react-icons/io";
 import { MdUpdate } from "react-icons/md";
 import { BiExit } from "react-icons/bi";
 import { MdDescription } from "react-icons/md";
-import { SLoading } from "@/_util/Spinner-loading";
-import { IsRenderComponent } from "./folder-list";
+// import { IsRenderComponent } from "./folder-list";
 import { useInView } from "react-intersection-observer";
 import { TItemFolderPhoto } from "../../types/content/type";
 import OptionBtn from "./options/option-btn";
 import { MdCheck, MdClose } from "react-icons/md";
+import Loading from "@/app/loading";
 
 const btnList = [
   { name: "update", icon: <MdUpdate />, title: "Update" },
@@ -39,7 +39,7 @@ export interface ItemListState {
 
 export interface ItemListStateNav {
   isOpen: boolean;
-  iuProduct: number[];
+  idProduct: number[];
   type: string;
   targetFolder: string;
 }
@@ -55,7 +55,7 @@ const ItemsList = ({
 }) => {
   const {
     setUpdateState,
-    isLoadingItemFolderPhoto,
+    isFetchingItemFolder,
     fetchNextPageItemFolder,
     isHasPageItemFolder,
     isFetchingNextPageItemFolder,
@@ -95,7 +95,7 @@ const ItemsList = ({
   // ? Navigation State
   const [isOpenNav, setIsOpenNav] = useState<ItemListStateNav>({
     isOpen: true,
-    iuProduct: [],
+    idProduct: [],
     type: "",
     targetFolder: "",
   });
@@ -107,9 +107,9 @@ const ItemsList = ({
         case "navAction": {
           setIsOpenNav((prev: any) => ({
             ...prev,
-            iuProduct: prev.iuProduct.includes(idProduct)
-              ? prev.iuProduct.filter((f: number) => f !== idProduct)
-              : [...prev.iuProduct, idProduct],
+            idProduct: prev.idProduct.includes(idProduct)
+              ? prev.idProduct.filter((f: number) => f !== idProduct)
+              : [...prev.idProduct, idProduct],
           }));
           break;
         }
@@ -154,76 +154,80 @@ const ItemsList = ({
       {isOpenNav && (
         <OptionBtn isOpenNav={isOpenNav} setIsOpenNav={setIsOpenNav} />
       )}
-      <div
-        ref={containerRef}
-        className="relative flex justify-center flex-wrap gap-5 w-full my-4 max-h-100 overflow-y-auto">
-        {Array.isArray(data) &&
-          data.length > 0 &&
-          data.map((i: { idProduct: number; url: string }, idx) => {
-            const isLast = idx === data.length - 1;
-            return (
-              <div
-                key={i.idProduct}
-                ref={isLast ? lastItemRef : null}
-                className="relative flex flex-col w-[22%] h-65 rounded-2xl overflow-hidden border border-gray-100">
-                {/* Image wrapper */}
-                <div className="relative w-full md:h-64 lg:h-72">
-                  <Image
-                    src={i.url}
-                    alt={"Image"}
-                    fill
-                    className="object-cover"
-                  />
-                  {isOpenNav.type !== "" && (
-                    <button
-                      onClick={() => handleAction("navAction", i.idProduct)}
-                      className={`absolute top-3 left-3 flex items-center justify-center w-9 h-9 rounded-xl transition-colors
+      {isFetchingItemFolder ? (
+        <Loading />
+      ) : (
+        <div
+          ref={containerRef}
+          className="relative flex justify-center flex-wrap gap-5 w-full my-4 max-h-100 overflow-y-auto">
+          {Array.isArray(data) &&
+            data.length > 0 &&
+            data.map((i: { idProduct: number; url: string }, idx) => {
+              const isLast = idx === data.length - 1;
+              return (
+                <div
+                  key={i.idProduct}
+                  ref={isLast ? lastItemRef : null}
+                  className="relative flex flex-col w-[22%] h-65 rounded-2xl overflow-hidden border border-gray-100">
+                  {/* Image wrapper */}
+                  <div className="relative w-full md:h-64 lg:h-72">
+                    <Image
+                      src={i.url}
+                      alt={"Image"}
+                      fill
+                      className="object-cover"
+                    />
+                    {["move", "delete"].includes(isOpenNav.type) && (
+                      <button
+                        onClick={() => handleAction("navAction", i.idProduct)}
+                        className={`absolute top-3 left-3 flex items-center justify-center w-9 h-9 rounded-xl transition-colors
                         ${
-                          isOpenNav?.iuProduct.includes(i.idProduct)
+                          isOpenNav?.idProduct.includes(i.idProduct)
                             ? "bg-black/80 text-white"
                             : "bg-white/80 text-gray-700"
                         }`}>
-                      {isOpenNav?.iuProduct.includes(i.idProduct) ? (
-                        <MdCheck size={20} />
-                      ) : (
-                        <MdClose size={20} />
-                      )}
-                    </button>
-                  )}
+                        {isOpenNav?.idProduct.includes(i.idProduct) ? (
+                          <MdCheck size={20} />
+                        ) : (
+                          <MdClose size={20} />
+                        )}
+                      </button>
+                    )}
 
-                  {/* Buttons overlay */}
-                  <div className="absolute bottom-3 flex flex-wrap gap-2 px-4">
-                    {/* Toggle button */}
-                    <button
-                      className="w-9 h-9 rounded-xl bg-white/80 border border-gray-200 text-gray-700 flex-center"
-                      onClick={() => handleAction("toggle", i.idProduct, "")}>
-                      {isOpen.iuProduct === i.idProduct && isOpen.open ? (
-                        <IoMdOpen />
-                      ) : (
-                        <BiExit />
-                      )}
-                    </button>
+                    {/* Buttons overlay */}
+                    <div className="absolute bottom-3 flex flex-wrap gap-2 px-4">
+                      {/* Toggle button */}
+                      <button
+                        className="w-9 h-9 rounded-xl bg-white/80 border border-gray-200 text-gray-700 flex-center"
+                        onClick={() => handleAction("toggle", i.idProduct, "")}>
+                        {isOpen.iuProduct === i.idProduct && isOpen.open ? (
+                          <IoMdOpen />
+                        ) : (
+                          <BiExit />
+                        )}
+                      </button>
 
-                    {/* Action buttons */}
-                    {isOpen.open &&
-                      isOpen.iuProduct === i.idProduct &&
-                      btnList.map((btn, idx) => (
-                        <button
-                          key={idx}
-                          className="text-sm font-medium text-gray-600 w-9 h-9 rounded-xl bg-white/80 border border-gray-200 flex-center hover:bg-white hover:text-black"
-                          onClick={() =>
-                            handleAction(btn.name, i.idProduct, btn.name)
-                          }
-                          title={btn.title}>
-                          {btn.icon}
-                        </button>
-                      ))}
+                      {/* Action buttons */}
+                      {isOpen.open &&
+                        isOpen.iuProduct === i.idProduct &&
+                        btnList.map((btn, idx) => (
+                          <button
+                            key={idx}
+                            className="text-sm font-medium text-gray-600 w-9 h-9 rounded-xl bg-white/80 border border-gray-200 flex-center hover:bg-white hover:text-black"
+                            onClick={() =>
+                              handleAction(btn.name, i.idProduct, btn.name)
+                            }
+                            title={btn.title}>
+                            {btn.icon}
+                          </button>
+                        ))}
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-      </div>
+              );
+            })}
+        </div>
+      )}
     </>
   );
 };

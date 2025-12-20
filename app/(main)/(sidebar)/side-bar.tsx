@@ -86,10 +86,10 @@ const Sidebar = ({
   ];
 
   return (
-    <div className="w-full fixed top-[80px] h-screen z-100 flex ">
+    <div className="w-full fixed top-20 h-screen z-100 flex ">
       <aside
         className="
-          w-[80px] bg-black/80 backdrop-blur-sm 
+          w-20 bg-black/80 backdrop-blur-sm 
           border-white/10
           flex flex-col items-center pt-6
           overflow-y-auto
@@ -106,7 +106,7 @@ const Sidebar = ({
                 setActivePanel(activePanel === item.key ? null : item.key)
               }
               className="
-                w-[48px] h-[48px]
+                w-12 h-12
                 flex items-center justify-center
                 mb-1
                 rounded-md bg-white/10 border border-white/10 text-white
@@ -116,14 +116,14 @@ const Sidebar = ({
             </button>
 
             {activePanel === item.key && (
-              <div className="w-[80px] flex flex-col items-center mt-2 gap-2">
+              <div className="w-20 flex flex-col items-center mt-2 gap-2">
                 {item.menus.map((m, i) => (
                   <button
                     key={i}
                     type="button"
                     title={m.label}
                     onClick={() => router.push(m.to)}
-                    className="w-[40px] h-[40px] flex items-center justify-center rounded-md bg-white/10 border border-white/10 text-white hover:bg-white/20 transition relative">
+                    className="w-10 h-10 flex items-center justify-center rounded-md bg-white/10 border border-white/10 text-white hover:bg-white/20 transition relative">
                     <span className="text-xl">{m.icon}</span>
                   </button>
                 ))}

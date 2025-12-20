@@ -13,6 +13,19 @@ export type TImagePost = {
   createdAt: Date;
 };
 
+export type TImagePut = {
+  idProduct: number;
+  description: string;
+  imageName: string;
+  imagePath: string;
+  prevImage: string;
+  folderName: string;
+  hashtag: string[];
+  category: string[];
+  type: string;
+  updatedAt: Date;
+};
+
 export const zPostFormSchema = z.object({
   imageName: z.string(),
   imagePath: z.string(),

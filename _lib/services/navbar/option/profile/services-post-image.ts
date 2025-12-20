@@ -84,14 +84,11 @@ export const PostDb = async ({
 // * RESULT POST DB ===========================
 export const GetPostDb = async ({ idProduct }: { idProduct: number }) => {
   const result = await prisma.$queryRaw<
-    { ref_id_product: number; url: string }[]
-  >`SELECT ref_id_product, url
-    FROM users_product_image WHERE ref_id_product = ${idProduct}
+    { folder_name: string; ref_id_product: number; url: string }[]
+  >`SELECT up.folder_name, upi.ref_id_product, upi.url
+    FROM users_product_image upi
+    JOIN users_product up ON (up.id_product = upi.ref_id_product)
+    WHERE ref_id_product = ${idProduct}
     `;
-  const rawData = result.map((i) => ({
-    idProduct: i.ref_id_product,
-    url: i.url,
-  }));
-
-  return camelcaseKeys(rawData);
+  return camelcaseKeys(result);
 };

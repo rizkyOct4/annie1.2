@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { useContext, useEffect, useState } from "react";
 import { creatorContext } from "@/app/context";
-import { zPutFormSchema } from "../../schema/schema-form";
+import { TImagePut, zPutFormSchema } from "../../schema/schema-form";
 import { z } from "zod";
 import { ForbiddenRegex } from "@/_util/Regex";
 // import { IsRenderComponent } from "../../../folder-list";
@@ -36,8 +36,11 @@ const PutPhotoForm = ({
 }: {
   setIsRender: React.Dispatch<React.SetStateAction<any>>;
 }) => {
-  // const { descriptionItemFolderData, putPhoto, publicId } =
-  //   useContext(creatorContext);
+  const { UpdatedData, ListPostFolderData, refetchListPostFolder, setTypeBtn, putPhoto } =
+    useContext(creatorContext);
+  // console.log(UpdatedData);
+  // console.log(ListPostFolderData);
+
   const [showDummyFolder, setShowDummyFolder] = useState(false);
 
   const {
@@ -55,42 +58,55 @@ const PutPhotoForm = ({
       imageName: "",
       imagePath: "",
       prevImage: "",
+      folderName: "",
       hashtag: [],
       category: [],
       description: "",
     },
   });
 
-  // useEffect(() => {
-  //   // ! INITIATE DATA cuma berlaku saat pertama kali mount ke component !! kalau data beda pastikan RESET !!!
-  //   if (descriptionItemFolderData) {
-  //     reset({
-  //       imageName: descriptionItemFolderData[0].imageName || "",
-  //       imagePath: descriptionItemFolderData[0].url || "",
-  //       prevImage: descriptionItemFolderData[0].url || "",
-  //       hashtag: descriptionItemFolderData[0].hashtag || [],
-  //       category: descriptionItemFolderData[0].category || [],
-  //       description: descriptionItemFolderData[0].description || "",
-  //     });
-  //   }
-  // }, [descriptionItemFolderData, reset]);
+  useEffect(() => {
+    // ! INITIATE DATA cuma berlaku saat pertama kali mount ke component !! kalau data beda pastikan RESET !!!
+    if (UpdatedData) {
+      reset({
+        imageName: UpdatedData[0].imageName,
+        imagePath: UpdatedData[0].url,
+        prevImage: UpdatedData[0].url,
+        folderName: UpdatedData[0].folderName,
+        hashtag: UpdatedData[0].hashtag || [],
+        category: UpdatedData[0].category || [],
+        description: UpdatedData[0].description,
+      });
+    }
+    setTypeBtn("photo");
+    if (!ListPostFolderData) {
+      refetchListPostFolder();
+    }
+  }, [
+    ListPostFolderData,
+    UpdatedData,
+    refetchListPostFolder,
+    reset,
+    setTypeBtn,
+  ]);
 
   const submit = handleSubmit(async (values) => {
     try {
-      // const payload: PutImageSchema = {
-      //   iuProduct: descriptionItemFolderData[0].tarIuProduct,
-      //   publicId: publicId,
-      //   description: values.description,
-      //   imageName: values.imageName,
-      //   imagePath: values.imagePath,
-      //   prevImage: descriptionItemFolderData[0].url,
-      //   hashtag: values.hashtag,
-      //   category: values.category,
-      //   type: "photo",
-      //   createdAt: LocalISOTime(),
-      // };
-      // await putPhoto(payload);
-      // setIsRender({ isOpen: false, iuProduct: null, value: "" });
+      const payload: TImagePut = {
+        idProduct: UpdatedData[0].idProduct,
+        description: values.description,
+        imageName: values.imageName,
+        imagePath: values.imagePath,
+        prevImage: UpdatedData[0].url,
+        folderName: values.folderName,
+        hashtag: values.hashtag,
+        category: values.category,
+        type: "photo",
+        updatedAt: LocalISOTime(),
+      };
+      console.log(payload)
+      await putPhoto(payload);
+      setIsRender({ isOpen: false, iuProduct: null, value: "" });
     } catch (error) {
       console.error(error);
     }
@@ -146,7 +162,7 @@ const PutPhotoForm = ({
                     }
                   }}
                   className="rounded-md border border-white/20 bg-white/10 p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  // required
                 />
               </label>
 
@@ -184,7 +200,8 @@ const PutPhotoForm = ({
                   <div className="flex overflow-hidden rounded-md border border-white/20 bg-white/10 focus-within:ring-2 focus-within:ring-blue-500">
                     <input
                       {...register("folderName")}
-                      placeholder="Select folder..."
+                      defaultValue={watch("folderName")}
+                      // placeholder="Select folder..."
                       className="flex-1 bg-transparent p-2 text-white outline-none"
                     />
                     <button
@@ -196,7 +213,7 @@ const PutPhotoForm = ({
                   </div>
                 </label>
 
-                {/* {showDummyFolder && (
+                {showDummyFolder && (
                   <div className="absolute z-20 mt-1 max-h-40 w-full overflow-y-auto rounded-md border border-white/20 bg-black/90 shadow-lg">
                     {Array.isArray(ListPostFolderData) &&
                       ListPostFolderData.map((i) => (
@@ -215,7 +232,7 @@ const PutPhotoForm = ({
                         </div>
                       ))}
                   </div>
-                )} */}
+                )}
               </div>
 
               {/* Hashtag */}
@@ -330,5 +347,4 @@ const PutPhotoForm = ({
 
 export default PutPhotoForm;
 
-
-// todo kondisikan besok sama kau ini !! data update !! 
+// todo kondisikan besok sama kau ini !! data update !!

@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useCallback } from "react";
+import { useContext } from "react";
 import { creatorContext } from "@/app/context";
 import { SLoading } from "@/_util/Spinner-loading";
 import dynamic from "next/dynamic";
@@ -14,8 +14,10 @@ export default function ModalListItem({
 }: {
   currentPath: string;
 }) {
-  const { listItemFolderPhotoData, itemFolderVideoData } =
-    useContext(creatorContext);
+  const {
+    listItemFolderPhotoData,
+    // itemFolderVideoData,
+  } = useContext(creatorContext);
 
   switch (currentPath) {
     case "photo":

@@ -5,7 +5,6 @@ import React, {
   useCallback,
   useContext,
   useState,
-  useEffect,
 } from "react";
 import { creatorContext } from "@/app/context";
 import { ChartSpline, ChevronDown } from "lucide-react";
@@ -54,18 +53,20 @@ const ListItemPhoto = ({
   data: TListItemFolderPhoto[];
   currentPath: string;
 }) => {
-  const { folderNamePath, stateFolder, setStateFolder, itemFolderPhotoData } =
-    useContext(creatorContext);
+  const {
+    stateFolder,
+    setStateFolder,
+    itemFolderPhotoData,
+    isSort,
+    sortItemFolder,
+  } = useContext(creatorContext);
   const router = useRouter();
-
-  //   const currentPath = usePathname();
 
   const [isRender, setIsRender] = useState<IsRenderComponent>({
     isOpen: false,
     idProduct: null,
     value: "",
   });
-
 
   const handleAction = useCallback(
     (actionType: string, folderName: string) => {
@@ -169,7 +170,7 @@ const ListItemPhoto = ({
                   </div>
                   {stateFolder.isFolder === f.folderName && (
                     <ItemsList
-                      data={itemFolderPhotoData}
+                      data={isSort ? sortItemFolder : itemFolderPhotoData}
                       folderName={f.folderName}
                       setIsRender={setIsRender}
                     />

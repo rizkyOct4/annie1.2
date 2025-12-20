@@ -27,7 +27,7 @@ export const GetListPostFolder = async (id: string, type: string) => {
 // * GET UPDATE IMAGE =======
 export const GetUpdateImage = async (id: string, idProduct: number) => {
   const query = await prisma.$queryRaw<TGetUpdateImage[]>`
-    SELECT upi.ref_id_product, upi.description, upi.url, upi.hashtag, upi.category, COALESCE(SUM(upiv.like), 0)::int AS total_like, COALESCE(SUM(upiv.dislike), 0)::int AS total_dislike, up.folder_name, up.created_at
+    SELECT upi.ref_id_product, upi.description, upi.image_name, upi.url, upi.hashtag, upi.category, COALESCE(SUM(upiv.like), 0)::int AS total_like, COALESCE(SUM(upiv.dislike), 0)::int AS total_dislike, up.folder_name, up.created_at
     FROM users_product_image upi
     JOIN users_product up ON (up.id_product = upi.ref_id_product)
     JOIN users u ON (u.id = up.ref_id)
@@ -37,6 +37,7 @@ export const GetUpdateImage = async (id: string, idProduct: number) => {
       upi.description,
       upi.ref_id_product,
       upi.url,
+      upi.image_name,
       upi.hashtag,
       upi.category,
       up.folder_name,
@@ -61,14 +62,12 @@ export const GetUpdateImage = async (id: string, idProduct: number) => {
 
 // ? PUT IMAGE
 export const PutCloudinary = async ({
-  publicId,
-  iuProduct,
+  name,
   webpName,
   imagePath,
   prevImage,
 }: {
-  publicId: string;
-  iuProduct: number;
+  name: string;
   webpName: string;
   imagePath: string;
   prevImage: string;
@@ -92,7 +91,7 @@ export const PutCloudinary = async ({
       cloudinary.uploader
         .upload_stream(
           {
-            folder: `usersProduct/${publicId}/`,
+            folder: `users profile/${name}/products`,
             public_id: webpName, // hapus ekstensi lama
             resource_type: "image",
             format: "webp",
@@ -110,35 +109,37 @@ export const PutCloudinary = async ({
 };
 
 export const PutImage = ({
-  iuProduct,
+  idProduct,
   description,
   webpName,
   url,
+  folderName,
   hashtag,
   category,
-  createdAt,
+  updatedAt,
 }: {
-  iuProduct: number;
+  idProduct: number;
   description: string;
   webpName: string;
   url: string;
+  folderName: string;
   hashtag: string[];
   category: string[];
-  createdAt: Date;
+  updatedAt: Date;
 }) => {
   try {
     return prisma.$transaction(async (tx) => {
       // ? users_product DB
       await tx.$queryRaw`
         UPDATE users_product
-        SET created_at = ${createdAt}::timestamp
-        WHERE iu_product = ${iuProduct};
+        SET folder_name = ${folderName}, created_at = ${updatedAt}::timestamp
+        WHERE id_product = ${idProduct};
       `;
 
       await tx.$queryRaw`
         UPDATE users_product_image
         SET description = ${description}, image_name = ${webpName}, url = ${url}, hashtag = ${hashtag}::varchar[], category = ${category}::varchar[]
-        WHERE tar_iu_product = ${iuProduct}
+        WHERE ref_id_product = ${idProduct}
         `;
     });
   } catch (err: any) {

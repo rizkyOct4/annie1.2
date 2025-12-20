@@ -9,19 +9,22 @@ export type TOriginalListFolder = {
 
 // ? 2
 export type ItemFolderType = {
+  folderName: string;
   idProduct: number;
   url: string;
+  createdAt: Date
 };
 export type TOriginalItemFolder = {
-  folderName: string;
   data: ItemFolderType[];
   hasMore: boolean;
 };
 
 // ? 3
-export type TItemFolderDescription = {
-  tarIuProduct: number;
+export type TOriginalUpdated = {
+  idProduct: number;
+  folderName: string;
   description: string;
+  imageName: string;
   url: string;
   hashtag: string[];
   category: string[];

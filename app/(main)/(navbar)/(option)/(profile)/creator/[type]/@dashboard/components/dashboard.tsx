@@ -2,7 +2,6 @@
 
 import { memo, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-import { SLoading } from "@/_util/Spinner-loading";
 
 import ActivePath from "./active-path";
 import SearchFolder from "./search-folder";
@@ -10,16 +9,10 @@ import PostingBtn from "./posting-btn";
 import { IDashboard } from "../../types/dashboard/interface";
 
 const LazyPostPhotoForm = dynamic(
-  () => import("../../form/photo/post-photo-form"),
-  {
-    loading: () => <SLoading />,
-  }
+  () => import("../../form/photo/post-photo-form")
 );
 const LazyPostVideoForm = dynamic(
-  () => import("../../form/video/post-video-form"),
-  {
-    loading: () => <SLoading />,
-  }
+  () => import("../../form/video/post-video-form")
 );
 
 export const Dashboard = ({ currentPath }: { currentPath: string }) => {

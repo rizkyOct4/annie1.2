@@ -9,10 +9,11 @@ import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useSearchParams } from "next/navigation";
 import { ROUTES_PROFILE } from "../config";
-import { usePost } from "./sub/use-sub-photo";
+import { usePost, usePut } from "./sub/use-sub-photo";
 import { ROUTES_LIST_FOLDER } from "../config/list-folder";
 import { ROUTES_ITEM_FOLDER } from "../config/item-folder";
 import { ROUTES_CREATOR_PHOTO_PANEL } from "../config/routes-panel";
+import { SortASC } from "@/_util/GenerateData";
 
 // * LIST FOLDER ====
 const useListFolder = (id: string) => {
@@ -53,7 +54,7 @@ const useListFolder = (id: string) => {
     [listFolderPhoto?.pages]
   );
 
-  // console.log(listFolderData)
+  // console.log(listFolderPhoto)
 
   return {
     // * LIST FOLDER PHOTO
@@ -77,6 +78,17 @@ const useListItemFolder = (id: string) => {
     isIuProduct: null,
   });
 
+  // ? UPDATE STATE 
+  const [updateState, setUpdateState] = useState(null);
+
+  // ? SORT ITEMS DATA
+  const [isSort, setIsSort] = useState(false);
+
+  // ! START LIST FOLDERS ==========================
+
+
+
+  // ! START CONTENT ==========================
   // * List Item Folder
   const { data: listItemFolder } = useInfiniteQuery({
     queryKey: ["keyListItemFolder", id, stateContent.year, stateContent.month],
@@ -110,9 +122,11 @@ const useListItemFolder = (id: string) => {
   const {
     data: itemFolderPhoto,
     isLoading: isLoadingItemFolderPhoto,
+    isFetching: isFetchingItemFolder,
     fetchNextPage: fetchNextPageItemFolder,
     hasNextPage: isHasPageItemFolder,
     isFetchingNextPage: isFetchingNextPageItemFolder,
+    refetch: isRefetchItemFolder,
   } = useInfiniteQuery({
     queryKey: ["keyItemFolderPhoto", id, stateFolder.isFolder],
     queryFn: async ({ pageParam = 1 }) => {
@@ -140,8 +154,28 @@ const useListItemFolder = (id: string) => {
     retry: false,
   });
 
-  // console.log(`list item Folder:`, listItemFolder);
-  // console.log(itemFolderPhoto);
+  // ! END CONTENT ==========================
+
+  // * UPDATE DATA
+  const { data: getUpdatePhoto } = useQuery({
+    queryKey: ["keyUpdatePhoto", id, updateState],
+    queryFn: async () => {
+      const URL = ROUTES_PROFILE.GET_BTN({
+        key: "getUpdate",
+        path: type,
+        idProduct: updateState,
+      });
+      const { data } = await axios.get(URL);
+      return data;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!updateState,
+    gcTime: 1000 * 60 * 60, // Cache data akan disimpan selama 1 jam
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
+    refetchOnMount: false,
+    retry: false,
+  });
 
   // ? LIST
   const listItemFolderPhotoData = useMemo(
@@ -154,6 +188,13 @@ const useListItemFolder = (id: string) => {
     () => itemFolderPhoto?.pages.flatMap((page) => page.data) ?? [],
     [itemFolderPhoto?.pages]
   );
+  const sortItemFolder = useMemo(
+    () => SortASC(itemFolderPhotoData),
+    [itemFolderPhotoData]
+  );
+
+  // ? UPDATED DATA
+  const UpdatedData = useMemo(() => getUpdatePhoto ?? [], [getUpdatePhoto]);
 
   const { postPhoto } = usePost({
     keyListFolder: [
@@ -165,8 +206,24 @@ const useListItemFolder = (id: string) => {
     keyItemFolder: ["keyItemFolderPhoto", id, stateFolder.isFolder],
     type: type,
   });
+  const { putPhoto } = usePut({
+    keyListFolder: [
+      "keyListItemFolder",
+      id,
+      stateContent?.year,
+      stateContent?.month,
+    ],
+    keyItemFolder: ["keyItemFolderPhoto", id, stateFolder.isFolder],
+    keyUpdatePhoto: ["keyUpdatePhoto", id, updateState],
+    rawKeyItemFolder: {
+      key: "keyItemFolderPhoto",
+      id: id,
+      updateFolder: stateFolder.isFolder,
+    },
+    type: type,
+  });
 
-  // console.log(listItemFolderPhotoData)
+  // console.log(listItemFolder);
 
   return {
     // ? STATE
@@ -180,11 +237,24 @@ const useListItemFolder = (id: string) => {
     // ? DATA
     itemFolderPhotoData,
     isLoadingItemFolderPhoto,
+    isFetchingItemFolder,
     fetchNextPageItemFolder,
     isHasPageItemFolder,
     isFetchingNextPageItemFolder,
+    isRefetchItemFolder,
 
+    // * UTLS
+    sortItemFolder,
+    isSort,
+    setIsSort,
+
+    // ? DATA UPDATE
+    UpdatedData,
+    setUpdateState,
+
+    // ? ACTION
     postPhoto,
+    putPhoto,
   };
 };
 
@@ -225,12 +295,13 @@ const useItemDescription = (id: string) => {
 // ? ===============
 const useCreatorButton = (id: string) => {
   const [typeBtn, setTypeBtn] = useState<string>("");
-  const { type } = useParams<{ type: string }>();
-
-  const [updateState, setUpdateState] = useState(null);
 
   // * LIST POST FOLDER
-  const { data: listPostFolder, isLoading: isLoadingListPost } = useQuery({
+  const {
+    data: listPostFolder,
+    isLoading: isLoadingListPost,
+    refetch: refetchListPostFolder,
+  } = useQuery({
     queryKey: ["listFolderPost", id, typeBtn],
     queryFn: async () => {
       const URL = ROUTES_PROFILE.GET_BTN({ key: typeBtn, typeBtn: typeBtn });
@@ -246,35 +317,12 @@ const useCreatorButton = (id: string) => {
     retry: false,
   });
 
-  // * UPDATE DATA
-  const { data: getUpdatePhoto } = useQuery({
-    queryKey: ["keyUpdatePhoto", id, updateState],
-    queryFn: async () => {
-      const URL = ROUTES_PROFILE.GET_BTN({
-        key: "getUpdate",
-        path: type,
-        idProduct: updateState,
-      });
-      const { data } = await axios.get(URL);
-      return data;
-    },
-    staleTime: 1000 * 60 * 5,
-    enabled: !!updateState,
-    gcTime: 1000 * 60 * 60, // Cache data akan disimpan selama 1 jam
-    placeholderData: keepPreviousData,
-    refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
-    refetchOnMount: false,
-    retry: false,
-  });
-
-  const UpdatedData = useMemo(() => getUpdatePhoto ?? [], [getUpdatePhoto]);
-
   const ListPostFolderData = useMemo(
     () => listPostFolder ?? [],
     [listPostFolder]
   );
 
-  console.log(`updated data:`, UpdatedData);
+  // console.log(`updated data:`, UpdatedData);
   // console.log(ListPostFolderData);
 
   return {
@@ -282,11 +330,8 @@ const useCreatorButton = (id: string) => {
     isLoadingListPost,
     ListPostFolderData,
     setTypeBtn,
+    refetchListPostFolder,
 
-    // ? updateDataPhoto
-    UpdatedData,
-    getUpdatePhoto,
-    setUpdateState,
     // UpdatePhotoData,
     // setIuProduct,
     // isLoadingUpdatePhoto,
