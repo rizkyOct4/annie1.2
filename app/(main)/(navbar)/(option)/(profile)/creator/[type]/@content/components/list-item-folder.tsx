@@ -1,19 +1,16 @@
 "use client";
 
-import React, {
-  memo,
-  useCallback,
-  useContext,
-  useState,
-} from "react";
+import React, { memo, useCallback, useContext, useState } from "react";
 import { creatorContext } from "@/app/context";
 import { ChartSpline, ChevronDown } from "lucide-react";
+import { MdDelete } from "react-icons/md";
 import { useRouter } from "next/navigation";
 
 import ItemsList from "./items-list";
 import { TListItemFolderPhoto } from "../../types/content/type";
 import dynamic from "next/dynamic";
 import Loading from "@/app/loading";
+import PutFolderNameForm from "../../form/photo/put-name-folder-form";
 
 const LazyUpdatePhotoForm = dynamic(
   () => import("../../form/photo/put-photo-form"),
@@ -21,6 +18,12 @@ const LazyUpdatePhotoForm = dynamic(
     loading: () => <Loading />,
   }
 );
+// const LazyPutFolderNameForm = dynamic(
+//   () => import("../../form/photo/put-name-folder-form"),
+//   {
+//     loading: () => <Loading />,
+//   }
+// );
 
 export interface FolderListToggle {
   open: boolean;
@@ -34,6 +37,7 @@ export interface IsRenderComponent {
 }
 
 const listBtn = [
+  { name: `Delete`, icon: <MdDelete size={18} />, value: "delete" },
   {
     name: `Stats`,
     icon: <ChartSpline size={18} />,
@@ -68,8 +72,14 @@ const ListItemPhoto = ({
     value: "",
   });
 
+  const [newNameFolder, setNewNamefolder] = useState({
+    open: false,
+    targetFolder: "",
+  });
+
   const handleAction = useCallback(
-    (actionType: string, folderName: string) => {
+    (e: React.SyntheticEvent, actionType: string, folderName: string) => {
+      e.preventDefault();
       switch (actionType) {
         case "toggle": {
           setStateFolder((prev: { isFolder: string }) => ({
@@ -88,9 +98,16 @@ const ListItemPhoto = ({
           // );
           break;
         }
+        case "updateFolder": {
+          setNewNamefolder((prev: { open: boolean; targetFolder: string }) => ({
+            open: prev.targetFolder === folderName ? false : true,
+            targetFolder: prev.targetFolder === folderName ? "" : folderName,
+          }));
+          break;
+        }
       }
     },
-    [setStateFolder, router, currentPath]
+    [setStateFolder, router, currentPath, setNewNamefolder]
   );
 
   const renderComponent = useCallback(() => {
@@ -115,26 +132,39 @@ const ListItemPhoto = ({
                   <div className="flex items-center gap-3">
                     {/* Icon */}
                     <div className="w-9 h-9 flex-center rounded-md border border-white/30">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        className="w-5 h-5 text-white">
-                        <path
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.75a1 1 0 0 1 .8.4l1 1.333A1 1 0 0 0 12.56 7H18.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-9z"
-                        />
-                      </svg>
+                      <button
+                        type="button"
+                        onClick={(e) =>
+                          handleAction(e, "updateFolder", f.folderName)
+                        }
+                        title="Change Foldername"
+                        className="text-white hover:text-blue-500 transition-colors cursor-pointer">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          className="w-5 h-5">
+                          <path
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.75a1 1 0 0 1 .8.4l1 1.333A1 1 0 0 0 12.56 7H18.5A2.5 2.5 0 0 1 21 9.5v7A2.5 2.5 0 0 1 18.5 19h-13A2.5 2.5 0 0 1 3 16.5v-9z"
+                          />
+                        </svg>
+                      </button>
                     </div>
 
                     {/* Text */}
-                    <div className="flex-1 min-w-0 flex items-center gap-2">
-                      <span className="text-sm font-medium text-white truncate">
-                        {f.folderName}
-                      </span>
+                    <div className="flex-1 w-9 h-9 flex items-center gap-2">
+                      {newNameFolder.open &&
+                      newNameFolder.targetFolder === f.folderName ? (
+                        <PutFolderNameForm currentFoldername={f.folderName} />
+                      ) : (
+                        <span className="text-sm font-medium text-white truncate">
+                          {f.folderName}
+                        </span>
+                      )}
 
                       <span className="text-sm font-medium text-white px-2 py-1 rounded border border-white/30">
                         {f.amountItem}
@@ -146,12 +176,12 @@ const ListItemPhoto = ({
                       {listBtn.map((btn) => (
                         <button
                           key={btn.value}
-                          onClick={() =>
-                            handleAction(btn.value, f.folderName || "")
+                          onClick={(e) =>
+                            handleAction(e, btn.value, f.folderName || "")
                           }
                           className={`
                             flex items-center px-4 py-2 text-white text-sm font-medium
-                            transition-all duration-200 ease-in-out
+                            transition-all duration-200 ease-in-out gap-2
                             ${
                               btn.value === "toggle" &&
                               stateFolder.isOpen &&

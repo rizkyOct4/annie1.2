@@ -9,16 +9,32 @@ import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useSearchParams } from "next/navigation";
 import { ROUTES_PROFILE } from "../config";
-import { usePost, usePut } from "./sub/use-sub-photo";
+import { usePost, usePut, usePutFolderName } from "./sub/use-sub-photo";
 import { ROUTES_LIST_FOLDER } from "../config/list-folder";
 import { ROUTES_ITEM_FOLDER } from "../config/item-folder";
 import { ROUTES_CREATOR_PHOTO_PANEL } from "../config/routes-panel";
 import { SortASC } from "@/_util/GenerateData";
 
-// * LIST FOLDER ====
-const useListFolder = (id: string) => {
+// * CONTENT ====
+const useContentProfile = (id: string) => {
   const { type } = useParams<{ type: string }>();
+  const [stateContent, setStateContent] = useState({
+    year: "",
+    month: "",
+  });
+  const [stateFolder, setStateFolder] = useState({
+    isOpen: false,
+    isFolder: "",
+    isIuProduct: null,
+  });
 
+  // ? UPDATE STATE
+  const [updateState, setUpdateState] = useState(null);
+
+  // ? SORT ITEMS DATA
+  const [isSort, setIsSort] = useState(false);
+
+  // ! START LIST FOLDERS ==========================
   const {
     data: listFolderPhoto,
     fetchNextPage: FNPListFolderPhoto,
@@ -48,45 +64,7 @@ const useListFolder = (id: string) => {
     refetchOnMount: false, // "always" => refetch jika stale saja
     retry: false,
   });
-
-  const listFolderData = useMemo(
-    () => listFolderPhoto?.pages.flatMap((page) => page?.data ?? []),
-    [listFolderPhoto?.pages]
-  );
-
-  // console.log(listFolderPhoto)
-
-  return {
-    // * LIST FOLDER PHOTO
-    listFolderData,
-    FNPListFolderPhoto,
-    HNPListFolderPhoto,
-    IFNPListFolderPhoto,
-  };
-};
-
-// * CONTENT ====
-const useListItemFolder = (id: string) => {
-  const { type } = useParams<{ type: string }>();
-  const [stateContent, setStateContent] = useState({
-    year: "",
-    month: "",
-  });
-  const [stateFolder, setStateFolder] = useState({
-    isOpen: false,
-    isFolder: "",
-    isIuProduct: null,
-  });
-
-  // ? UPDATE STATE 
-  const [updateState, setUpdateState] = useState(null);
-
-  // ? SORT ITEMS DATA
-  const [isSort, setIsSort] = useState(false);
-
-  // ! START LIST FOLDERS ==========================
-
-
+  // ! END LIST FOLDERS ==========================
 
   // ! START CONTENT ==========================
   // * List Item Folder
@@ -153,7 +131,6 @@ const useListItemFolder = (id: string) => {
     refetchOnMount: false, // "always" => refetch jika stale saja
     retry: false,
   });
-
   // ! END CONTENT ==========================
 
   // * UPDATE DATA
@@ -177,13 +154,18 @@ const useListItemFolder = (id: string) => {
     retry: false,
   });
 
-  // ? LIST
+  // ? LIST FOLDERS DATA
+  const listFolderData = useMemo(
+    () => listFolderPhoto?.pages.flatMap((page) => page?.data ?? []),
+    [listFolderPhoto?.pages]
+  );
+
+  // ? ITEMS
   const listItemFolderPhotoData = useMemo(
     () => listItemFolder?.pages.flatMap((page) => page.data) ?? [],
     [listItemFolder?.pages]
   );
 
-  // ? ITEMS
   const itemFolderPhotoData = useMemo(
     () => itemFolderPhoto?.pages.flatMap((page) => page.data) ?? [],
     [itemFolderPhoto?.pages]
@@ -197,6 +179,7 @@ const useListItemFolder = (id: string) => {
   const UpdatedData = useMemo(() => getUpdatePhoto ?? [], [getUpdatePhoto]);
 
   const { postPhoto } = usePost({
+    keyFolder: ["keyListFolderPhoto", id, type],
     keyListFolder: [
       "keyListItemFolder",
       id,
@@ -223,6 +206,14 @@ const useListItemFolder = (id: string) => {
     type: type,
   });
 
+  // * UPDATE NEW NAME FOLDER
+  const { updateNameFolder } = usePutFolderName({
+    keyFolder: ["keyListFolderPhoto", id, type],
+    keyListItemFolder: ["keyListItemFolder", id, stateContent.year, stateContent.month],
+    keyItemFolder: ["keyItemFolderPhoto", id, stateFolder.isFolder],
+    keyUpdatePhoto: ["keyUpdatePhoto", id, updateState],
+    type: type,
+  });
   // console.log(listItemFolder);
 
   return {
@@ -230,6 +221,12 @@ const useListItemFolder = (id: string) => {
     setStateContent,
     stateFolder,
     setStateFolder,
+
+    // * LIST FOLDER PHOTO
+    listFolderData,
+    FNPListFolderPhoto,
+    HNPListFolderPhoto,
+    IFNPListFolderPhoto,
 
     // ? DATA
     listItemFolderPhotoData,
@@ -255,6 +252,9 @@ const useListItemFolder = (id: string) => {
     // ? ACTION
     postPhoto,
     putPhoto,
+
+    // * UPDATE NEW NAME FOLDER
+    updateNameFolder,
   };
 };
 
@@ -339,8 +339,8 @@ const useCreatorButton = (id: string) => {
 };
 
 export {
-  useListFolder,
-  useListItemFolder,
+  // useListFolder,
+  useContentProfile,
   useItemDescription,
   // useCreatorPhoto,
   useCreatorButton,

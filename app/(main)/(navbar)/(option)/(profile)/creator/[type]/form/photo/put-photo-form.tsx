@@ -36,8 +36,13 @@ const PutPhotoForm = ({
 }: {
   setIsRender: React.Dispatch<React.SetStateAction<any>>;
 }) => {
-  const { UpdatedData, ListPostFolderData, refetchListPostFolder, setTypeBtn, putPhoto } =
-    useContext(creatorContext);
+  const {
+    UpdatedData,
+    ListPostFolderData,
+    refetchListPostFolder,
+    setTypeBtn,
+    putPhoto,
+  } = useContext(creatorContext);
   // console.log(UpdatedData);
   // console.log(ListPostFolderData);
 
@@ -56,7 +61,7 @@ const PutPhotoForm = ({
     mode: "onChange",
     defaultValues: {
       imageName: "",
-      imagePath: "",
+      imagePath:  "",
       prevImage: "",
       folderName: "",
       hashtag: [],
@@ -69,13 +74,13 @@ const PutPhotoForm = ({
     // ! INITIATE DATA cuma berlaku saat pertama kali mount ke component !! kalau data beda pastikan RESET !!!
     if (UpdatedData) {
       reset({
-        imageName: UpdatedData[0].imageName,
-        imagePath: UpdatedData[0].url,
-        prevImage: UpdatedData[0].url,
-        folderName: UpdatedData[0].folderName,
-        hashtag: UpdatedData[0].hashtag || [],
-        category: UpdatedData[0].category || [],
-        description: UpdatedData[0].description,
+        imageName: UpdatedData[0]?.imageName ?? "",
+        imagePath: UpdatedData[0]?.url ?? "",
+        prevImage: UpdatedData[0]?.url ?? "",
+        folderName: UpdatedData[0]?.folderName,
+        hashtag: UpdatedData[0]?.hashtag || [],
+        category: UpdatedData[0]?.category || [],
+        description: UpdatedData[0]?.description,
       });
     }
     setTypeBtn("photo");
@@ -104,7 +109,7 @@ const PutPhotoForm = ({
         type: "photo",
         updatedAt: LocalISOTime(),
       };
-      console.log(payload)
+      console.log(payload);
       await putPhoto(payload);
       setIsRender({ isOpen: false, iuProduct: null, value: "" });
     } catch (error) {
@@ -130,41 +135,41 @@ const PutPhotoForm = ({
           onSubmit={submit}>
           <div className="flex flex-col gap-6 overflow-y-auto pr-1 md:flex-row">
             {/* LEFT */}
-            <div className="flex flex-1 flex-col gap-4 p-1">
+            <div className="relative flex flex-1 flex-col gap-4 p-1">
               {watch("imagePath") && (
-                <Image
-                  src={watch("imagePath")}
-                  alt="Preview"
-                  width={240}
-                  height={140}
-                  className="w-full h-40 rounded-xl border border-white/20 object-cover"
-                />
+                <>
+                  <Image
+                    src={watch("imagePath")}
+                    alt="Preview"
+                    width={240}
+                    height={140}
+                    className="w-full h-40 rounded-xl border border-white/20 object-cover"
+                  />
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span className="text-white/80">Upload Photo</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setValue("imageName", file.name, {
+                              shouldValidate: true,
+                            });
+                            setValue("imagePath", reader.result as string, {
+                              shouldValidate: true,
+                            });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                      className="rounded-md border border-white/20 bg-white/10 p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </label>
+                </>
               )}
-
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="text-white/80">Upload Photo</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setValue("imageName", file.name, {
-                          shouldValidate: true,
-                        });
-                        setValue("imagePath", reader.result as string, {
-                          shouldValidate: true,
-                        });
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                  }}
-                  className="rounded-md border border-white/20 bg-white/10 p-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  // required
-                />
-              </label>
 
               <label className="flex flex-col gap-1 text-sm">
                 <span className="flex items-center gap-2 text-white/80">

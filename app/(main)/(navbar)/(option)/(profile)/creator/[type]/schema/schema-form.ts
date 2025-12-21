@@ -82,3 +82,13 @@ export const zPutFormSchema = z.object({
     .max(3, "* Max 3 hashtags"),
   category: z.array(z.string()).max(3, "* Max 3 category"),
 });
+
+
+export const zPutNameFolderFormSchema = z.object({
+  folderName: z
+    .string()
+    .max(20, "* Max 20 Characters")
+    .refine((val) => !val.match(ForbiddenRegex()), {
+      message: `* Invalid character`,
+    }),
+});

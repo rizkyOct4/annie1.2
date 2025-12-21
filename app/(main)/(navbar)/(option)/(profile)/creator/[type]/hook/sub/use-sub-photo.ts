@@ -11,15 +11,19 @@ import type {
   TOriginalListFolder,
   TOriginalItemFolder,
   TOriginalUpdated,
+  TOriginalList,
+  TPutFolderName,
 } from "../../types/type";
 import { showToast } from "@/_util/Toast";
 import type { TImagePost, TImagePut } from "../../schema/schema-form";
 
 const usePost = ({
+  keyFolder,
   keyListFolder,
   keyItemFolder,
   type,
 }: {
+  keyFolder: Array<string>;
   keyListFolder: Array<string>;
   keyItemFolder: Array<string>;
   type: string;
@@ -40,13 +44,45 @@ const usePost = ({
       showToast({ type: "loading", fallback: true });
 
       await Promise.all([
+        queryClient.cancelQueries({ queryKey: keyFolder }),
         queryClient.cancelQueries({ queryKey: keyListFolder }),
         queryClient.cancelQueries({ queryKey: keyItemFolder }),
       ]);
 
+      const prevFolder = queryClient.getQueryData(keyFolder);
       const prevListFolderData = queryClient.getQueryData(keyListFolder);
       const prevItemFolderData = queryClient.getQueryData(keyItemFolder);
 
+      // ? LIST
+      queryClient.setQueryData<InfiniteData<TOriginalList>>(
+        keyFolder,
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData?.pages.map((page: any) => ({
+              ...page,
+              data: page.data.map(
+                (i: { folder: string[]; totalProduct: number }) => {
+                  const isExistFolder = i.folder.includes(mutate.folderName);
+
+                  if (!isExistFolder) {
+                    return {
+                      ...i,
+                      totalProduct: i.totalProduct + 1,
+                      folder: [...i.folder, mutate.folderName],
+                    };
+                  }
+                  return i;
+                }
+              ),
+            })),
+          };
+        }
+      );
+
+      // ? LIST FOLDER
       queryClient.setQueryData<InfiniteData<TOriginalListFolder>>(
         keyListFolder,
         (oldData) => {
@@ -83,7 +119,7 @@ const usePost = ({
         }
       );
 
-      return { prevListFolderData, prevItemFolderData };
+      return { prevFolder, prevListFolderData, prevItemFolderData };
     },
     onSuccess: (response) => {
       const { data } = response;
@@ -121,7 +157,12 @@ const usePost = ({
       showToast({ type: "loading", fallback: false });
       showToast({ type: "error", fallback: error });
       console.error(error);
-      if (context?.prevListFolderData && context?.prevItemFolderData) {
+      if (
+        context?.prevFolder &&
+        context?.prevListFolderData &&
+        context?.prevItemFolderData
+      ) {
+        queryClient.setQueryData(keyFolder, context.prevFolder);
         queryClient.setQueryData(keyListFolder, context.prevListFolderData);
         queryClient.setQueryData(keyItemFolder, context.prevItemFolderData);
       }
@@ -141,11 +182,13 @@ const usePut = ({
   keyListFolder: Array<string>;
   keyItemFolder: Array<string>;
   keyUpdatePhoto: Array<string | null>;
-  rawKeyItemFolder?: {
-    key: string;
-    id: string;
-    updateFolder: string;
-  } | undefined,
+  rawKeyItemFolder?:
+    | {
+        key: string;
+        id: string;
+        updateFolder: string;
+      }
+    | undefined;
   type: string;
 }) => {
   const queryClient = useQueryClient();
@@ -173,6 +216,7 @@ const usePut = ({
       const prevItemData = queryClient.getQueryData(keyItemFolder);
       const prevUpdated = queryClient.getQueryData(keyUpdatePhoto);
 
+      // ? LIST FOLDER
       queryClient.setQueryData<InfiniteData<TOriginalListFolder>>(
         keyListFolder,
         (oldData) => {
@@ -271,8 +315,8 @@ const usePut = ({
         }
       );
 
-      if(rawKeyItemFolder?.updateFolder !== data[0].folderName) {
-        // * TARGET REFETCH CACHE
+      // * TARGET REFETCH CACHE
+      if (rawKeyItemFolder?.updateFolder !== data[0].folderName) {
         queryClient.invalidateQueries({
           queryKey: [
             rawKeyItemFolder?.key,
@@ -304,4 +348,149 @@ const usePut = ({
   return { putPhoto };
 };
 
-export { usePost, usePut };
+const usePutFolderName = ({
+  keyFolder,
+  keyListItemFolder,
+  keyItemFolder,
+  keyUpdatePhoto,
+  type,
+}: {
+  keyFolder: Array<string>;
+  keyListItemFolder: Array<string>;
+  keyItemFolder: Array<string>;
+  keyUpdatePhoto: Array<string | null>;
+  type: string;
+}) => {
+  const queryClient = useQueryClient();
+
+  const { mutateAsync: updateNameFolder } = useMutation({
+    mutationFn: async (data) => {
+      const URL = ROUTES_PROFILE.ACTION_PHOTO({
+        method: "putNameFolder",
+        type: "photo",
+        path: type,
+      });
+      const res = await axios.put(URL, data);
+      return res.data;
+    },
+    onMutate: async (mutate: TPutFolderName) => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: keyFolder }),
+        queryClient.cancelQueries({ queryKey: keyListItemFolder }),
+        queryClient.cancelQueries({ queryKey: keyItemFolder }),
+        queryClient.cancelQueries({ queryKey: keyUpdatePhoto }),
+      ]);
+
+      const prevFolder = queryClient.getQueryData(keyFolder);
+      const prevListItemData = queryClient.getQueryData(keyListItemFolder);
+      const prevItemData = queryClient.getQueryData(keyItemFolder);
+      const prevUpdated = queryClient.getQueryData(keyUpdatePhoto);
+
+      // ? FOLDER
+      queryClient.setQueryData<InfiniteData<TOriginalList>>(
+        keyFolder,
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData?.pages.map((page: any) => ({
+              ...page,
+              data: page.data.map((i: { folder: string[] }) => {
+                const isExist = i.folder.includes(mutate.targetFolder);
+                if (isExist) {
+                  return {
+                    ...i,
+                    folder: i.folder
+                      .filter((f) => f !== mutate.targetFolder)
+                      .concat(mutate.value),
+                  };
+                }
+                return i;
+              }),
+            })),
+          };
+        }
+      );
+
+      // ? LIST ITEM FOLDER
+      queryClient.setQueryData<InfiniteData<TOriginalListFolder>>(
+        keyListItemFolder,
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData?.pages.map((page: any) => ({
+              ...page,
+              data: page.data.map((i: { folderName: string }) =>
+                i.folderName === mutate.targetFolder
+                  ? {
+                      ...i,
+                      folderName: mutate.value,
+                    }
+                  : i
+              ),
+            })),
+          };
+        }
+      );
+
+      // ? ITEM FOLDER
+      if (prevItemData) {
+        queryClient.setQueryData<InfiniteData<TOriginalItemFolder>>(
+          keyItemFolder,
+          (oldData) => {
+            if (!oldData) return oldData;
+
+            return {
+              ...oldData,
+              pages: oldData?.pages.map((page: any) => ({
+                ...page,
+                page: page.data.map((i: { folderName: string }) => ({
+                  ...i,
+                  folderName: mutate.value,
+                })),
+              })),
+            };
+          }
+        );
+      }
+
+      // ? UPDATED DATA
+      if (prevUpdated) {
+        queryClient.setQueryData<TOriginalUpdated[]>(
+          keyUpdatePhoto,
+          (oldData) => {
+            if (!oldData) return oldData;
+            return oldData.map((i) => ({
+              ...i,
+              folderName: mutate.value,
+            }));
+          }
+        );
+      }
+
+      return { prevFolder, prevListItemData, prevItemData, prevUpdated };
+    },
+    onError: (error, _variables, context) => {
+      showToast({ type: "loading", fallback: false });
+      showToast({ type: "error", fallback: error });
+      console.error(error);
+      if (
+        context?.prevFolder &&
+        context?.prevListItemData &&
+        context?.prevItemData &&
+        context?.prevUpdated
+      ) {
+        queryClient.setQueryData(keyFolder, context.prevFolder);
+        queryClient.setQueryData(keyListItemFolder, context.prevListItemData);
+        queryClient.setQueryData(keyItemFolder, context.prevItemData);
+        queryClient.setQueryData(keyUpdatePhoto, context.prevUpdated);
+      }
+    },
+  });
+  return { updateNameFolder };
+};
+
+export { usePost, usePut, usePutFolderName };

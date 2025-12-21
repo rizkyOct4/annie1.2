@@ -1,3 +1,15 @@
+export type TList = {
+  month: number;
+  year: number;
+  totalProduct: number;
+  folder: string[];
+};
+
+export type TOriginalList = {
+  data: TList[];
+  hasMore: boolean;
+};
+
 export type ListFolderType = {
   folderName: string;
   amountItem: number;
@@ -12,7 +24,7 @@ export type ItemFolderType = {
   folderName: string;
   idProduct: number;
   url: string;
-  createdAt: Date
+  createdAt: Date;
 };
 export type TOriginalItemFolder = {
   data: ItemFolderType[];
@@ -50,3 +62,8 @@ export type PutImageSchema = {
   type: string;
   createdAt: Date;
 };
+
+export type TPutFolderName = {
+  targetFolder: string;
+  value: string
+}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   PutCloudinary,
   PutImage,
+  PutFolderName,
 } from "@/_lib/services/navbar/option/profile/action/services-btn";
 // import { ItemFolderDescription } from "@/_lib/navbar/profile/route";
 import GetToken from "@/_lib/middleware/get-token";
@@ -101,6 +102,8 @@ export async function PUT(req: NextRequest) {
     const method = req.nextUrl.searchParams.get("method");
     const typePut = req.nextUrl.searchParams.get("type");
 
+    const changeNameFolder = req.nextUrl.searchParams.get("change-folder");
+
     if (method === "put" && typePut === "photo") {
       const {
         idProduct,
@@ -138,6 +141,18 @@ export async function PUT(req: NextRequest) {
 
       const result = await GetUpdateImage(id, idProduct);
 
+      return NextResponse.json({
+        message: "Update Success",
+        data: result,
+      });
+    }
+    if (changeNameFolder && typePut === "photo") {
+      const { targetFolder, value } = await req.json();
+
+      const result = await PutFolderName({
+        targetFolder: targetFolder,
+        value: value,
+      });
       return NextResponse.json({
         message: "Update Success",
         data: result,

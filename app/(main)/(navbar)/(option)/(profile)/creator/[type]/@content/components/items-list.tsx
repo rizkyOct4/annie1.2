@@ -175,6 +175,7 @@ const ItemsList = ({
                       src={i.url}
                       alt={"Image"}
                       fill
+                      sizes="(max-width: 200px) 100vw"
                       className="object-cover"
                     />
                     {["move", "delete"].includes(isOpenNav.type) && (
