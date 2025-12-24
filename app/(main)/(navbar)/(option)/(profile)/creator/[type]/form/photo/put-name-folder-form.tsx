@@ -15,7 +15,7 @@ const PutFolderNameForm = ({
 }: {
   currentFoldername: string;
 }) => {
-  const { updateNameFolder } = useContext(creatorContext);
+  const { updateNameFolder, refetchListPostFolder } = useContext(creatorContext);
 
   const {
     register,
@@ -41,6 +41,7 @@ const PutFolderNameForm = ({
 
       // setIsRender({ open: false, type: "" });
       //   console.log(payload);
+      refetchListPostFolder()
     } catch (error) {
       console.error(error);
     }

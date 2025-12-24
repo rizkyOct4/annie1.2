@@ -8,7 +8,6 @@ import { IoMdOpen } from "react-icons/io";
 import { MdUpdate } from "react-icons/md";
 import { BiExit } from "react-icons/bi";
 import { MdDescription } from "react-icons/md";
-// import { IsRenderComponent } from "./folder-list";
 import { useInView } from "react-intersection-observer";
 import { TItemFolderPhoto } from "../../types/content/type";
 import OptionBtn from "./options/option-btn";
@@ -35,6 +34,7 @@ export interface ItemListStateNav {
   idProduct: number[];
   type: string;
   targetFolder: string;
+  prevFolder: string;
 }
 
 const ItemsList = ({
@@ -91,6 +91,7 @@ const ItemsList = ({
     idProduct: [],
     type: "",
     targetFolder: "",
+    prevFolder: folderName,
   });
 
   const handleAction = useCallback(
@@ -299,59 +300,6 @@ const ItemsList = ({
                     )}
 
                     {/* ===== OVERLAY ACTIONS ===== */}
-                    {/* <div
-                      className="
-                absolute bottom-3 left-0 right-0
-                flex justify-start gap-2
-                px-4
-                opacity-0
-                group-hover:opacity-100
-                transition
-              ">
-                      <button
-                        className="
-                  w-9 h-9
-                  rounded-xl
-                  bg-white/80
-                  border border-gray-200
-                  text-gray-700
-                  flex items-center justify-center
-                  hover:bg-white
-                  transition
-                "
-                        onClick={(e) =>
-                          handleAction(e, "toggle", i.idProduct, "")
-                        }>
-                        {isOpen.iuProduct === i.idProduct && isOpen.open ? (
-                          <IoMdOpen />
-                        ) : (
-                          <BiExit />
-                        )}
-                      </button>
-
-                      {isOpen.open &&
-                        isOpen.iuProduct === i.idProduct &&
-                        btnList.map((btn, idx) => (
-                          <button
-                            key={idx}
-                            title={btn.title}
-                            className="
-                      w-9 h-9
-                      rounded-xl
-                      bg-white/80
-                      border border-gray-200
-                      text-gray-600
-                      flex items-center justify-center
-                      hover:bg-white hover:text-black
-                      transition
-                    "
-                            onClick={(e) =>
-                              handleAction(e, btn.name, i.idProduct, btn.name)
-                            }>
-                            {btn.icon}
-                          </button>
-                        ))}
-                    </div> */}
                     <div
                       className="
     absolute bottom-3 left-0 right-0

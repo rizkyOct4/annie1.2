@@ -36,7 +36,7 @@ const PostPhotoForm = ({
 }: {
   setIsRender: React.Dispatch<React.SetStateAction<ToggleStateType>>;
 }) => {
-  const { ListPostFolderData, isLoadingListPost, postPhoto } =
+  const { ListPostFolderData, isLoadingListPost, postPhoto, refetchListPostFolder } =
     useContext(creatorContext);
 
   const {
@@ -75,6 +75,7 @@ const PostPhotoForm = ({
       };
       await postPhoto(payload);
       setIsRender({ open: false, type: "" });
+      refetchListPostFolder()
       // console.log(payload);
     } catch (error) {
       console.error(error);

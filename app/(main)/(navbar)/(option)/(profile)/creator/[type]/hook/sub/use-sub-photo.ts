@@ -16,6 +16,7 @@ import type {
 } from "../../types/type";
 import { showToast } from "@/_util/Toast";
 import type { TImagePost, TImagePut } from "../../schema/schema-form";
+import { PutGroupedImage } from "../../@content/components/options/option-btn";
 
 const usePost = ({
   keyFolder,
@@ -493,7 +494,25 @@ const usePutFolderName = ({
   return { updateNameFolder };
 };
 
-const useGroupedPut = ({type}: {type: string}) => {
+const usePutGrouped = ({
+  keyFolder,
+  keyListItemFolder,
+  keyItemFolder,
+  keyUpdatePhoto,
+  rawKeyUpdatePhoto,
+  type,
+}: {
+  keyFolder: Array<string>;
+  keyListItemFolder: Array<string>;
+  keyItemFolder: Array<string>;
+  keyUpdatePhoto: Array<string | number | null>;
+  rawKeyUpdatePhoto?: {
+    key: string;
+    id: string;
+    idProduct: number | null;
+  };
+  type: string;
+}) => {
   const queryClient = useQueryClient();
 
   const { mutateAsync: groupedPutPhoto } = useMutation({
@@ -506,9 +525,127 @@ const useGroupedPut = ({type}: {type: string}) => {
       const res = await axios.put(URL, data);
       return res.data;
     },
+    onMutate: async (mutate: PutGroupedImage) => {
+      await Promise.all([
+        queryClient.cancelQueries({ queryKey: keyFolder }),
+        queryClient.cancelQueries({ queryKey: keyListItemFolder }),
+        queryClient.cancelQueries({ queryKey: keyItemFolder }),
+        queryClient.cancelQueries({ queryKey: keyUpdatePhoto }),
+      ]);
+
+      const prevFolder = queryClient.getQueryData(keyFolder);
+      const prevListItemData = queryClient.getQueryData(keyListItemFolder);
+      const prevItemData = queryClient.getQueryData(keyItemFolder);
+      const prevUpdatePhoto = queryClient.getQueryData(keyUpdatePhoto);
+
+      // ? LIST FOLDER
+      queryClient.setQueryData<InfiniteData<TOriginalListFolder>>(
+        keyListItemFolder,
+        (oldData) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              data: page.data
+                .map((i: { folderName: string; amountItem: number }) => {
+                  if (i.folderName === mutate.prevFolder) {
+                    return {
+                      ...i,
+                      amountItem: i.amountItem - mutate.idProduct.length,
+                    };
+                  }
+
+                  if (i.folderName === mutate.targetFolder) {
+                    return {
+                      ...i,
+                      amountItem: i.amountItem + mutate.idProduct.length,
+                    };
+                  }
+
+                  return i;
+                })
+                .filter((f) => f.amountItem !== 0),
+            })),
+          };
+        }
+      );
+
+      // ? ITEM FOLDER
+      queryClient.setQueryData<InfiniteData<TOriginalItemFolder>>(
+        keyItemFolder,
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData?.pages.map((page: any) => ({
+              ...page,
+              data: page.data.filter(
+                (f: { idProduct: number }) =>
+                  !mutate.idProduct.includes(f.idProduct)
+              ),
+            })),
+          };
+        }
+      );
+
+      // ? UPDATED DATA
+      if (prevUpdatePhoto) {
+        queryClient.setQueryData<TOriginalUpdated[]>(
+          keyUpdatePhoto,
+          (oldData) => {
+            if (!oldData) return oldData;
+
+            return oldData.map((i) => {
+              // ? FIND MENGEMBALIKAN DATA !!!
+              const updated = mutate.idProduct.find((m) => m === i.idProduct);
+
+              if (updated) {
+                return {
+                  ...i,
+                  folderName: mutate.targetFolder,
+                };
+              }
+              return i;
+            });
+          }
+        );
+      }
+      return { prevFolder, prevListItemData, prevItemData, prevUpdatePhoto };
+    },
+    onSuccess: (response) => {
+      const { data } = response;
+
+      // queryClient.setQueryData(keyFolder, (oldData) => {
+      //   if(!oldData) return oldData
+
+
+      // })
+
+      // TODO KONDISIKAN BESOK INI SAMA KAU !! BUAT FOLDER KEY INI KETIKA GROUP PUT DATANYA HILANG JIKA TOTAL = 0
+
+      console.log(response);
+    },
+    onError: (error, _variables, context) => {
+      showToast({ type: "loading", fallback: false });
+      showToast({ type: "error", fallback: error });
+      console.error(error);
+      if (
+        context?.prevFolder &&
+        context?.prevListItemData &&
+        context?.prevItemData &&
+        context?.prevUpdatePhoto
+      ) {
+        queryClient.setQueryData(keyFolder, context.prevFolder);
+        queryClient.setQueryData(keyListItemFolder, context.prevListItemData);
+        queryClient.setQueryData(keyItemFolder, context.prevItemData);
+        queryClient.setQueryData(keyUpdatePhoto, context.prevUpdatePhoto);
+      }
+    },
   });
 
   return { groupedPutPhoto };
 };
 
-export { usePost, usePut, usePutFolderName, useGroupedPut };
+export { usePost, usePut, usePutFolderName, usePutGrouped };

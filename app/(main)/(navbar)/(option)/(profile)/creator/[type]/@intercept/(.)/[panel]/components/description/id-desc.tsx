@@ -6,7 +6,7 @@ import type { TPhotoDescription } from "../../../../../types/panel/description/t
 
 const ItemDescription = ({ data }: { data: TPhotoDescription[] }) => {
   return (
-    <div className="space-y-6 bg-white/5 border border-white/10 rounded-xl p-6">
+    <div className="space-y-6">
       {Array.isArray(data) &&
         data.length > 0 &&
         data.map((i) => (

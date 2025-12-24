@@ -5,6 +5,13 @@ import { FolderClock, ArrowUp01, RefreshCcw } from "lucide-react";
 import { useCallback, useContext } from "react";
 import { MdDriveFileMove, MdDelete } from "react-icons/md";
 import { ItemListStateNav } from "../items-list";
+import { showToast } from "@/_util/Toast";
+
+export interface PutGroupedImage {
+  idProduct: number[];
+  targetFolder: string;
+  prevFolder: string;
+}
 
 const OptionBtn = ({
   isOpenNav,
@@ -18,6 +25,7 @@ const OptionBtn = ({
     isRefetchItemFolder,
     type,
     setTypeBtn,
+    groupedPutPhoto,
     ListPostFolderData,
   } = useContext(creatorContext);
 
@@ -57,16 +65,27 @@ const OptionBtn = ({
   );
 
   const handleSubmit = useCallback(
-    (e: React.SyntheticEvent) => {
+    async (e: React.SyntheticEvent) => {
       e.preventDefault();
+
+      const payload: PutGroupedImage = {
+        idProduct: isOpenNav.idProduct,
+        targetFolder: isOpenNav.targetFolder,
+        prevFolder: isOpenNav.prevFolder,
+      };
+
+      const res = groupedPutPhoto(payload);
+      showToast({ type: "success", fallback: res.message });
+
       setIsOpenNav({
         isOpen: false,
         idProduct: [],
         type: "",
         targetFolder: "",
+        prevFolder: "",
       });
     },
-    [setIsOpenNav]
+    [setIsOpenNav, isOpenNav, groupedPutPhoto]
   );
 
   return (
@@ -150,6 +169,7 @@ const OptionBtn = ({
                 ListPostFolderData.map(
                   (i: { folderName: string }, idx: number) => (
                     <option
+                      disabled={i.folderName === isOpenNav.prevFolder}
                       key={idx}
                       value={i.folderName}
                       className="text-black">

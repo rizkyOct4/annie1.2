@@ -9,7 +9,12 @@ import { useMemo, useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useSearchParams } from "next/navigation";
 import { ROUTES_PROFILE } from "../config";
-import { usePost, usePut, usePutFolderName } from "./sub/use-sub-photo";
+import {
+  usePost,
+  usePut,
+  usePutFolderName,
+  usePutGrouped,
+} from "./sub/use-sub-photo";
 import { ROUTES_LIST_FOLDER } from "../config/list-folder";
 import { ROUTES_ITEM_FOLDER } from "../config/item-folder";
 import { ROUTES_CREATOR_PHOTO_PANEL } from "../config/routes-panel";
@@ -140,6 +145,7 @@ const useContentProfile = (id: string) => {
   });
   // ! END CONTENT ==========================
 
+
   // * UPDATE DATA
   const { data: getUpdatePhoto } = useQuery({
     queryKey: ["keyUpdatePhoto", id, updateState],
@@ -160,6 +166,7 @@ const useContentProfile = (id: string) => {
     refetchOnMount: false,
     retry: false,
   });
+  // console.log(getUpdatePhoto)
 
   // ? LIST FOLDERS DATA
   const listFolderData = useMemo(
@@ -185,6 +192,7 @@ const useContentProfile = (id: string) => {
   // ? UPDATED DATA
   const UpdatedData = useMemo(() => getUpdatePhoto ?? [], [getUpdatePhoto]);
 
+  // * ====== SUB =======
   const { postPhoto } = usePost({
     keyFolder: ["keyListFolderPhoto", id, type],
     keyListFolder: [
@@ -226,6 +234,24 @@ const useContentProfile = (id: string) => {
     keyUpdatePhoto: ["keyUpdatePhoto", id, updateState],
     type: type,
   });
+  const { groupedPutPhoto } = usePutGrouped({
+    keyFolder: ["keyListFolderPhoto", id, type],
+    keyListItemFolder: [
+      "keyListItemFolder",
+      id,
+      stateContent.year,
+      stateContent.month,
+    ],
+    keyItemFolder: ["keyItemFolderPhoto", id, stateFolder.isFolder],
+    keyUpdatePhoto: ["keyUpdatePhoto", id, updateState],
+    rawKeyUpdatePhoto: {
+      key: "keyUpdatePhoto",
+      id: id,
+      idProduct: updateState
+    },
+    type: type,
+  });
+
   // console.log(itemFolderPhoto);
 
   return {
@@ -265,12 +291,13 @@ const useContentProfile = (id: string) => {
     // ? ACTION
     postPhoto,
     putPhoto,
+    groupedPutPhoto,
 
     // * UPDATE NEW NAME FOLDER
     updateNameFolder,
 
     // * CURRENT-PATH
-    type
+    type,
   };
 };
 
@@ -325,7 +352,7 @@ const useCreatorButton = (id: string) => {
       return data;
     },
     enabled: typeBtn !== "",
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 1,
     gcTime: 1000 * 60 * 60,
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: false,

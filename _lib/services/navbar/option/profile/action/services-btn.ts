@@ -143,6 +143,7 @@ export const PutImage = ({
   });
 };
 
+// ? PUT FOLDER NAME
 export const PutFolderName = ({
   targetFolder,
   value,
@@ -158,4 +159,39 @@ export const PutFolderName = ({
         WHERE folder_name = ${targetFolder}
       `;
   });
+};
+
+// ? PUT GROUPED FOLDER
+export const PutGroupedFolderName = ({
+  targetFolder,
+  idProduct,
+  prevFolder,
+}: {
+  targetFolder: string;
+  idProduct: number[];
+  prevFolder: string;
+}) => {
+  return prisma.$transaction(async (tx) => {
+    // ? users_product -> folder_name DB
+    await tx.$executeRaw`
+        UPDATE users_product
+        SET folder_name = ${targetFolder}
+        WHERE folder_name = ${prevFolder}
+        AND id_product = ANY(${idProduct})
+      `;
+  });
+};
+
+export const getResultPutGrouped = async ({
+  prevFolder,
+}: {
+  prevFolder: string;
+}) => {
+  const query = await prisma.$queryRaw<{ prevFolder: number }[]>`
+    SELECT COALESCE(COUNT(folder_name), 0) AS prevFolder
+    FROM users_product
+    WHERE folder_name = ${prevFolder}
+  `;
+  const dataRaw = [{ data: query[0].prevFolder }];
+  return dataRaw;
 };
