@@ -51,7 +51,7 @@ const useCreators = (id: string) => {
     () => listCreators?.pages.flatMap((page) => page.data) ?? [],
     [listCreators?.pages]
   );
-  // console.log(listCreatorsData)
+  // console.log(listCreators)
 
   return { listCreatorsData, fetchNextPage, hasNextPage, isFetchingNextPage };
 };

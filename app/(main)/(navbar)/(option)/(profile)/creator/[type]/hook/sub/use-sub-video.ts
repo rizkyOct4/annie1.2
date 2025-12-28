@@ -16,11 +16,13 @@ import type { TPostVideo } from "../../form/video/post-video-form";
 import { showToast } from "@/_util/Toast";
 
 export const usePostVideo = ({
+  refetchFolderVideo,
   keyFolderVideo,
   keyListFolderVideo,
   keyItemsVideo,
   type,
 }: {
+  refetchFolderVideo: Function;
   keyFolderVideo: Array<string>;
   keyListFolderVideo: Array<string>;
   keyItemsVideo: Array<string>;
@@ -39,8 +41,6 @@ export const usePostVideo = ({
       return res.data;
     },
     onMutate: async (mutate: TPostVideo) => {
-      showToast({ type: "loading", fallback: true });
-
       await Promise.all([
         queryClient.cancelQueries({ queryKey: keyFolderVideo }),
         queryClient.cancelQueries({ queryKey: keyListFolderVideo }),
@@ -151,20 +151,23 @@ export const usePostVideo = ({
       return { prevFolderVideo, prevListFolderVideo, prevItemsVideo };
     },
     onSuccess: () => {
-      showToast({ type: "loading", fallback: false });
+      const firstVideo = queryClient.getQueryData(keyFolderVideo);
+      if (!firstVideo) return refetchFolderVideo();
     },
     onError: (error, _variables, context) => {
-      showToast({ type: "loading", fallback: false });
       showToast({ type: "error", fallback: error });
       console.error(error);
       if (
-        context?.prevFolder &&
-        context?.prevListFolderData &&
-        context?.prevItemFolderData
+        context?.prevFolderVideo &&
+        context?.prevListFolderVideo &&
+        context?.prevItemsVideo
       ) {
-        queryClient.setQueryData(keyFolder, context.prevFolder);
-        queryClient.setQueryData(keyListFolder, context.prevListFolderData);
-        queryClient.setQueryData(keyItemFolder, context.prevItemFolderData);
+        queryClient.setQueryData(keyFolderVideo, context.prevFolderVideo);
+        queryClient.setQueryData(
+          keyListFolderVideo,
+          context.prevListFolderVideo
+        );
+        queryClient.setQueryData(keyItemsVideo, context.prevItemsVideo);
       }
     },
   });

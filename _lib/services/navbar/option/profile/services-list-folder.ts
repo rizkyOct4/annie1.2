@@ -25,7 +25,7 @@ export const GetListFolder = async ({
                 json_agg(DISTINCT up.folder_name ORDER BY up.folder_name) AS folder
             FROM users_product up
             JOIN users u ON (up.ref_id = u.id)
-            WHERE u.id = ${id}::uuid AND up.type = ${pathUrl}::type_product AND up.status = true
+            WHERE u.public_id = ${id} AND up.type = ${pathUrl}::type_product AND up.status = true
             GROUP BY year, month
         `;
 
@@ -34,7 +34,7 @@ export const GetListFolder = async ({
             EXTRACT(YEAR FROM up.created_at)::int AS year
         FROM users_product up
         JOIN users u ON (u.id = up.ref_id)
-        WHERE u.id = ${id}::uuid AND up.type = ${pathUrl}::type_product AND up.status = true
+        WHERE u.public_id = ${id} AND up.type = ${pathUrl}::type_product AND up.status = true
         GROUP BY EXTRACT(YEAR FROM up.created_at)
     `;
 

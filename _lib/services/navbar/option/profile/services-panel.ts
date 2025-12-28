@@ -6,9 +6,9 @@ import { cacheLife, cacheTag } from "next/cache";
 
 // ? ITEM DESCRIPTION
 export const ItemFolderDescription = async (idProduct: number, id: string) => {
-  "use cache";
-  cacheLife("minutes");
-  cacheTag(`product-description-photo-${idProduct}-${id}`);
+  // "use cache";
+  // cacheLife("minutes");
+  // cacheTag(`product-description-photo-${idProduct}-${id}`);
 
   const query = await prisma.$queryRaw<any[]>`
       SELECT upi.ref_id_product, upi.description, upi.image_name, upi.url, upi.hashtag, upi.category, COALESCE(SUM(upiv.like), 0)::int AS total_like, COALESCE(SUM(upiv.dislike), 0)::int AS total_dislike, up.folder_name, up.created_at
@@ -16,7 +16,7 @@ export const ItemFolderDescription = async (idProduct: number, id: string) => {
       JOIN users_product up ON (up.id_product = upi.ref_id_product)
       JOIN users u ON (u.id = up.ref_id)
       LEFT JOIN users_product_image_vote upiv ON (upiv.ref_id_product = up.id_product)
-      WHERE upi.ref_id_product = ${idProduct} AND u.id = ${id}::uuid
+      WHERE upi.ref_id_product = ${idProduct} AND u.public_id = ${id}
       GROUP BY
         upi.description,
         upi.ref_id_product,

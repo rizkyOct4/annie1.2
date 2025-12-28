@@ -88,6 +88,7 @@ export const {
       // ? credentials login → user berisi data dari authorize
       if (user) {
         token.id = user.id;
+        token.publicId = user.publicId;
         token.email = user.email;
         token.name = user.name;
         token.role = user.role;
@@ -114,10 +115,11 @@ export const {
         });
 
         token.id = fetch[0].id;
+        token.publicId = fetch[0].publicId;
         token.email = profile.email;
         token.name = profile.name;
         token.role = fetch[0].role;
-        token.picture = fetch[0].picture || profile.picture;
+        token.picture = profile.picture || fetch[0].picture || "";
         token.createdAt = fetch[0].createdAt ?? "";
       }
 
@@ -125,13 +127,13 @@ export const {
       return token;
     },
     // ? INI YG AKAN DIGUNAKNA DI CLIENT !!
-    async session({ session, token }) {
+    async session({ session, token }: { session: any; token: any }) {
       if (token) {
-        session.user.id = token.id as string;
+        session.user.publicId = token.publicId as string;
         session.user.email = token.email as string;
         session.user.name = token.name as string;
         session.user.role = token.role as string;
-        session.user.image = token.picture as string;
+        session.user.image = token.image as string;
         session.user.createdAt = token.createdAt as string;
       }
       return session;
@@ -162,3 +164,9 @@ export const {
 
 // todo kembalikan error dari server ke CLIENT besok !!
 // todo JUST LITTLE BIT MORE !!
+
+// Field	Isi	Tujuan
+// token.sub	OAuth Provider ID	Identitas eksternal
+// token.id	UUID DB	Relasi internal
+// publicId	nanoid	URL publik
+// email	user email	login

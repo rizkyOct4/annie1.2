@@ -7,11 +7,11 @@ import camelcaseKeys from "camelcase-keys";
 export const PostImageProductCloudinary = async ({
   webpName,
   imagePath,
-  username,
+  id,
 }: {
   webpName: string;
   imagePath: string;
-  username: string;
+  id: string;
 }) => {
   // ? Check Cloudinary
   // --- 1. Decode base64 jadi buffer ---
@@ -29,7 +29,7 @@ export const PostImageProductCloudinary = async ({
     cloudinary.uploader
       .upload_stream(
         {
-          folder: `users profile/${username}/products`,
+          folder: `users/${id}/products/images`,
           public_id: webpName, // hapus ekstensi lama -> default public_id
           resource_type: "image",
           format: "webp",
@@ -70,10 +70,20 @@ export const PostDb = async ({
 }) => {
   return prisma.$transaction(async (tx) => {
     // ? users_product DB
+
     const [user_product] = await tx.$queryRaw<any>`
-        INSERT INTO users_product 
+      INSERT INTO users_product
         (ref_id, id_product, type, folder_name, status, created_at)
-        VALUES (${id}::uuid, ${idProduct}, ${type}::type_product, ${folderName}, ${true}, ${createdAt}::timestamp) RETURNING id_product`;
+      VALUES (
+        (SELECT id FROM users WHERE public_id = ${id}),
+        ${idProduct},
+        ${type}::type_product,
+        ${folderName},
+        true,
+        ${createdAt}::timestamp
+      )
+      RETURNING id_product
+    `;
 
     await tx.$executeRaw`
         INSERT INTO users_product_image 

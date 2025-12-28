@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useCallback, useState } from "react";
-import VideoPlayerModal from "./video/video-player";
 import OptionBtn from "./options/option-btn";
 import { MdCheck, MdClose } from "react-icons/md";
 
@@ -27,11 +26,12 @@ type VideoActionType = "play" | "share" | "delete" | "navAction";
 const VideoCard = ({
   data,
   folderName,
+  setIsRender,
 }: {
   data: VideoItem[];
   folderName: string;
+  setIsRender: any;
 }) => {
-  const [activeVideo, setActiveVideo] = useState<VideoItem | null>(null);
   // console.log(`video data:`, data);
 
   // ? Navigation State
@@ -57,7 +57,13 @@ const VideoCard = ({
         }
 
         case "play":
-          setActiveVideo(item);
+          setIsRender({
+            isOpen: true,
+            idProduct: item.idProduct,
+            value: "video",
+            url: item.url,
+            thumbnailUrl: item.thumbnailUrl,
+          });
           break;
 
         case "share":
@@ -73,7 +79,7 @@ const VideoCard = ({
           break;
       }
     },
-    []
+    [setIsRender]
   );
 
   return (
@@ -217,13 +223,6 @@ const VideoCard = ({
             </div>
           </div>
         ))}
-
-      {activeVideo && (
-        <VideoPlayerModal
-          video={activeVideo}
-          onClose={() => setActiveVideo(null)}
-        />
-      )}
     </>
   );
 };

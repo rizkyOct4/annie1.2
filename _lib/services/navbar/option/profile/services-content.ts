@@ -22,7 +22,7 @@ export const ListItemFolder = async ({
         SELECT up.folder_name, COUNT(up.folder_name)::int AS amount_item
           FROM users_product up
           JOIN users u ON (u.id = up.ref_id)
-        WHERE u.id = ${id}::uuid
+        WHERE u.public_id = ${id}
           AND EXTRACT(YEAR FROM up.created_at)::int = ${year}
           AND EXTRACT(MONTH FROM up.created_at)::int = ${month}
           AND up.type = ${path}::type_product
@@ -38,7 +38,7 @@ export const ListItemFolder = async ({
         SELECT COUNT(DISTINCT up.folder_name)::int AS amount_folder
         FROM users_product up
         JOIN users u ON (u.id = up.ref_id)
-        WHERE u.id = ${id}::uuid AND up.status = true
+        WHERE u.public_id = ${id} AND up.status = true
           AND EXTRACT(YEAR FROM up.created_at)::int = ${year}
           AND EXTRACT(MONTH FROM up.created_at)::int = ${month}
         AND up.type = ${path}::type_product

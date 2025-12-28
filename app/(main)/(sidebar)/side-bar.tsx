@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, memo } from "react";
+import { useState, memo, useCallback } from "react";
 import {
   FiUsers,
   FiCompass,
@@ -85,6 +85,29 @@ const Sidebar = ({
     },
   ];
 
+  const handleAction = useCallback(
+    (e: React.SyntheticEvent, actionType: string) => {
+      e.preventDefault();
+      switch (actionType) {
+        case "/discussion":
+        case "/challenges":
+        case "/meetup":
+        case "/category":
+        case "/creators":
+        case "/getting-started":
+        case "/guideline":
+        case "/report":
+        case "/api":
+        case "/legal":
+        case "/changelog": {
+          router.push(actionType);
+          break;
+        }
+      }
+    },
+    [router]
+  );
+
   return (
     <div className="w-full fixed top-20 h-screen z-100 flex">
       {/* ===== SIDEBAR ===== */}
@@ -134,9 +157,8 @@ const Sidebar = ({
                 {item.menus.map((m, i) => (
                   <button
                     key={i}
-                    type="button"
                     title={m.label}
-                    onClick={() => router.push(m.to)}
+                    onClick={(e) => handleAction(e, m.to)}
                     className="
                   w-10 h-10
                   flex items-center justify-center

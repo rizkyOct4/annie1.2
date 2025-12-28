@@ -43,6 +43,7 @@ const useCreatorPhoto = ({
     fetchNextPage: FNPListFolderPhoto,
     hasNextPage: HNPListFolderPhoto,
     isFetchingNextPage: IFNPListFolderPhoto,
+    refetch: refetchFolder
   } = useInfiniteQuery({
     queryKey: ["keyListFolderPhoto", id, type],
     queryFn: async ({ pageParam = 1 }) => {
@@ -189,6 +190,7 @@ const useCreatorPhoto = ({
 
   // * ====== SUB =======
   const { postPhoto } = usePost({
+    refetchFolder: refetchFolder,
     keyFolder: ["keyListFolderPhoto", id, type],
     keyListFolder: [
       "keyListItemFolder",
@@ -288,6 +290,7 @@ const useCreatorPhoto = ({
 
     // * UTLS
     sortItemFolder,
+    refetchFolder,
 
     // ? DATA UPDATE
     UpdatedData,

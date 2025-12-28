@@ -19,7 +19,10 @@ const page = async ({
   await queryClient.prefetchQuery({
     queryKey: key,
     queryFn: () =>
-      GetTargetCreatorsDescription({ idTargetCreator: currentPath }),
+      GetTargetCreatorsDescription({
+        selfId: id,
+        idTargetCreator: currentPath,
+      }),
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

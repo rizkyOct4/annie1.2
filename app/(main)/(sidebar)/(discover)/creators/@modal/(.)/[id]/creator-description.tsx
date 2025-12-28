@@ -6,55 +6,6 @@ import { memo } from "react";
 
 const CreatorDesc = ({ data }: { data: TTargetCreatorsDescription[] }) => {
   return (
-    // <div className="flex bg-white border border-gray-200 rounded-xl shadow-md overflow-hidden w-full h-full">
-    //   {/* Left: Photo */}
-    //   <div className="shrink-0 w-60 relative">
-    //     <Image
-    //       src={data[0]?.picture ?? ""}
-    //       alt={""}
-    //       fill
-    //       className="object-cover"
-    //     />
-    //   </div>
-
-    //   {/* Right: Description */}
-    //   <div className="flex flex-col justify-between p-5 gap-3 flex-1">
-    //     {/* Top: Name & Short Description */}
-    //     <div>
-    //       <h2 className="text-xl font-bold text-gray-900">
-    //         {data[0]?.username}
-    //       </h2>
-    //       {/* <p className="text-sm text-gray-500 mt-1">{data[0].description}</p> */}
-    //     </div>
-
-    //     {/* Middle: Biodata & Info */}
-    //     <div className="flex flex-col gap-2 text-gray-700 text-sm">
-    //       <p>{data[0]?.biodata}</p>
-    //       <div className="flex flex-col gap-1">
-    //         <span className="text-gray-600">
-    //           <strong>Gender:</strong> {data[0]?.gender}
-    //         </span>
-    //         <span className="text-gray-600">
-    //           <strong>Phone:</strong> {data[0]?.phoneNumber}
-    //         </span>
-    //         <span className="text-gray-600">
-    //           <strong>Location:</strong> {data[0]?.location}
-    //         </span>
-    //       </div>
-    //       {Array.isArray(data[0]?.socialLink) && data[0]?.socialLink.length > 0
-    //         ? data[0]?.socialLink.map((i: any) => (
-    //             <a
-    //               href={i.link}
-    //               target="_blank"
-    //               rel="noopener noreferrer"
-    //               className="text-blue-600 font-medium hover:underline break-all">
-    //               {i.platform}
-    //             </a>
-    //           ))
-    //         : null}
-    //     </div>
-    //   </div>
-    // </div>
     <div
       className="
     flex
@@ -69,9 +20,10 @@ const CreatorDesc = ({ data }: { data: TTargetCreatorsDescription[] }) => {
       {/* Left: Photo */}
       <div className="relative w-80 shrink-0">
         <Image
-          src={data[0]?.picture ?? ""}
-          alt=""
+          src={data[0]?.picture ?? "/"}
+          alt={"#"}
           fill
+          sizes="(max-width: 320px) 100vw"
           className="object-cover"
         />
       </div>

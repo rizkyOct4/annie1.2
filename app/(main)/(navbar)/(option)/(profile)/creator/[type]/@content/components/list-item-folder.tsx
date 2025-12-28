@@ -11,6 +11,8 @@ import PutFolderNameForm from "../../form/photo/put-name-folder-form";
 import PutPhotoForm from "../../form/photo/put-photo-form";
 import PhotoCard from "./photo-card";
 import VideoCard from "./video-card";
+import VideoPlayerModal from "./video/video-player";
+
 
 export interface FolderListToggle {
   open: boolean;
@@ -55,10 +57,12 @@ const ListItem = ({
     sortItemFolder,
   } = useContext(creatorContext);
 
-  const [isRender, setIsRender] = useState<IsRenderComponent>({
+  const [isRender, setIsRender] = useState<any>({
     isOpen: false,
     idProduct: null,
     value: "",
+    url: "",
+    thumbnailUrl: ""
   });
 
   const [newNameFolder, setNewNamefolder] = useState({
@@ -100,12 +104,15 @@ const ListItem = ({
       case "update": {
         return <PutPhotoForm setIsRender={setIsRender} />;
       }
+      case "video": {
+        return <VideoPlayerModal data={isRender} setIsRender={setIsRender} />;
+      }
     }
   }, [isRender]);
 
   return (
     <>
-      <div className="w-full flex px-4">
+      <div className="w-full flex px-4 relative">
         <div className="flex flex-col gap-3 w-full">
           {isFetchingListItemFolder | isFetchingListItemFolderVideo ? (
             <Loading />
@@ -224,7 +231,7 @@ const ListItem = ({
 
                   {/* ===== ITEMS LIST ===== */}
                   {stateFolder.isFolder === f.folderName && (
-                    <div className="relative flex flex-wrap justify-center gap-6 w-full max-h-120 overflow-y-auto mt-4 pl-4 border-l border-emerald-500">
+                    <div className="flex flex-wrap justify-center gap-6 w-full max-h-120 overflow-y-auto mt-4 pl-4 border-l border-emerald-500">
                       {currentPath === "photo" ? (
                         <PhotoCard
                           data={isSort ? sortItemFolder : itemFolderPhotoData}
@@ -235,6 +242,7 @@ const ListItem = ({
                         <VideoCard
                           data={ItemsVideoData}
                           folderName={f.folderName}
+                          setIsRender={setIsRender}
                         />
                       )}
                     </div>
@@ -251,4 +259,4 @@ const ListItem = ({
   );
 };
 
-export default memo(ListItem);
+export default ListItem;

@@ -76,7 +76,6 @@ const PhotoCard = ({
   ]);
 
   const pathname = usePathname();
-  const router = useRouter();
 
   // ? Items State
   const [isOpen, setIsOpen] = useState<ItemListState>({
@@ -132,10 +131,6 @@ const PhotoCard = ({
           break;
         }
         case "openDescription": {
-          // router.push(
-          //   `${pathname}/description?folder-name=${folderName}&id=${idProduct}`
-          // );
-          // break;
           const newUrl = `${pathname}/description?folder-name=${folderName}&id=${idProduct}`;
           history.pushState({}, "", newUrl);
           break;

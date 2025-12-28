@@ -4,10 +4,6 @@ import camelcaseKeys from "camelcase-keys";
 import type { TRegisterResultOAuth } from "./schema-auth";
 import { nanoid } from "nanoid";
 
-
-
-// const id = nanoid(8);  
-
 export const CredentialRegister = async ({
   firstName,
   lastName,
@@ -28,11 +24,12 @@ export const CredentialRegister = async ({
     const passwordHash = await bcrypt.hash(password, salt);
 
     const username = `${firstName} ${lastName}`;
+    const publicId = nanoid(8);
 
     const [userDb] = await tx.$queryRaw<
       { id: string }[]
-    >`INSERT INTO users (first_name, last_name, email, password, role) VALUES 
-      (${firstName}, ${lastName}, ${email}, ${passwordHash}, ${role}::user_role) RETURNING id`;
+    >`INSERT INTO users (first_name, last_name, email, password, role, public_id) VALUES 
+      (${firstName}, ${lastName}, ${email}, ${passwordHash}, ${role}::user_role, ${publicId}) RETURNING id`;
 
     await tx.$executeRaw`INSERT INTO users_description (ref_id, username, gender) VALUES (${userDb.id}::uuid, ${username}, ${gender}::user_gender)`;
   });
@@ -61,6 +58,8 @@ export const OAuthRegister = async ({
       SELECT email from users
       WHERE email = ${email}
     `;
+  const publicId = nanoid(8);
+
   if (queryCheck.length < 1) {
     // * Credential
     prisma.$transaction(async (tx) => {
@@ -71,24 +70,25 @@ export const OAuthRegister = async ({
 
         const [userDb] = await tx.$queryRaw<
           { id: string }[]
-        >`INSERT INTO users (first_name, last_name, email, password, role) VALUES 
-              (${firstName}, ${lastName}, ${email}, ${passwordHash}, ${role}::user_role) RETURNING id`;
+        >`INSERT INTO users (first_name, last_name, email, password, role, public_id)
+        VALUES (${firstName}, ${lastName}, ${email}, ${passwordHash}, ${role}::user_role, ${publicId}) RETURNING id`;
 
         await tx.$executeRaw`INSERT INTO users_description (ref_id, username, gender) VALUES (${userDb.id}::uuid, ${username}, ${gender}::user_gender)`;
       } else {
         // * OAuth
         const [userDb] = await tx.$queryRaw<{ id: string }[]>`
-            INSERT INTO users (first_name, last_name, email) VALUES
-            (${firstName}, ${lastName}, ${email}) RETURNING id`;
-        await tx.$queryRaw`
+            INSERT INTO users (first_name, last_name, email, public_id) VALUES
+            (${firstName}, ${lastName}, ${email}, ${publicId}) RETURNING id`;
+        
+            await tx.$executeRaw`
             INSERT INTO users_description (ref_id, username, picture) VALUES
             (${userDb.id}::uuid, ${fullname}, ${picture})`;
       }
     });
   }
 
-  const result = await prisma.$queryRaw<TRegisterResultOAuth[]>`
-      SELECT u.id, u.role, u.created_at, ud.picture
+  const result = await prisma.$queryRaw<TRegisterResultOAuth>`
+      SELECT u.id, u.role, u.created_at, u.public_id, ud.picture
       FROM users u
       LEFT JOIN users_description ud ON (ud.ref_id = u.id)
       WHERE u.email = ${email}`;
@@ -104,7 +104,7 @@ export const CredentialsLogin = async ({
   password: string;
 }) => {
   const userCheck: any[] =
-    await prisma.$queryRaw`SELECT id, email, password, first_name, last_name, role, created_at FROM users WHERE email = ${email}`;
+    await prisma.$queryRaw`SELECT id, public_id, email, password, first_name, last_name, role, created_at FROM users WHERE email = ${email}`;
 
   if (userCheck.length === 0) {
     return {
@@ -124,6 +124,7 @@ export const CredentialsLogin = async ({
 
   const rawData = {
     id: userCheck[0].id,
+    publicId: userCheck[0].public_id,
     email: userCheck[0].email,
     name: `${userCheck[0].first_name} ${userCheck[0].last_name}`,
     role: userCheck[0].role,
@@ -135,6 +136,3 @@ export const CredentialsLogin = async ({
     user: camelcaseKeys(rawData),
   };
 };
-
-// !import { nanoid } from "nanoid";
-// todo UBAH BESOK TABEL USERS !! TAMBAHKAN PUBLICID KHUSUS CLIENT !!! 

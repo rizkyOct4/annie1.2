@@ -9,6 +9,7 @@ datasource db {
 
 model users {
   id                                                                                     String?                           @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  public_id                                                                               String                            @unique
   first_name                                                                             String                            @db.VarChar(50)
   last_name                                                                              String                            @db.VarChar(50)
   email                                                                                  String                            @unique @db.VarChar(255)
@@ -26,6 +27,9 @@ model users {
   users_product_image_vote_users_product_image_vote_tar_iu_senderTousers                 users_product_image_vote[]        @relation("users_product_image_vote_tar_iu_senderTousers")
   users_product_image_followers_sender                                                   users_followers[]                 @relation("users_sender")
   users_product_image_followers_receiver                                                 users_followers[]                 @relation("users_receiver")
+
+   @@index([role])
+   @@index([created_at])
 }
 
 model users_description {

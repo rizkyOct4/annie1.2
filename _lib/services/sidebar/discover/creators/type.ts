@@ -1,11 +1,9 @@
-export type CreatorsType = {
-  first_name: string;
-  last_name: string;
+export type TAllCreators = {
   public_id: string;
   created_at: Date;
-  username: string | undefined;
-  picture: string | undefined;
-};
+  username: string;
+  picture: string | undefined
+}[];
 
 export interface TTargetCreatorsDescription {
   username: string | null;

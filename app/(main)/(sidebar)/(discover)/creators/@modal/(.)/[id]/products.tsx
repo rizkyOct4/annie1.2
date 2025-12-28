@@ -101,7 +101,7 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
           const isLast = idx === listCreatorProductData.length - 1;
           return (
             <div
-              key={i.iuProduct}
+              key={i.idProduct}
               ref={isLast ? lastItemRef : null}
               className="
             relative
@@ -121,6 +121,7 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
                   src={i.url}
                   alt={i.description}
                   fill
+                  sizes="(max-width: 240px) 100vw"
                   className="object-cover"
                 />
 

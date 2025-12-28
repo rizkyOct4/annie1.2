@@ -28,7 +28,7 @@ const useCreatorVideo = ({
   const { type: currentPath } = useParams<{ type: string }>();
 
   // * FOLDERS ======
-  const { data: listFolderVideo } = useInfiniteQuery({
+  const { data: listFolderVideo, refetch: refetchFolderVideo } = useInfiniteQuery({
     queryKey: ["keyListFolderVideo", id, type],
     queryFn: async ({ pageParam = 1 }) => {
       const { data } = await axios.get(
@@ -131,6 +131,7 @@ const useCreatorVideo = ({
 
   // ? SUB =====
   const { postVideo } = usePostVideo({
+    refetchFolderVideo: refetchFolderVideo,
     keyFolderVideo: ["keyListFolderVideo", id, type],
     keyListFolderVideo: [
       "keyListItemFolderVideo",

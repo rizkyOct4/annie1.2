@@ -11,6 +11,7 @@ import { ForbiddenRegex } from "@/_util/Regex";
 import { zPostVideoFormSchema } from "./schema";
 import { showToast } from "@/_util/Toast";
 import { uploadVideoToCloudinary } from "./direct-upload-video";
+// import Chunked from "./Chunk";
 
 type PostFormSchema = z.infer<typeof zPostVideoFormSchema>;
 
@@ -89,7 +90,7 @@ const PostVideoForm = ({
   const [showDummyFolder, setShowDummyFolder] = useState(false);
 
   const [videoFile, setVideoFile] = useState<File | null>(null);
-  
+
   const submit = handleSubmit(async (values) => {
     try {
       setIsRender({ open: false, type: "" });
@@ -124,7 +125,7 @@ const PostVideoForm = ({
       showToast({ type: "loading", fallback: false });
     } catch (err) {
       console.error(err);
-      showToast({ type: "error", message: "Upload gagal" });
+      showToast({ type: "loading", fallback: false });
     }
   });
 

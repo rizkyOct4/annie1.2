@@ -13,7 +13,7 @@ import {
   PostImageProductCloudinary,
   PostDb,
   GetPostDb,
-} from "@/_lib/services/navbar/option/profile/services-post-image";
+} from "@/_lib/services/navbar/option/profile/action/services-image";
 import { revalidateTag } from "next/cache";
 import { GetUpdateImage } from "@/_lib/services/navbar/option/profile/action/services-btn";
 import {
@@ -23,7 +23,7 @@ import {
 
 export async function POST(req: NextRequest) {
   try {
-    const { id, name } = await GetToken();
+    const { id } = await GetToken();
 
     const method = req.nextUrl.searchParams.get("method");
     const typePost = req.nextUrl.searchParams.get("type");
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       const cloudUrl = await PostImageProductCloudinary({
         webpName,
         imagePath,
-        username: name,
+        id,
       });
 
       await PostDb({
@@ -66,8 +66,6 @@ export async function POST(req: NextRequest) {
       });
 
       revalidateTag(`list-folder-btn-${id}`, "max");
-      // revalidateTag(`folders-photo-${id}`, "max");
-      // revalidateTag(`item-folder-photo-${folderName}`, "max");
 
       return NextResponse.json({
         message: "New Post Success",

@@ -9,3 +9,5 @@ cloudinary.config({
 
 
 export default cloudinary;
+
+// ? https://console.cloudinary.com/app/c-307fa36858d89168a59d42642fcd32/settings/upload/presets

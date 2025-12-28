@@ -22,11 +22,13 @@ import {
 } from "../../@content/components/options/option-btn";
 
 const usePost = ({
+  refetchFolder,
   keyFolder,
   keyListFolder,
   keyItemFolder,
   type,
 }: {
+  refetchFolder: Function;
   keyFolder: Array<string>;
   keyListFolder: Array<string>;
   keyItemFolder: Array<string>;
@@ -128,6 +130,10 @@ const usePost = ({
     onSuccess: (response) => {
       const { data } = response;
       showToast({ type: "loading", fallback: false });
+
+      const firstUpload = queryClient.getQueryData(keyFolder);
+      if (!firstUpload) return refetchFolder();
+
       queryClient.setQueryData<InfiniteData<TOriginalItemFolder>>(
         keyItemFolder,
         (oldData) => {

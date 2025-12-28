@@ -29,52 +29,16 @@ const CreatorsCard = ({ currentPath }: { currentPath: string }) => {
   }, [inView, hasNextPage, fetchNextPage, isFetchingNextPage]);
 
   return (
-    // <div
-    //   ref={containerRef}
-    //   className="flex-center flex-wrap gap-4 p-4 overflow-y-auto w-full h-screen">
-    //   {Array.isArray(listCreatorsData) && listCreatorsData.length > 0
-    //     ? listCreatorsData.map((i, idx) => {
-    //         const isLast = idx === listCreatorsData.length - 1;
-    //         return (
-    //           <div
-    //             className="bg-white rounded-2xl shadow hover:shadow-xl transition overflow-hidden w-[20%] sm:w-72 md:w-64"
-    //             key={idx}
-    //             ref={isLast ? lastItemRef : null}>
-    //             <div className="relative h-60">
-    //               <Image
-    //                 width={160}
-    //                 height={100}
-    //                 src={i.picture || "/"}
-    //                 alt="#"
-    //                 className="object-cover"
-    //               />
-    //             </div>
-    //             <div className="pt-2 px-4 pb-4">
-    //               <button
-    //                 type="button"
-    //                 className="font-semibold text-black cursor-pointer"
-    //                 onClick={() => {
-    //                   router.push(`/${currentPath}/${i.id}`);
-    //                 }}>
-    //                 {i.username}
-    //               </button>
-    //               <p className="text-sm text-gray-500">{i.username}</p>
-    //             </div>
-    //           </div>
-    //         );
-    //       })
-    //     : null}
-    // </div>
     <div
       ref={containerRef}
       className="
-    flex-center
-    flex-wrap
-    gap-4
-    p-4
-    overflow-y-auto
-    w-full
-    h-screen
+        flex-center
+        flex-wrap
+        gap-4
+        p-4
+        overflow-y-auto
+        w-full
+        h-screen
   ">
       {Array.isArray(listCreatorsData) && listCreatorsData.length > 0
         ? listCreatorsData.map((i, idx) => {
@@ -99,6 +63,7 @@ const CreatorsCard = ({ currentPath }: { currentPath: string }) => {
                     src={i.picture || "/"}
                     alt="#"
                     className="w-full h-full object-cover"
+                    priority
                   />
                 </div>
 
@@ -113,7 +78,7 @@ const CreatorsCard = ({ currentPath }: { currentPath: string }) => {
                   block
                 "
                     onClick={() => {
-                      router.push(`/${currentPath}/${i.id}`);
+                      router.push(`/${currentPath}/${i.publicId}`);
                     }}>
                     {i.username}
                   </button>

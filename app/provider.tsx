@@ -9,11 +9,11 @@ interface ProfileProviderProps {
 }
 
 interface UserProfile {
-  id: string;
-  username: string;
-  email: string;
-  image: string;
-  role: string;
+  id?: string;
+  username: string | null | undefined;
+  email: string  | null | undefined;
+  image: string  | null | undefined;
+  role?: string;
   preferences: {
     theme: "light" | "dark";
     language: string;
@@ -30,14 +30,15 @@ interface UserProfile {
     type: "free" | "premium" | "trial";
     expiresAt?: string;
   };
-  followersCount: number;
-  followingCount: number;
-  createdAt: string;
-  updatedAt: Date | null;
+  followersCount?: number;
+  followingCount?: number;
+  createdAt?: string;
+  updatedAt?: Date | null;
 }
 
 const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) => {
   const { data: session } = useSession();
+  // console.log(session)
 
   const [data, setData] = useState<UserProfile | null>(null);
 
@@ -45,7 +46,7 @@ const ProfileProvider: React.FC<ProfileProviderProps> = ({ children }) => {
     if (session?.user) {
       // Misalnya: mengambil data user dari API, atau menyesuaikan berdasarkan data session
       setData({
-        id: session.user.id,
+        id: session.user.publicId,
         username: session.user.name,
         email: session.user.email,
         image: session.user.image,

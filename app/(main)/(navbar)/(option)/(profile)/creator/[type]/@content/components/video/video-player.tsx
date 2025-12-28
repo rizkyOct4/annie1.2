@@ -3,23 +3,36 @@
 import { VideoItem } from "../video-card";
 import { memo } from "react";
 
-interface Props {
-  video: VideoItem;
-  onClose: () => void;
-}
+// interface Props {
+//   video: VideoItem;
+//   onClose: () => void;
+// }
 
-const VideoPlayerModal = ({ video, onClose }: Props) => {
+const VideoPlayerModal = ({
+  data,
+  setIsRender,
+}: {
+  data: any;
+  setIsRender: any;
+}) => {
   return (
     <div className="overlay backdrop-blur-sm">
       <button
-        onClick={onClose}
+        onClick={() =>
+          setIsRender((prev: any) => ({
+            ...prev,
+            value: "",
+            url: "",
+            thumbnailUrl: "",
+          }))
+        }
         className="absolute top-6 right-6 text-white text-xl">
         ✕
       </button>
 
       <video
-        src={video.url}
-        poster={video.thumbnailUrl}
+        src={data.url}
+        poster={data.thumbnailUrl}
         controls
         autoPlay
         playsInline
