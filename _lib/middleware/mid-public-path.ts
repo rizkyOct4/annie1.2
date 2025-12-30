@@ -27,13 +27,14 @@ const PublicPath = async ({
   }
   if (!role && req.method !== "GET") {
     return NextResponse.json(
-      { message: "Unauthorized", redirect: pathname },
+      { message: "Unauthorized", redirect: pathname.replace("/api", "") },
       { status: 401 }
     );
   }
+  if (role) return NextResponse.next();
 };
 
 export { PublicPath };
 
-
 // todo KONDISIKAN BESOK PROXY LAGI !!!
+// ! item list folder foto cache masih bug ??

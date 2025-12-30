@@ -8,7 +8,7 @@ import { zEmailFormSchema } from "../@modal/(.)/[id]/schema";
 
 type EmailFormSchema = z.infer<typeof zEmailFormSchema>;
 
-const FormEmail = () => {
+const FormEmail = ({ setRenderAction }: any) => {
   const { register, handleSubmit, formState } = useForm<EmailFormSchema>({
     // ? REGEXNYA DISINI TERJADI !!!!
     resolver: zodResolver(zEmailFormSchema),
@@ -32,146 +32,101 @@ const FormEmail = () => {
   });
 
   return (
-    // <form onSubmit={submit} className="space-y-4 w-full h-full">
-    //   <div>
-    //     <label
-    //       htmlFor="subject"
-    //       className="block text-sm font-medium text-white mb-2"
-    //     >
-    //       Subject
-    //     </label>
-    //     <input
-    //       id="subject"
-    //       type="text"
-    //       placeholder="Input your subject email..."
-    //       required
-    //       {...register("subject")}
-    //       className="block w-full rounded-lg border border-gray-300 px-4 py-2 form-input"
-    //     />
-    //     {formState.errors.subject && (
-    //       <p className="invalidate">{formState.errors.subject.message}</p>
-    //     )}
-    //   </div>
-    //   <div>
-    //     <label
-    //       htmlFor="text-area"
-    //       className="block text-sm font-medium text-white mb-2"
-    //     >
-    //       Message
-    //     </label>
-    //     <textarea
-    //       id="text-area"
-    //       rows={5}
-    //       placeholder="Input your message..."
-    //       required
-    //       {...register("message")}
-    //       className="block w-full rounded-lg border border-gray-300 px-4 py-2 form-input resize-none"
-    //     />
-    //     {formState.errors.message && (
-    //       <p className="invalidate">{formState.errors.message.message}</p>
-    //     )}
-    //   </div>
-    //   <div className="flex justify-end gap-3 pt-2">
-    //     <button
-    //       type="submit"
-    //       className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition"
-    //     >
-    //       Send
-    //     </button>
-    //   </div>
-    // </form>
-    <form onSubmit={submit} className="w-full h-full flex flex-col gap-4">
-      {/* Subject */}
-      <div>
-        <label
-          htmlFor="subject"
-          className="block text-sm font-medium text-gray-300 mb-2">
-          Subject
-        </label>
-
-        <input
-          id="subject"
-          type="text"
-          placeholder="Input your subject email..."
-          required
-          {...register("subject")}
-          className="
-        block
-        w-full
-        rounded-lg
-        bg-white/5
-        border
-        border-white/10
-        px-4
-        py-2
-        text-gray-200
-        placeholder-gray-500
-        outline-none
-      "
-        />
-
-        {formState.errors.subject && (
-          <p className="mt-1 text-xs text-red-400">
-            {formState.errors.subject.message}
-          </p>
-        )}
-      </div>
-
-      {/* Message */}
-      <div>
-        <label
-          htmlFor="text-area"
-          className="block text-sm font-medium text-gray-300 mb-2">
-          Message
-        </label>
-
-        <textarea
-          id="text-area"
-          rows={5}
-          placeholder="Input your message..."
-          required
-          {...register("message")}
-          className="
-        block
-        w-full
-        resize-none
-        rounded-lg
-        bg-white/5
-        border
-        border-white/10
-        px-4
-        py-2
-        text-gray-200
-        placeholder-gray-500
-        outline-none
-      "
-        />
-
-        {formState.errors.message && (
-          <p className="mt-1 text-xs text-red-400">
-            {formState.errors.message.message}
-          </p>
-        )}
-      </div>
-
-      {/* Action */}
-      <div className="flex justify-end pt-2">
-        <button
-          type="submit"
-          className="
-        px-4
-        py-2
-        rounded-lg
-        bg-white/10
-        border
-        border-white/10
-        text-gray-200
-        font-medium
+    <div className="overlay">
+      <div
+        className="
+        relative
+        w-full max-w-md
+        rounded-xl
+        bg-black/80
+        border border-white/10
+        backdrop-blur-md
+        p-5
       ">
-          Send
-        </button>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-gray-200">Send Email</h3>
+
+          <button
+            type="button"
+            onClick={() => setRenderAction("")}
+            className="
+            p-1.5
+            rounded-lg
+            text-gray-400
+            hover:text-gray-200
+            hover:bg-white/10
+          ">
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={submit} className="w-full flex flex-col gap-4">
+          {/* Subject */}
+          <div>
+            <label className="block text-sm text-gray-300 mb-2">Subject</label>
+            <input
+              type="text"
+              placeholder="Input your subject email..."
+              {...register("subject")}
+              required
+              className="
+              w-full rounded-lg
+              bg-white/5
+              border border-white/10
+              px-4 py-2
+              text-gray-200
+              outline-none
+            "
+            />
+            {formState.errors.subject && (
+              <p className="mt-1 text-xs text-red-400">
+                {formState.errors.subject.message}
+              </p>
+            )}
+          </div>
+
+          {/* Message */}
+          <div>
+            <label className="block text-sm text-gray-300 mb-2">Message</label>
+            <textarea
+              rows={5}
+              placeholder="Input your message..."
+              {...register("message")}
+              required
+              className="
+              w-full resize-none rounded-lg
+              bg-white/5
+              border border-white/10
+              px-4 py-2
+              text-gray-200
+              outline-none
+            "
+            />
+            {formState.errors.message && (
+              <p className="mt-1 text-xs text-red-400">
+                {formState.errors.message.message}
+              </p>
+            )}
+          </div>
+
+          {/* ACTION */}
+          <div className="flex justify-end pt-2">
+            <button
+              type="submit"
+              className="
+              px-4 py-2
+              rounded-lg
+              bg-white/10
+              border border-white/10
+              text-gray-200
+              font-medium
+            ">
+              Send
+            </button>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   );
 };
 

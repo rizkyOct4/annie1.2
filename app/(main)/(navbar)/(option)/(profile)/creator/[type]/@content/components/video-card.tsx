@@ -34,7 +34,7 @@ const VideoCard = ({
   folderName: string;
   setIsRender: any;
 }) => {
-  const { isFetchingItemFolder } = useContext(creatorContext);
+  const { isFetchingItemFolderVideo } = useContext(creatorContext);
   // console.log(`video data:`, data);
 
   // ? Navigation State
@@ -90,7 +90,7 @@ const VideoCard = ({
       {isOpenNav && (
         <OptionBtn isOpenNav={isOpenNav} setIsOpenNav={setIsOpenNav} />
       )}
-      {isFetchingItemFolder ? (
+      {isFetchingItemFolderVideo ? (
         <Loading />
       ) : (
         Array.isArray(data) &&

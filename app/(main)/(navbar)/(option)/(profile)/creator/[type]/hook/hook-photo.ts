@@ -26,7 +26,6 @@ import type {
 } from "../context/type";
 import { useParams } from "next/navigation";
 
-
 // * CONTENT ====
 const useCreatorPhoto = ({
   stateContent,
@@ -35,15 +34,15 @@ const useCreatorPhoto = ({
   id,
   type,
 }: UseCreatorPhotoParams) => {
-    const { type: currentPath } = useParams<{ type: string }>();
-  
+  const { type: currentPath } = useParams<{ type: string }>();
+
   // ! START LIST FOLDERS ==========================
   const {
     data: listFolderPhoto,
     fetchNextPage: FNPListFolderPhoto,
     hasNextPage: HNPListFolderPhoto,
     isFetchingNextPage: IFNPListFolderPhoto,
-    refetch: refetchFolder
+    refetch: refetchFolder,
   } = useInfiniteQuery({
     queryKey: ["keyListFolderPhoto", id, type],
     queryFn: async ({ pageParam = 1 }) => {
@@ -99,7 +98,8 @@ const useCreatorPhoto = ({
       staleTime: 1000 * 60 * 3,
       gcTime: 1000 * 60 * 60,
       initialPageParam: 1,
-      enabled: !!stateContent.year && !!stateContent.month && type === currentPath,
+      enabled:
+        !!stateContent.year && !!stateContent.month && type === currentPath,
       placeholderData: keepPreviousData,
       refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
       refetchOnMount: false, // "always" => refetch jika stale saja
@@ -114,7 +114,7 @@ const useCreatorPhoto = ({
     fetchNextPage: fetchNextPageItemFolder,
     hasNextPage: isHasPageItemFolder,
     isFetchingNextPage: isFetchingNextPageItemFolder,
-    refetch: isRefetchItemFolder,
+    refetch: refetchItemFolder,
   } = useInfiniteQuery({
     queryKey: ["keyItemFolderPhoto", id, stateFolder.isFolder],
     queryFn: async ({ pageParam = 1 }) => {
@@ -143,6 +143,7 @@ const useCreatorPhoto = ({
   });
   // ! END CONTENT ==========================
 
+  // console.log(itemFolderPhoto)
   // * UPDATE DATA
   const { data: getUpdatePhoto } = useQuery({
     queryKey: ["keyUpdatePhoto", id, updateState],
@@ -199,6 +200,11 @@ const useCreatorPhoto = ({
       stateContent?.month,
     ],
     keyItemFolder: ["keyItemFolderPhoto", id, stateFolder.isFolder],
+    rawKeyItemFolder: {
+      key: "keyItemFolderPhoto",
+      id: id,
+      postFolder: stateFolder.isFolder,
+    },
     type: type,
   });
   const { putPhoto } = usePut({
@@ -286,7 +292,7 @@ const useCreatorPhoto = ({
     fetchNextPageItemFolder,
     isHasPageItemFolder,
     isFetchingNextPageItemFolder,
-    isRefetchItemFolder,
+    refetchItemFolder,
 
     // * UTLS
     sortItemFolder,

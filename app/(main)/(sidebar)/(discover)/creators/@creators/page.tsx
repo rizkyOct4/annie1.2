@@ -6,25 +6,25 @@ import { GetAllCreators } from "@/_lib/services/sidebar/discover/creators/servic
 
 const page = async () => {
   const currentPath = "creators";
-  const queryClient = getQueryClient();
-  const { id } = await GetToken();
+  // const queryClient = getQueryClient();
+  // const { id } = await GetToken();
 
-  const key = ["keyListAllCreators", currentPath, id];
+  // const key = ["keyListAllCreators", currentPath, id];
 
-  await queryClient.prefetchInfiniteQuery({
-    queryKey: key,
-    queryFn: ({ pageParam = 1 }) =>
-      GetAllCreators({
-        limit: 10,
-        offset: (pageParam - 1) * 10,
-      }),
-    initialPageParam: 1,
-  });
+  // await queryClient.prefetchInfiniteQuery({
+  //   queryKey: key,
+  //   queryFn: ({ pageParam = 1 }) =>
+  //     GetAllCreators({
+  //       limit: 10,
+  //       offset: (pageParam - 1) * 10,
+  //     }),
+  //   initialPageParam: 1,
+  // });
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <CreatorsCard currentPath={currentPath} />
-    </HydrationBoundary>
+    // <HydrationBoundary state={dehydrate(queryClient)}>
+    <CreatorsCard currentPath={currentPath} />
+    // </HydrationBoundary>
   );
 };
 

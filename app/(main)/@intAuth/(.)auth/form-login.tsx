@@ -32,21 +32,24 @@ const Login = ({
   });
 
   const submit = handleSubmit(async (values) => {
-    const res = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
-
-    if (res?.error) {
-      console.log(res);
-      showToast({
-        type: "error",
-        fallback: "Something Went Wrong, Try Again!",
+    try {
+      const res = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: false,
       });
-    } else {
-      showToast({ type: "success", fallback: "Login successful!" });
-      router.push(redirect);
+      if (res?.error) {
+        console.log(res);
+        showToast({
+          type: "error",
+          fallback: "Something Went Wrong, Try Again!",
+        });
+      } else {
+        showToast({ type: "success", fallback: "Login successful!" });
+        router.push(redirect);
+      }
+    } catch (err) {
+      console.error(err);
     }
   });
 

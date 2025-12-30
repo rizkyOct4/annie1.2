@@ -16,4 +16,3 @@ export default function MainLayout({
   );
 }
 
-// ? 【EDM Relax #4】Chill & Focus Lo-Fi EDM 🎧 Background Music for Study, Work & Everyday Moments

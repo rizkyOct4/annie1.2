@@ -26,12 +26,18 @@ const usePost = ({
   keyFolder,
   keyListFolder,
   keyItemFolder,
+  rawKeyItemFolder,
   type,
 }: {
   refetchFolder: Function;
   keyFolder: Array<string>;
   keyListFolder: Array<string>;
   keyItemFolder: Array<string>;
+  rawKeyItemFolder?: {
+    key: string;
+    id: string;
+    postFolder: string;
+  };
   type: string;
 }) => {
   const queryClient = useQueryClient();
@@ -49,15 +55,21 @@ const usePost = ({
     onMutate: async (mutate: TImagePost) => {
       showToast({ type: "loading", fallback: true });
 
+      const rawKey = [
+        rawKeyItemFolder?.key,
+        rawKeyItemFolder?.id,
+        mutate.folderName,
+      ];
+
       await Promise.all([
         queryClient.cancelQueries({ queryKey: keyFolder }),
         queryClient.cancelQueries({ queryKey: keyListFolder }),
-        queryClient.cancelQueries({ queryKey: keyItemFolder }),
+        queryClient.cancelQueries({ queryKey: rawKey }),
       ]);
 
       const prevFolder = queryClient.getQueryData(keyFolder);
       const prevListFolderData = queryClient.getQueryData(keyListFolder);
-      const prevItemFolderData = queryClient.getQueryData(keyItemFolder);
+      const prevRawItem = queryClient.getQueryData(rawKey);
 
       // ? LIST
       queryClient.setQueryData<InfiniteData<TOriginalList>>(
@@ -125,7 +137,7 @@ const usePost = ({
         }
       );
 
-      return { prevFolder, prevListFolderData, prevItemFolderData };
+      return { prevFolder, prevListFolderData, prevRawItem };
     },
     onSuccess: (response) => {
       const { data } = response;
@@ -134,8 +146,14 @@ const usePost = ({
       const firstUpload = queryClient.getQueryData(keyFolder);
       if (!firstUpload) return refetchFolder();
 
+      const rawKey = [
+        rawKeyItemFolder?.key,
+        rawKeyItemFolder?.id,
+        data[0].folderName,
+      ];
+
       queryClient.setQueryData<InfiniteData<TOriginalItemFolder>>(
-        keyItemFolder,
+        rawKey,
         (oldData) => {
           if (!oldData) return oldData;
 
@@ -170,11 +188,11 @@ const usePost = ({
       if (
         context?.prevFolder &&
         context?.prevListFolderData &&
-        context?.prevItemFolderData
+        context?.prevRawItem
       ) {
         queryClient.setQueryData(keyFolder, context.prevFolder);
         queryClient.setQueryData(keyListFolder, context.prevListFolderData);
-        queryClient.setQueryData(keyItemFolder, context.prevItemFolderData);
+        queryClient.setQueryData(rawKeyItemFolder, context.prevRawItem);
       }
     },
   });

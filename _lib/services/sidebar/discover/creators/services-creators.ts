@@ -133,7 +133,7 @@ export const PostLikeImage = async (
       } else {
         await tx.$executeRaw`
             UPDATE users_product_image_vote SET created_at = ${createdAt}::timestamp, status = ${status}::type_status_vote
-            WHERE ref_id_product = ${refIdProduct}
+            WHERE ref_id_product = ${refIdProduct} AND ref_id_sender = (SELECT id FROM users WHERE public_id = ${id})
           `;
       }
     });

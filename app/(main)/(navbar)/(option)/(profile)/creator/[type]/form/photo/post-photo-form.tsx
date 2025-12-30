@@ -73,10 +73,10 @@ const PostPhotoForm = ({
         folderName: values.folderName,
         createdAt: LocalISOTime(),
       };
+      // console.log(payload)
       await postPhoto(payload);
       setIsRender({ open: false, type: "" });
       refetchListPostFolder()
-      // console.log(payload);
     } catch (error) {
       console.error(error);
     }

@@ -23,7 +23,11 @@ export const GetListPostFolder = async (id: string, type: string) => {
 // * GET UPDATE IMAGE =======
 export const GetUpdateImage = async (id: string, idProduct: number) => {
   const query = await prisma.$queryRaw<TGetUpdateImage[]>`
-    SELECT upi.ref_id_product AS "idProduct", upi.description, upi.image_name, upi.url, upi.hashtag, upi.category, COALESCE(SUM(upiv.like), 0)::int AS total_like, COALESCE(SUM(upiv.dislike), 0)::int AS total_dislike, up.folder_name, up.created_at
+    SELECT upi.ref_id_product AS "idProduct", upi.description,
+    upi.image_name, upi.url, upi.hashtag, upi.category,
+    COUNT(*) FILTER (WHERE upiv.status = 'like')::int AS total_like,
+    COUNT(*) FILTER (WHERE upiv.status = 'dislike')::int AS total_dislike,
+    up.folder_name, up.created_at
     FROM users_product_image upi
     JOIN users_product up ON (up.id_product = upi.ref_id_product)
     JOIN users u ON (u.id = up.ref_id)
@@ -31,7 +35,7 @@ export const GetUpdateImage = async (id: string, idProduct: number) => {
     WHERE upi.ref_id_product = ${idProduct} AND u.public_id = ${id}
     GROUP BY
       upi.description,
-      upi.idProduct,
+      upi.ref_id_product,
       upi.url,
       upi.image_name,
       upi.hashtag,

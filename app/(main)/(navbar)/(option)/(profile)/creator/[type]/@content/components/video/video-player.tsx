@@ -26,7 +26,7 @@ const VideoPlayerModal = ({
             thumbnailUrl: "",
           }))
         }
-        className="absolute top-6 right-6 text-white text-xl">
+        className="absolute top-10 left-10 text-white text-xl">
         ✕
       </button>
 

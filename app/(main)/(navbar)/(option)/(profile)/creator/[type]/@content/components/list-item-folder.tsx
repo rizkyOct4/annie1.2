@@ -1,10 +1,9 @@
 "use client";
 
-import React, { memo, useCallback, useContext, useState } from "react";
+import React, {  useCallback, useContext, useState } from "react";
 import { creatorContext } from "@/app/context";
 import { ChartSpline, ChevronDown } from "lucide-react";
 import { MdDelete } from "react-icons/md";
-import { useRouter } from "next/navigation";
 import { TListItemFolder } from "../../types/content/type";
 import Loading from "@/app/loading";
 import PutFolderNameForm from "../../form/photo/put-name-folder-form";

@@ -1,136 +1,73 @@
 "use client";
 
-import { IoHomeOutline } from "react-icons/io5";
-import { AiOutlineFullscreenExit } from "react-icons/ai";
-import { SlOptionsVertical } from "react-icons/sl";
 import { useState, useCallback, memo } from "react";
-import { useRouter } from "next/navigation";
+import { SlOptionsVertical } from "react-icons/sl";
+import { FiBell } from "react-icons/fi";
 import Options from "./option/option";
 
 const Navbar = () => {
-  const router = useRouter();
+  const [open, setOpen] = useState<"notif" | "option" | null>(null);
 
-  const navbarList = [
-    { name: "Homepage", icon: <IoHomeOutline />, link: "/homepage" },
-  ];
-
-  const [state, setState] = useState(false);
-
-  const handleAction = useCallback((actionType: string) => {
-    switch (actionType) {
-      case "option": {
-        setState((prev) => !prev);
-        break;
-      }
-    }
+  const toggle = useCallback((type: "notif" | "option") => {
+    setOpen((prev) => (prev === type ? null : type));
   }, []);
 
   return (
-    // <div
-    //   className="fixed top-0 left-0 right-0 w-full h-20 z-101 bg-black/80
-    //             flex justify-between items-center px-8 border-b-white border-b-2 backdrop-blur-sm">
-    //   {/* Brand */}
-    //   <div className="text-white font-semibold text-lg tracking-wide">
-    //     Next Prototype
-    //   </div>
-
-    //   {/* Right Section */}
-    //   <div className="flex items-center gap-6">
-    //     {/* Dynamic Nav List */}
-    //     {Array.isArray(navbarList) &&
-    //       navbarList.map((i, index) => (
-    //         <button
-    //           key={index}
-    //           onClick={() => router.push(i.link)}
-    //           className="flex items-center gap-2
-    //                   px-4 py-2 rounded-md bg-white text-black
-    //                 hover:bg-gray-200 transition hover:cursor-pointer">
-    //           <span className="text-lg">{i.icon}</span>
-    //           {i.name}
-    //         </button>
-    //       ))}
-
-    //     {/* Options */}
-    //     <div className="relative">
-    //       <button
-    //         className="text-white flex justify-center items-center p-2
-    //               rounded-md border border-white/20 bg-white/10
-    //             hover:bg-white/20 transition hover:cursor-pointer"
-    //         onClick={() => handleAction("option")}>
-    //         {state ? (
-    //           <AiOutlineFullscreenExit className="text-xl" />
-    //         ) : (
-    //           <SlOptionsVertical className="text-xl" />
-    //         )}
-    //       </button>
-
-    //       {state && <Options setState={setState} />}
-    //     </div>
-    //   </div>
-    // </div>
-    <div
-      className="
-    fixed top-0 left-0 right-0
-    w-full h-20 z-101
-    flex items-center justify-between
-    px-8
-    bg-black/80
-    backdrop-blur-md
-    border-b border-emerald-500
-  ">
-      {/* ===== BRAND ===== */}
-      <div className="text-gray-200 font-semibold text-lg tracking-wide">
-        Next Prototype
-      </div>
-
-      {/* ===== RIGHT SECTION ===== */}
-      <div className="flex items-center gap-6">
-        {/* NAV LIST */}
-        {Array.isArray(navbarList) &&
-          navbarList.map((i, index) => (
-            <button
-              key={index}
-              onClick={() => router.push(i.link)}
-              className="
-            flex items-center gap-2
-            px-4 py-2
-            rounded-lg
-            text-sm font-medium
-            bg-white/5
-            border border-white/10
-            text-gray-200
-            hover:bg-white/10 hover:border-white/20
-            transition
-          ">
-              <span className="text-base">{i.icon}</span>
-              <span>{i.name}</span>
-            </button>
-          ))}
-
-        {/* OPTIONS */}
-        <div className="relative">
-          <button
-            onClick={() => handleAction("option")}
-            className="
-          flex items-center justify-center
-          p-2
-          rounded-lg
-          bg-white/5
+    <div className="fixed top-4 right-4 z-101">
+      <div
+        className="
+          flex items-center gap-2
+          p-1
+          rounded-2xl
+          bg-black/70
+          backdrop-blur-md
           border border-white/10
-          text-gray-200
-          hover:bg-white/10 hover:border-white/20
-          transition
         ">
-            {state ? (
-              <AiOutlineFullscreenExit className="text-xl" />
-            ) : (
-              <SlOptionsVertical className="text-xl" />
-            )}
-          </button>
+        <button
+          title="Notifications"
+          onClick={() => toggle("notif")}
+          aria-label="Notifications"
+          className={`
+            w-10 h-10
+            flex items-center justify-center
+            rounded-xl
+            transition-all duration-200
+            ${
+              open === "notif"
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-white/5 text-gray-200 hover:bg-white/10"
+            }
+          `}>
+          <FiBell className="text-lg" />
+        </button>
 
-          {state && <Options setState={setState} />}
-        </div>
+        {/* OPTIONS BUTTON */}
+        <button
+          onClick={() => toggle("option")}
+          aria-label="Options"
+          title="Options"
+          className={`
+            w-10 h-10
+            flex items-center justify-center
+            rounded-xl
+            transition-all duration-200
+            ${
+              open === "option"
+                ? "bg-emerald-500/20 text-emerald-400"
+                : "bg-white/5 text-gray-200 hover:bg-white/10"
+            }
+          `}>
+          <SlOptionsVertical className="text-lg" />
+        </button>
       </div>
+
+      {/* PANELS */}
+      {open === "option" && <Options setState={() => setOpen(null)} />}
+      {open === "notif" && (
+        <div className="absolute right-0 mt-3">
+          {/* Notification Panel Placeholder */}
+        </div>
+      )}
     </div>
   );
 };

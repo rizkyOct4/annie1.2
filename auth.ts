@@ -44,18 +44,14 @@ export const {
       },
       // ? credentials -> ini parameter dari login form kau !!!
       async authorize(credentials?: LoginCredentials | undefined) {
-        try {
-          if (!credentials?.email || !credentials?.password) {
-            return null;
-          }
-          const res = await CredentialsLogin({
-            email: credentials.email,
-            password: credentials.password,
-          });
-          return res.user;
-        } catch (err: any) {
-          throw new Error(err?.message);
+        if (!credentials?.email || !credentials?.password) {
+          return null;
         }
+        const res = await CredentialsLogin({
+          email: credentials.email,
+          password: credentials.password,
+        });
+        return res.user;
       },
     }),
     Google({
@@ -87,7 +83,6 @@ export const {
       // ! user -> credential, profile -> OAuth
       // ? credentials login → user berisi data dari authorize
       if (user) {
-        token.id = user.id;
         token.publicId = user.publicId;
         token.email = user.email;
         token.name = user.name;
@@ -114,7 +109,6 @@ export const {
           picture: profilePicture,
         });
 
-        token.id = fetch[0].id;
         token.publicId = fetch[0].publicId;
         token.email = profile.email;
         token.name = profile.name;

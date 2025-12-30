@@ -21,6 +21,7 @@ import {
   BiCommentDetail,
   BiInfoCircle,
 } from "react-icons/bi";
+import { handleUnauthorized } from "@/_util/Unauthorized";
 
 interface ListProductState {
   open: boolean;
@@ -92,8 +93,7 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
             await postLikePhoto(postData);
           } catch (err: any) {
             if (err.status === 401) {
-              router.push("/auth");
-            } else {
+              if (handleUnauthorized(err, router)) return;
               console.error(err);
             }
           }
@@ -136,12 +136,10 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
             h-90
             overflow-hidden
             rounded-xl
-            bg-black/80
             border border-white/10
-            backdrop-blur-sm
           ">
               {/* Image section */}
-              <div className="relative w-full h-[90%]">
+              <div className="relative w-full h-full">
                 <Image
                   src={i.url}
                   alt={i.description}
@@ -194,7 +192,9 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
                   <button
                     className="flex items-center gap-1"
                     type="button"
-                    onClick={(e) => handleAction(e, "like", i.idProduct, i.status)}>
+                    onClick={(e) =>
+                      handleAction(e, "like", i.idProduct, i.status)
+                    }>
                     <span className="text-blue-500">
                       <BiLike size={18} />
                     </span>
@@ -204,7 +204,9 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
                   <button
                     className="flex items-center gap-1"
                     type="button"
-                    onClick={(e) => handleAction(e, "dislike", i.idProduct, i.status)}>
+                    onClick={(e) =>
+                      handleAction(e, "dislike", i.idProduct, i.status)
+                    }>
                     <span className="text-gray-500">
                       <BiDislike size={18} />
                     </span>

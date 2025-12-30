@@ -11,7 +11,7 @@ export const ItemFolderDescription = async (idProduct: number, id: string) => {
   // cacheTag(`product-description-photo-${idProduct}-${id}`);
 
   const query = await prisma.$queryRaw<any[]>`
-      SELECT upi.ref_id_product, upi.description, upi.image_name, upi.url, upi.hashtag, upi.category, COALESCE(SUM(upiv.like), 0)::int AS total_like, COALESCE(SUM(upiv.dislike), 0)::int AS total_dislike, up.folder_name, up.created_at
+      SELECT upi.ref_id_product, upi.description, upi.image_name, upi.url, upi.hashtag, upi.category, COUNT(*) FILTER (WHERE upiv.status = 'like')::int AS total_like, COUNT(*) FILTER (WHERE upiv.status = 'dislike')::int AS total_dislike, up.folder_name, up.created_at
       FROM users_product_image upi
       JOIN users_product up ON (up.id_product = upi.ref_id_product)
       JOIN users u ON (u.id = up.ref_id)

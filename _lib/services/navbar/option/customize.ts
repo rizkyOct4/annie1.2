@@ -21,7 +21,7 @@ export const GetCustomize = async ({ id }: { id: string }) => {
           ud.social_link
         FROM users u
         LEFT JOIN users_description ud ON (ud.ref_id = u.id)
-        WHERE u.id = ${id}::uuid
+        WHERE u.public_id = ${id}
     `;
   return camelcaseKeys(query);
 };
@@ -31,12 +31,10 @@ export const PostCloudinary = async ({
   pictureWebp,
   picture,
   id,
-  username,
 }: {
   pictureWebp: string;
   picture: string;
   id: string;
-  username: string;
 }) => {
   // ? Check Cloudinary
   // --- 1. Decode base64 jadi buffer ---
@@ -54,8 +52,8 @@ export const PostCloudinary = async ({
     cloudinary.uploader
       .upload_stream(
         {
-          folder: `users profile/${username}/`,
-          user_picture: pictureWebp, // hapus ekstensi lama
+          folder: `users/${id}/`,
+          public_id: pictureWebp, // hapus ekstensi lama
           resource_type: "image",
           format: "webp",
         },
@@ -91,12 +89,12 @@ export const PostCustomize = async ({
   return prisma.$transaction(async (tx) => {
     // ! DELETE
     await tx.$executeRaw`
-          DELETE FROM users_description WHERE ref_id = ${id}::uuid
+          DELETE FROM users_description WHERE ref_id = (SELECT id FROM users WHERE public_id = ${id})
         `;
     // * INSERT
     await tx.$executeRaw`
           INSERT INTO users_description (ref_id, username, biodata, gender, phone_number, location, picture, social_link, updated_at)
-          VALUES (${id}::uuid, ${username},${biodata},${gender}::user_gender,${phoneNumber},${location},${urlCloud},${JSON.stringify(
+          VALUES ((SELECT id FROM users WHERE public_id = ${id}), ${username},${biodata},${gender}::user_gender,${phoneNumber},${location},${urlCloud},${JSON.stringify(
       socialLink
     )}::jsonb,  ${new Date()})
           `;
@@ -107,7 +105,7 @@ export const PostReturn = async ({ id }: { id: string }) => {
   const result = await prisma.$queryRaw<TGetCustomize[]>`
     SELECT username, biodata, gender, phone_number, location, picture, social_link
     FROM users_description
-    WHERE ref_id = ${id}::uuid
+    WHERE ref_id = (SELECT id FROM users WHERE public_id = ${id})
   `;
 
   return camelcaseKeys(result);

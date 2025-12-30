@@ -95,7 +95,7 @@ export const PostDb = async ({
 export const GetPostDb = async ({ idProduct }: { idProduct: number }) => {
   const result = await prisma.$queryRaw<
     { folder_name: string; ref_id_product: number; url: string }[]
-  >`SELECT up.folder_name, upi.ref_id_product, upi.url
+  >`SELECT up.folder_name, up.created_at, up.id_product, upi.url
     FROM users_product_image upi
     JOIN users_product up ON (up.id_product = upi.ref_id_product)
     WHERE ref_id_product = ${idProduct}

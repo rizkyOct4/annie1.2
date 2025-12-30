@@ -52,7 +52,7 @@ body {
 
 .overlay {
   position: fixed;
-  top: 80px;
+  top: 0;
   left: 80px;
   right: 0;
   bottom: 0;
@@ -64,7 +64,7 @@ body {
 }
 .overlay-auth {
   position: fixed;
-  top: 80px;
+  top: 0;
   left: 80px;
   right: 0;
   bottom: 0;

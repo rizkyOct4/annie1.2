@@ -94,7 +94,7 @@ const useCreatorVideo = ({
   const {
     data: itemsVideo,
     isLoading: isLoadingItemFolderVideo,
-    isFetching: isFetchingItemFolder,
+    isFetching: isFetchingItemFolderVideo,
     fetchNextPage: fetchNextPageItemFolder,
     hasNextPage: isHasPageItemFolder,
     isFetchingNextPage: isFetchingNextPageItemFolder,
@@ -172,7 +172,7 @@ const useCreatorVideo = ({
     // ? 3
     ItemsVideoData,
     refetchItemsVideo,
-    isFetchingItemFolder,
+    isFetchingItemFolderVideo,
 
     // * ACTION
     postVideo,

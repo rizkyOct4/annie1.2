@@ -9,11 +9,11 @@ interface ProfileProviderProps {
 }
 
 interface UserProfile {
-  id?: string;
+  id: string;
   username: string | null | undefined;
   email: string  | null | undefined;
   image: string  | null | undefined;
-  role?: string;
+  role: string;
   preferences: {
     theme: "light" | "dark";
     language: string;

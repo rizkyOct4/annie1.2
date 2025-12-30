@@ -1,6 +1,12 @@
 "use client";
 
-import { FaBoxOpen, FaFlag, FaEnvelope, FaUser } from "react-icons/fa";
+import {
+  FaUser,
+  FaImage,
+  FaVideo,
+  FaMusic,
+  FaBoxOpen,
+} from "react-icons/fa";
 import { ModalState } from "../../types/interface";
 import { memo } from "react";
 
@@ -17,31 +23,35 @@ const OptionsMenu = ({
       icon: <FaUser size={18} />,
     },
     {
+      label: "Photos",
+      icon: <FaImage size={18} />,
+    },
+    {
+      label: "Videos",
+      icon: <FaVideo size={18} />,
+    },
+    {
+      label: "Music",
+      icon: <FaMusic size={18} />,
+    },
+    {
       label: "Products",
       icon: <FaBoxOpen size={18} />,
     },
-    {
-      label: "Email",
-      icon: <FaEnvelope size={18} />,
-    },
-    {
-      label: "Report",
-      icon: <FaFlag size={18} />,
-    },
   ];
+
   return (
     <div
       className="
-    w-20
-    bg-black/80
-    border-r border-white/10
-    backdrop-blur-sm
-    flex
-    flex-col
-    items-center
-    py-4
-    gap-3
-  ">
+        w-20
+        bg-black/80
+        border-r border-white/10
+        flex flex-col
+        items-center
+        py-4
+        gap-2
+      "
+    >
       {options.map((i) => {
         const isActive = open.isValue === i.label;
 
@@ -49,34 +59,49 @@ const OptionsMenu = ({
           <button
             type="button"
             key={i.label}
-            onClick={() => {
+            onClick={() =>
               setOpen((prev) => ({
                 ...prev,
                 isValue: i.label,
-              }));
-            }}
-            className="
-          w-full
-          flex
-          flex-col
-          items-center
-          gap-1
-          py-3
-          rounded-lg
-        ">
+              }))
+            }
+            className={`
+              w-full
+              flex flex-col
+              items-center
+              gap-1
+              py-3
+              rounded-xl
+            `}
+          >
             {/* ICON */}
-            <span className={isActive ? "text-emerald-500" : "text-gray-400"}>
+            <span
+              className={`
+                transition-colors
+                ${
+                  isActive
+                    ? "text-emerald-400"
+                    : "text-gray-400"
+                }
+              `}
+            >
               {i.icon}
             </span>
 
             {/* LABEL */}
             <span
               className={`
-            text-[10px]
-            font-medium
-            text-center
-            ${isActive ? "text-gray-300" : "text-gray-500"}
-          `}>
+                text-[10px]
+                font-medium
+                text-center
+                transition-colors
+                ${
+                  isActive
+                    ? "text-gray-300"
+                    : "text-gray-500"
+                }
+              `}
+            >
               {i.label}
             </span>
           </button>

@@ -79,8 +79,8 @@ export const OAuthRegister = async ({
         const [userDb] = await tx.$queryRaw<{ id: string }[]>`
             INSERT INTO users (first_name, last_name, email, public_id) VALUES
             (${firstName}, ${lastName}, ${email}, ${publicId}) RETURNING id`;
-        
-            await tx.$executeRaw`
+
+        await tx.$executeRaw`
             INSERT INTO users_description (ref_id, username, picture) VALUES
             (${userDb.id}::uuid, ${fullname}, ${picture})`;
       }
@@ -88,7 +88,7 @@ export const OAuthRegister = async ({
   }
 
   const result = await prisma.$queryRaw<TRegisterResultOAuth>`
-      SELECT u.id, u.role, u.created_at, u.public_id, ud.picture
+      SELECT u.role, u.created_at, u.public_id, ud.picture
       FROM users u
       LEFT JOIN users_description ud ON (ud.ref_id = u.id)
       WHERE u.email = ${email}`;
@@ -104,26 +104,18 @@ export const CredentialsLogin = async ({
   password: string;
 }) => {
   const userCheck: any[] =
-    await prisma.$queryRaw`SELECT id, public_id, email, password, first_name, last_name, role, created_at FROM users WHERE email = ${email}`;
-
-  if (userCheck.length === 0) {
-    return {
-      success: false,
-      message: "Invalid email or password",
-    };
-  }
+    await prisma.$queryRaw`SELECT public_id, email, password, first_name, last_name, role, created_at FROM users WHERE email = ${email}`;
 
   const passwordMatch = await bcrypt.compare(password, userCheck[0].password);
 
+  if (userCheck.length === 0) {
+    throw new Error("Invalid email or password");
+  }
   if (!passwordMatch) {
-    return {
-      success: false,
-      message: "Invalid password",
-    };
+    throw new Error("Invalid password");
   }
 
   const rawData = {
-    id: userCheck[0].id,
     publicId: userCheck[0].public_id,
     email: userCheck[0].email,
     name: `${userCheck[0].first_name} ${userCheck[0].last_name}`,

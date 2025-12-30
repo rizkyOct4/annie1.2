@@ -39,7 +39,6 @@ export async function POST(req: NextRequest) {
       pictureWebp,
       picture,
       id,
-      username
     });
 
     await PostCustomize({

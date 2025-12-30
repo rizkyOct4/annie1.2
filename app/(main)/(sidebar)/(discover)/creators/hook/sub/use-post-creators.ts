@@ -50,25 +50,40 @@ const usePost = ({
                   idProduct: number;
                   totalLike: number;
                   totalDislike: number;
+                  status: null | string;
                 }) => {
                   if (i.idProduct !== mutate.refIdProduct) return i;
 
                   let totalLike = i.totalLike;
                   let totalDislike = i.totalDislike;
+                  let status = i.status;
 
-                  if (mutate.status === "like") {
+                  if (status === null) {
+                    if (mutate.status === "like") {
+                      totalLike += 1;
+                      status = mutate.status;
+                    }
+                    if (mutate.status === "dislike") {
+                      totalDislike += 1;
+                      status = mutate.status;
+                    }
+                  }
+
+                  else if (mutate.status === "like" && status !== null) {
                     totalLike += 1;
                     if (totalDislike !== 0) totalDislike -= 1;
+                    status = mutate.status;
                   }
-                  if (mutate.status === "dislike") {
+                  else if (mutate.status === "dislike" && status !== null) {
                     totalDislike += 1;
                     if (totalLike !== 0) totalLike -= 1;
+                    status = mutate.status;
                   }
                   return {
                     ...i,
                     totalLike,
                     totalDislike,
-                    status: mutate.status,
+                    status: status,
                   };
                 }
               ),

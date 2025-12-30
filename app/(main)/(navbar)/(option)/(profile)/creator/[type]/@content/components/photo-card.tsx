@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useContext, useState, useRef, useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { creatorContext } from "@/app/context";
 import { IoMdOpen } from "react-icons/io";
 import { MdUpdate } from "react-icons/md";

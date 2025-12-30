@@ -26,7 +26,7 @@ const OptionBtn = ({
 }) => {
   const {
     setIsSort,
-    isRefetchItemFolder,
+    refetchItemFolder,
     refetchItemsVideo,
     type,
     setTypeBtn,
@@ -63,7 +63,7 @@ const OptionBtn = ({
         }
         case "refresh": {
           if (type === "photo") {
-            isRefetchItemFolder();
+            refetchItemFolder();
           } else {
             refetchItemsVideo();
           }
@@ -76,7 +76,7 @@ const OptionBtn = ({
       setTypeBtn,
       type,
       setIsSort,
-      isRefetchItemFolder,
+      refetchItemFolder,
       refetchItemsVideo,
     ]
   );
