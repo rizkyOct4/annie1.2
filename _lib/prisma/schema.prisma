@@ -16,20 +16,18 @@ model users {
   password                                                                               String?                           @db.VarChar(255)
   role                                                                                   user_role?                        @default(creator)
   created_at                                                                             DateTime?                         @default(now()) @db.Timestamp(6)
+  
+  ref_users_stats                                                                        users_stats?
   users_description                                                                      users_description?
   users_product                                                                          users_product[]
-  users_product_image_bookmark                                                           users_product_image_bookmark[]
-  users_product_image_comment_users_product_image_comment_tar_iu_receiverTousers         users_product_image_comment[]     @relation("users_product_image_comment_tar_iu_receiverTousers")
-  users_product_image_comment_users_product_image_comment_tar_iu_senderTousers           users_product_image_comment[]     @relation("users_product_image_comment_tar_iu_senderTousers")
-  users_product_image_sub_comment_users_product_image_sub_comment_tar_iu_receiverTousers users_product_image_sub_comment[] @relation("users_product_image_sub_comment_tar_iu_receiverTousers")
-  users_product_image_sub_comment_users_product_image_sub_comment_tar_iu_senderTousers   users_product_image_sub_comment[] @relation("users_product_image_sub_comment_tar_iu_senderTousers")
-  users_product_image_vote_users_product_image_vote_tar_iu_receiverTousers               users_product_image_vote[]        @relation("users_product_image_vote_tar_iu_receiverTousers")
-  users_product_image_vote_users_product_image_vote_tar_iu_senderTousers                 users_product_image_vote[]        @relation("users_product_image_vote_tar_iu_senderTousers")
-  users_product_image_followers_sender                                                   users_followers[]                 @relation("users_sender")
-  users_product_image_followers_receiver                                                 users_followers[]                 @relation("users_receiver")
+  ref_table_interaction_followers_target                                                 users_interactions_followers[]                 @relation("users_target")
+  ref_table_interaction_followers_sender                                                 users_interactions_followers[]                 @relation("users_sender")
+  ref_table_interaction_vote_sender                                                      users_interactions_vote[]           @relation("video_vote_sender")
+  ref_table_interaction_comment                                                          users_interactions_comment[]
+  ref_table_interaction_bookmark                                                         users_interactions_bookmark[]
 
-   @@index([role])
-   @@index([created_at])
+  @@index([role])
+  @@index([created_at])
 }
 
 model users_description {
@@ -45,16 +43,20 @@ model users_description {
   users          users        @relation(fields: [ref_id], references: [id], onDelete: Cascade)
 }
 
-model users_followers {
-  ref_id_sender     String        @db.Uuid   
-  ref_id_receiver   String        @db.Uuid
-  id_follower       Int           @id
-  created_at        DateTime?     @default(now()) @db.Timestamp(6)
-  users_sender      users         @relation("users_sender", fields: [ref_id_sender], references: [id], onDelete: Cascade)
-  users_receiver    users         @relation("users_receiver", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
+model users_stats {
+  ref_id_user     String   @db.Uuid @unique
+  total_views     Int      @default(0)
+  total_likes     Int      @default(0)
+  total_followers Int      @default(0)
+  total_image  Int      @default(0)
+  total_video  Int      @default(0)
+  total_music  Int      @default(0)
 
-  @@unique([ref_id_sender, ref_id_receiver])
+  this_ref_user   users   @relation(fields: [ref_id_user], references: [id], onDelete: Cascade)
+
+  @@index([ref_id_user])
 }
+
 
 model users_product {
   ref_id                       String                         @db.Uuid
@@ -66,8 +68,12 @@ model users_product {
   users                        users                          @relation(fields: [ref_id], references: [id], onDelete: Cascade)
   users_product_image          users_product_image?
   users_product_video          users_product_video?
-  users_product_image_bookmark users_product_image_bookmark[]
-  users_product_image_vote     users_product_image_vote[]
+
+  ref_table_photo_stats        users_photo_stats?
+  ref_table_video_stats        users_video_stats?
+  ref_table_users_interaction_vote    users_interactions_vote[]
+  ref_table_users_interaction_comment   users_interactions_comment[]
+  ref_table_users_interaction_bookmark   users_interactions_bookmark[]
 
   @@index([ref_id], name: "idx_ref_id")
   @@index([created_at], name: "idx_created_at")
@@ -85,54 +91,6 @@ model users_product_image {
   category       String[]      @default([])
   users_product  users_product @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
 }
-
-model users_product_image_bookmark {
-  ref_id_user    String        @db.Uuid
-  ref_id_product Int          
-  id_bookmark    Int           @unique
-  status         Boolean?      @default(false)
-  users          users         @relation(fields: [ref_id_user], references: [id], onDelete: Cascade)
-  users_product  users_product @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
-}
-
-model users_product_image_comment {
-  ref_id_sender                                            String                             @db.Uuid
-  ref_id_receiver                                          String                              @db.Uuid
-  id_image_comment                                         Int                               @id
-  text                                                     String
-  created_at                                               DateTime?                         @default(now()) @db.Timestamp(6)
-  users_users_product_image_comment_tar_iu_receiverTousers users                             @relation("users_product_image_comment_tar_iu_receiverTousers", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
-  users_users_product_image_comment_tar_iu_senderTousers   users                             @relation("users_product_image_comment_tar_iu_senderTousers", fields: [ref_id_sender], references: [id], onDelete: Cascade)
-  users_product_image_sub_comment                          users_product_image_sub_comment[]
-}
-
-model users_product_image_sub_comment {
-  ref_id_comment                                               Int
-  ref_id_sender                                                String     @db.Uuid
-  ref_id_receiver                                              String     @db.Uuid
-  id_sub_image_comment                                         Int                         @id
-  text                                                         String
-  created_at                                                   DateTime?                   @default(now()) @db.Timestamp(6)
-  users_product_image_comment                                  users_product_image_comment @relation(fields: [ref_id_comment], references: [id_image_comment], onDelete: Cascade)
-  users_users_product_image_sub_comment_tar_iu_receiverTousers users                       @relation("users_product_image_sub_comment_tar_iu_receiverTousers", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
-  users_users_product_image_sub_comment_tar_iu_senderTousers   users                       @relation("users_product_image_sub_comment_tar_iu_senderTousers", fields: [ref_id_sender], references: [id], onDelete: Cascade)
-}
-
-model users_product_image_vote {
-  ref_id_sender                                         String      @db.Uuid
-  ref_id_receiver                                       String      @db.Uuid
-  ref_id_product                                        Int
-  id_vote                                               Int           @id
-  status                                                type_status_vote? 
-  created_at                                            DateTime?     @default(now()) @db.Timestamp(6)
-  users_product                                         users_product @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
-  users_users_product_image_vote_tar_iu_receiverTousers users         @relation("users_product_image_vote_tar_iu_receiverTousers", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
-  users_users_product_image_vote_tar_iu_senderTousers   users         @relation("users_product_image_vote_tar_iu_senderTousers", fields: [ref_id_sender], references: [id], onDelete: Cascade)
-
-  @@index([status, ref_id_sender, ref_id_receiver, ref_id_product])
-  @@unique([ref_id_sender, ref_id_product])
-}
-
 
 model users_product_video {
   ref_id_product  Int             @unique
@@ -152,6 +110,100 @@ model users_product_video {
   @@unique([ref_id_product, cloud_public_id])
 }
 
+model users_photo_stats {
+  ref_id_product      Int       @unique
+  views               Int?      @default(0)
+  like                Int?      @default(0)
+  dislike             Int?      @default(0)
+  share               Int?      @default(0)
+  bookmark            Int?      @default(0)
+
+  this_ref_stats      users_product       @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
+
+  @@index([ref_id_product])
+  @@index([views])
+  @@index([like, dislike])
+  @@index([share])
+  @@index([bookmark])
+}
+
+model users_video_stats {
+  ref_id_product      Int       @unique
+  views               Int?      @default(0)
+  like                Int?      @default(0)
+  dislike             Int?      @default(0)
+  share               Int?      @default(0)
+  bookmark            Int?      @default(0)
+
+  this_ref_stats      users_product       @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
+
+  @@index([ref_id_product])
+  @@index([views])
+  @@index([like, dislike])
+  @@index([share])
+  @@index([bookmark])
+}
+
+
+model users_interactions_vote {
+  ref_id_product      Int
+  ref_id_sender       String                    @db.Uuid
+  action_vote         status_action_vote?       @default(null)
+  created_at          DateTime?                 @default(now()) @db.Timestamp(6)
+
+  this_ref_vote_product       users_product       @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
+  this_ref_vote_sender        users       @relation("video_vote_sender", fields: [ref_id_sender], references: [id], onDelete: Cascade)
+ 
+  @@index([ref_id_product])
+  @@unique([ref_id_product, ref_id_sender])
+}
+
+model users_interactions_comment {
+  parent_id_comment   Int           @id
+  type_comment        type_product
+  ref_id_product      Int
+  ref_id_sender       String        @db.Uuid
+  text                String
+  created_at          DateTime?     @default(now()) @db.Timestamp(6)
+
+  @@index([parent_id_comment])
+  @@index([ref_id_sender])
+
+  this_ref_comment               users_product       @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)          
+  this_ref_comment_sender        users               @relation(fields: [ref_id_sender], references: [id], onDelete: Cascade)          
+}
+
+model users_interactions_bookmark {
+  ref_id_product      Int
+  ref_id_sender       String        @db.Uuid
+  status              Boolean
+  type_bookmark       type_product
+  created_at          DateTime?     @default(now()) @db.Timestamp(6)
+
+  @@unique([ref_id_product, ref_id_sender])
+  @@index([status])
+
+  this_ref_bookmark   users     @relation(fields: [ref_id_sender], references: [id], onDelete: Cascade)
+  this_ref_bookmark_product   users_product     @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
+}
+
+model users_interactions_followers {
+  ref_id_receiver   String        @db.Uuid
+  ref_id_sender     String        @db.Uuid
+  status            Boolean?      @default(false)
+  created_at        DateTime?     @default(now()) @db.Timestamp(6)
+  
+  this_ref          users         @relation("users_target", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
+  this_ref_sender   users         @relation("users_sender", fields: [ref_id_sender], references: [id], onDelete: Cascade)
+
+  @@unique([ref_id_receiver, ref_id_sender])
+  @@index([status])
+  @@index([ref_id_sender])
+}
+
+
+
+
 enum type_product {
   photo
   video
@@ -160,6 +212,12 @@ enum type_product {
 enum type_status_vote {
   like
   dislike
+}
+
+enum status_action_vote {
+  like
+  dislike
+  null
 }
 
 enum user_gender {

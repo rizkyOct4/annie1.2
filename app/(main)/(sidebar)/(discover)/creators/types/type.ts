@@ -8,6 +8,7 @@ export type CreatorsType = {
 };
 
 export type TTargetCreatorsDescription = {
+  publicId: string;
   username?: string;
   biodata?: string;
   gender?: string;
@@ -20,6 +21,9 @@ export type TTargetCreatorsDescription = {
       value: string;
     }
   ];
+  createdAt: Date
+  totalPhoto: number;
+  totalVideo: number;
 };
 
 export type OriginalCreatorListData = {

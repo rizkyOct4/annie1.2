@@ -81,8 +81,6 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
           if (status === actionType) return;
           try {
             const postData = {
-              idVote: RandomId(),
-              refIdReceiver: creatorId,
               refIdProduct: idProduct,
               like: actionType === "like" ? 1 : null,
               dislike: actionType === "dislike" ? 1 : null,
@@ -108,7 +106,7 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
         }
       }
     },
-    [creatorId, router, postLikePhoto]
+    [router, postLikePhoto]
   );
 
   return (

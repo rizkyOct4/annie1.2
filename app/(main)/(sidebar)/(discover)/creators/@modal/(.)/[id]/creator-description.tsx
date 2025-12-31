@@ -11,6 +11,8 @@ import {
   FaLinkedin,
   FaYoutube,
   FaGlobe,
+  FaUserPlus,
+  FaUserCheck,
 } from "react-icons/fa";
 
 const CreatorDesc = ({
@@ -21,6 +23,8 @@ const CreatorDesc = ({
   setRenderAction: any;
 }) => {
   const creator = data?.[0];
+
+  const [isFollowed, setIsFollowed] = useState(false);
 
   const dummySocialLink = [
     {
@@ -45,17 +49,25 @@ const CreatorDesc = ({
     },
   ];
 
-  const copyProfile = useCallback(() => {
-    navigator.clipboard.writeText(window.location.href);
-  }, []);
-
-  const dummyStats = {
-    totalPhoto: 24,
-    totalVideo: 8,
-    totalMusic: 5,
-  };
-
-  if (!creator) return null;
+  const handleAction = useCallback(
+    async (actionType: string) => {
+      switch (actionType) {
+        case "copyProfile":
+          navigator.clipboard.writeText(window.location.href);
+          break;
+        case "follow": {
+          setIsFollowed(!isFollowed);
+          const payload = {
+            idReceiver: creator.publicId,
+            status: isFollowed === true ? false : true,
+          };
+          console.log(payload);
+          break;
+        }
+      }
+    },
+    [isFollowed, creator]
+  );
 
   return (
     <div
@@ -68,8 +80,8 @@ const CreatorDesc = ({
       {/* ===== LEFT : AVATAR / COVER ===== */}
       <div className="relative w-80 shrink-0">
         <Image
-          src={creator.picture ?? "/"}
-          alt={creator.username}
+          src={creator?.picture ?? "/"}
+          alt="#"
           fill
           sizes="(max-width: 768px) 100vw"
           className="object-cover"
@@ -99,20 +111,19 @@ const CreatorDesc = ({
         <div className="flex items-start justify-between">
           <div>
             <h2 className="text-lg font-semibold text-gray-200">
-              {creator.username}
+              {creator?.username}
             </h2>
 
-            {/* <p className="text-xs text-gray-500">
-              Joined {new Date(creator.createdAt).toLocaleDateString()}
-            </p> */}
+            <p className="text-xs text-gray-500">
+              Joined {new Date(creator?.createdAt).toLocaleDateString()}
+            </p>
           </div>
 
           {/* ===== ACTION BAR ===== */}
           <div className="flex items-center gap-2">
-            {/* EMAIL */}
-            {/* {creator.email && ( */}
+            {/* {creator?.email && ( */}
             <button
-              // href={`mailto:${creator.email}`}
+              // href={`mailto:${creator?.email}`}
               onClick={() => setRenderAction("email")}
               title="Send Email"
               className="
@@ -127,7 +138,7 @@ const CreatorDesc = ({
               <FaEnvelope className="w-4 h-4" />
             </button>
             {/* <a
-              // href={`mailto:${creator.email}`}
+              // href={`mailto:${creator?.email}`}
               title="Send Email"
               className="
                   p-2 rounded-lg
@@ -144,7 +155,7 @@ const CreatorDesc = ({
 
             {/* COPY PROFILE */}
             <button
-              onClick={copyProfile}
+              onClick={() => handleAction("copyProfile")}
               title="Copy Profile Link"
               className="
                 p-2 rounded-lg
@@ -173,45 +184,66 @@ const CreatorDesc = ({
               ">
               <FaFlag className="w-4 h-4" />
             </button>
+
+            <button
+              onClick={() => handleAction("follow")}
+              title={isFollowed ? "Unfollow Creator" : "Follow Creator"}
+              className={`
+    p-2 rounded-lg
+    bg-white/5
+    border border-white/10
+    transition
+    ${
+      isFollowed
+        ? "text-green-400 bg-green-500/10"
+        : "text-gray-400 hover:text-green-400 hover:bg-green-500/10"
+    }
+  `}>
+              {isFollowed ? (
+                <FaUserCheck className="w-4 h-4" />
+              ) : (
+                <FaUserPlus className="w-4 h-4" />
+              )}
+            </button>
           </div>
         </div>
 
         {/* ===== BIO ===== */}
         <div className="text-sm text-gray-300 leading-relaxed">
-          {creator.biodata || "No bio provided."}
+          {creator?.biodata || "No bio provided."}
         </div>
 
         {/* ===== META INFO ===== */}
         <div className="flex flex-col gap-2 text-sm">
           <div className="flex items-start gap-2">
             <span className="min-w-20 text-gray-400">Gender:</span>
-            <span className="text-gray-300">{creator.gender || "-"}</span>
+            <span className="text-gray-300">{creator?.gender || "-"}</span>
           </div>
 
           <div className="flex items-start gap-2">
             <span className="min-w-20 text-gray-400">Location:</span>
-            <span className="text-gray-300">{creator.location || "-"}</span>
+            <span className="text-gray-300">{creator?.location || "-"}</span>
           </div>
 
           <div className="flex items-start gap-2">
             <span className="min-w-20 text-gray-400">Phone:</span>
-            <span className="text-gray-300">{creator.phoneNumber || "-"}</span>
+            <span className="text-gray-300">{creator?.phoneNumber || "-"}</span>
           </div>
         </div>
 
         <div className="flex gap-6 text-xs text-gray-400">
           <span>
-            <strong className="text-gray-200">{dummyStats.totalPhoto}</strong>{" "}
+            <strong className="text-gray-200">{creator?.totalPhoto}</strong>{" "}
             Photos
           </span>
           <span>
-            <strong className="text-gray-200">{dummyStats.totalVideo}</strong>{" "}
+            <strong className="text-gray-200">{creator?.totalVideo}</strong>{" "}
             Videos
           </span>
-          <span>
+          {/* <span>
             <strong className="text-gray-200">{dummyStats.totalMusic}</strong>{" "}
             Music
-          </span>
+          </span> */}
         </div>
 
         <div className="flex items-center gap-2">

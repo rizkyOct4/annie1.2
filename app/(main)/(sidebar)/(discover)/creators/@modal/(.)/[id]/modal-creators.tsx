@@ -18,12 +18,8 @@ const ModalPopup = () => {
 
   const renderContent = useCallback(() => {
     switch (open.isValue) {
-      // case "Email":
-      //   return <FormEmail />;
-      case "Products":
+      case "Photos":
         return <ListProducts creatorId={id} />;
-      // case "Report":
-      //   return <FormReport creatorId={id} />;
       case "Profile":
         return (
           <CreatorDesc
@@ -31,8 +27,6 @@ const ModalPopup = () => {
             setRenderAction={setRenderAction}
           />
         );
-      //   case "Profile":
-      //     return <CreatorDesc data={creatorDescriptionData} />;
     }
   }, [id, open.isValue, creatorDescriptionData]);
 

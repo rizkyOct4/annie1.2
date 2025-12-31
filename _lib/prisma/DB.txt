@@ -183,3 +183,54 @@ Operator	Arti	Contoh
 // URL CONFIG PATH ======================
 Client (membentuk URL)	encodeURIComponent	Supaya spasi & karakter khusus aman di URL
 Server (membaca URL)	decodeURIComponent	Supaya balik ke bentuk aslinya (“Behind The Scenes”)
+
+
+
+
+
+// model users_product_image_bookmark {
+//   ref_id_user    String        @db.Uuid
+//   ref_id_product Int          
+//   id_bookmark    Int           @unique
+//   status         Boolean?      @default(false)
+//   users          users         @relation(fields: [ref_id_user], references: [id], onDelete: Cascade)
+//   users_product  users_product @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
+// }
+
+// model users_product_image_comment {
+//   ref_id_sender                                            String                             @db.Uuid
+//   ref_id_receiver                                          String                              @db.Uuid
+//   id_image_comment                                         Int                               @id
+//   text                                                     String
+//   created_at                                               DateTime?                         @default(now()) @db.Timestamp(6)
+//   users_users_product_image_comment_tar_iu_receiverTousers users                             @relation("users_product_image_comment_tar_iu_receiverTousers", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
+//   users_users_product_image_comment_tar_iu_senderTousers   users                             @relation("users_product_image_comment_tar_iu_senderTousers", fields: [ref_id_sender], references: [id], onDelete: Cascade)
+//   users_product_image_sub_comment                          users_product_image_sub_comment[]
+// }
+
+// model users_product_image_sub_comment {
+//   ref_id_comment                                               Int
+//   ref_id_sender                                                String     @db.Uuid
+//   ref_id_receiver                                              String     @db.Uuid
+//   id_sub_image_comment                                         Int                         @id
+//   text                                                         String
+//   created_at                                                   DateTime?                   @default(now()) @db.Timestamp(6)
+//   users_product_image_comment                                  users_product_image_comment @relation(fields: [ref_id_comment], references: [id_image_comment], onDelete: Cascade)
+//   users_users_product_image_sub_comment_tar_iu_receiverTousers users                       @relation("users_product_image_sub_comment_tar_iu_receiverTousers", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
+//   users_users_product_image_sub_comment_tar_iu_senderTousers   users                       @relation("users_product_image_sub_comment_tar_iu_senderTousers", fields: [ref_id_sender], references: [id], onDelete: Cascade)
+// }
+
+// model users_product_image_vote {
+//   ref_id_sender                                         String      @db.Uuid
+//   ref_id_receiver                                       String      @db.Uuid
+//   ref_id_product                                        Int
+//   id_vote                                               Int           @id
+//   status                                                type_status_vote? 
+//   created_at                                            DateTime?     @default(now()) @db.Timestamp(6)
+//   users_product                                         users_product @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
+//   users_users_product_image_vote_tar_iu_receiverTousers users         @relation("users_product_image_vote_tar_iu_receiverTousers", fields: [ref_id_receiver], references: [id], onDelete: Cascade)
+//   users_users_product_image_vote_tar_iu_senderTousers   users         @relation("users_product_image_vote_tar_iu_senderTousers", fields: [ref_id_sender], references: [id], onDelete: Cascade)
+
+//   @@index([status, ref_id_sender, ref_id_receiver, ref_id_product])
+//   @@unique([ref_id_sender, ref_id_product])
+// }

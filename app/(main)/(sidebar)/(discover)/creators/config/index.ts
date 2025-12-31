@@ -1,14 +1,15 @@
-import { BASE_URL } from "@/_lib/config";
 
 export const ROUTES_CREATORS = {
   GET: ({
     typeConfig,
     pageParams,
     targetId,
+    key,
   }: {
     typeConfig: string;
     pageParams?: number;
     targetId?: string;
+    key?: "photo" | "video" | "music"
   }) => {
     const limit = 10;
     switch (typeConfig) {
@@ -17,7 +18,8 @@ export const ROUTES_CREATORS = {
       case "creatorsDescription":
         return `/creators/${targetId}/api`;
       case "listCreatorsProduct":
-        return `/creators/${targetId}/api?section=${pageParams}&limit=${limit}`;
+      case "listCreatorsProductVideo":
+        return `/creators/${targetId}/api?key=${key}&section=${pageParams}&limit=${limit}`;
       default:
         return "";
     }

@@ -90,7 +90,7 @@ const useCreatorsDescription = (id: string) => {
     retry: false,
   });
 
-  // * List Creators Product
+  // * List Creators Photos
   const {
     data: listProductCreators,
     fetchNextPage: fetchNextPageProduct,
@@ -103,6 +103,7 @@ const useCreatorsDescription = (id: string) => {
         typeConfig: "listCreatorsProduct",
         pageParams: pageParam,
         targetId: targetId,
+        key: "photo",
       });
       const { data } = await axios.get(URL);
       return data;
@@ -115,12 +116,45 @@ const useCreatorsDescription = (id: string) => {
       return lastPage?.hasMore ? allPages.length + 1 : undefined;
     },
     initialPageParam: 1,
-    enabled: !!targetId && open.isValue === "Products",
+    enabled: !!targetId && open.isValue === "Photos",
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
     refetchOnMount: false, // "always" => refetch jika stale saja
     retry: false,
   });
+
+  // console.log(listProductCreators)
+  // * List Creators Videos
+  const {
+    data: listProductCreatorsVideo,
+  } = useInfiniteQuery({
+    queryKey: ["keyListProductCreatorsVideo", id, targetId],
+    queryFn: async ({ pageParam = 1 }) => {
+      const URL = ROUTES_CREATORS.GET({
+        typeConfig: "listCreatorsProductVideo",
+        pageParams: pageParam,
+        targetId: targetId,
+        key: "video",
+      });
+      const { data } = await axios.get(URL);
+      return data;
+    },
+    staleTime: 1000 * 60 * 3,
+    gcTime: 1000 * 60 * 60,
+
+    // ? ketika melakukan fetchNextPage maka akan memanggil queryFn kembali
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage?.hasMore ? allPages.length + 1 : undefined;
+    },
+    initialPageParam: 1,
+    enabled: !!targetId && open.isValue === "Videos",
+    placeholderData: keepPreviousData,
+    refetchOnWindowFocus: false, // Tidak refetch saat kembali ke aplikasi
+    refetchOnMount: false, // "always" => refetch jika stale saja
+    retry: false,
+  });
+
+  // console.log(listProductCreatorsVideo)
 
   // ? child hook
   const { postLikePhoto } = usePost({

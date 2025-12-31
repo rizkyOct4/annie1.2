@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   GetTargetCreatorsDescription,
   GetListCreatorsProduct,
+  GetListCreatorsVideo,
   PostLikeImage,
 } from "@/_lib/services/sidebar/discover/creators/services-creators";
 import GetToken from "@/_lib/middleware/get-token";
@@ -11,28 +12,41 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const idTargetCreator = (await params).id;
+    const idTarget = (await params).id;
     const { id: idSender } = await GetToken();
 
+    const key = req.nextUrl.searchParams.get("key");
     const section = Number(req.nextUrl.searchParams.get("section"));
     const limit = Number(req.nextUrl.searchParams.get("limit"));
     const offset = (section - 1) * limit;
 
-    if (idTargetCreator && !section) {
+    if (idTarget && !section) {
       const resultdesc = await GetTargetCreatorsDescription({
-        idTargetCreator: idTargetCreator,
+        idTargetCreator: idTarget,
       });
       return NextResponse.json(resultdesc);
     }
 
-    if (section && limit) {
-      const result = await GetListCreatorsProduct({
-        idTarget: idTargetCreator,
-        idSender: idSender,
-        limit: limit,
-        offset: offset,
-      });
-      return NextResponse.json(result);
+    switch (key) {
+      case "photo": {
+        const result = await GetListCreatorsProduct({
+          idTarget: idTarget,
+          idSender: idSender,
+          limit: limit,
+          offset: offset,
+        });
+        return NextResponse.json(result);
+      }
+      case "video": {
+        const result = await GetListCreatorsVideo({
+          idTarget: idTarget,
+          idSender: idSender,
+          type: key,
+          limit: limit,
+          offset: offset,
+        });
+        return NextResponse.json(result);
+      }
     }
   } catch (err: any) {
     return NextResponse.json({ message: err.message }, { status: 500 });
@@ -45,13 +59,11 @@ export async function POST(req: NextRequest) {
     const { id } = await GetToken();
 
     if (action === "post") {
-      const { idVote, refIdReceiver, refIdProduct, status, createdAt } =
+      const { refIdProduct, status, createdAt } =
         await req.json();
 
       await PostLikeImage(
         id,
-        idVote,
-        refIdReceiver,
         refIdProduct,
         status,
         createdAt

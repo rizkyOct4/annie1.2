@@ -130,6 +130,3 @@ const FormReport = ({ setRenderAction }: { setRenderAction: any }) => {
 };
 
 export default FormReport;
-
-
-// todo WHATS NEXT ?? I THING I'VE GOOD ENOUGH LOLLLL
