@@ -7,6 +7,11 @@ export type CreatorsType = {
   picture?: string | undefined;
 };
 
+export type OriginalCreatorsDescription = {
+  data: TTargetCreatorsDescription[];
+  hasMore: boolean;
+};
+
 export type TTargetCreatorsDescription = {
   publicId: string;
   username?: string;
@@ -21,9 +26,11 @@ export type TTargetCreatorsDescription = {
       value: string;
     }
   ];
-  createdAt: Date
+  createdAt: Date;
   totalPhoto: number;
   totalVideo: number;
+  totalFollowers: number;
+  statusFollow: boolean;
 };
 
 export type OriginalCreatorListData = {
@@ -40,9 +47,8 @@ export type TListCreatorProduct = {
   createdAt: Date;
   totalLike: number;
   totalDislike: number;
-  status: string | null
+  status: string | null;
 };
-
 
 // ? POST ACTION LIKE / DISLIKE
 export type TPostActionLikeOrDislike = {
@@ -52,5 +58,10 @@ export type TPostActionLikeOrDislike = {
   like: number | null;
   dislike: number | null;
   status: string;
-  createdAt: Date
-}
+  createdAt: Date;
+};
+
+export type TPostActionFollow = {
+  idReceiver: string;
+  status: boolean;
+};

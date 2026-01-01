@@ -4,6 +4,7 @@ import {
   GetListCreatorsProduct,
   GetListCreatorsVideo,
   PostLikeImage,
+  PostFollowUsers,
 } from "@/_lib/services/sidebar/discover/creators/services-creators";
 import GetToken from "@/_lib/middleware/get-token";
 
@@ -55,21 +56,26 @@ export async function GET(
 
 export async function POST(req: NextRequest) {
   try {
-    const action = req.nextUrl.searchParams.get("action");
+    const key = req.nextUrl.searchParams.get("key");
+
     const { id } = await GetToken();
 
-    if (action === "post") {
-      const { refIdProduct, status, createdAt } =
-        await req.json();
+    switch (key) {
+      case "like": {
+        const { refIdProduct, status, createdAt } = await req.json();
 
-      await PostLikeImage(
-        id,
-        refIdProduct,
-        status,
-        createdAt
-      );
-
-      return NextResponse.json({ success: true });
+        await PostLikeImage(id, refIdProduct, status, createdAt);
+        return NextResponse.json({ success: true });
+      }
+      case "follow": {
+        const { idReceiver, status } = await req.json();
+        await PostFollowUsers({
+          idSender: id,
+          idReceiver: idReceiver,
+          status: status,
+        });
+        return NextResponse.json({ success: true });
+      }
     }
   } catch (err: any) {
     return NextResponse.json({ message: err.message }, { status: 500 });

@@ -12,12 +12,13 @@ import axios from "axios";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
 // import { usePost } from "./Post";
-import { usePost } from "./sub/use-post-creators";
+import { usePost, usePostFollow } from "./sub/use-post-creators";
 import { ModalState } from "../types/interface";
 import type {
   TTargetCreatorsDescription,
   TListCreatorProduct,
 } from "../types/type";
+
 
 const useCreators = (id: string) => {
   const currentPath = "creators";
@@ -125,9 +126,7 @@ const useCreatorsDescription = (id: string) => {
 
   // console.log(listProductCreators)
   // * List Creators Videos
-  const {
-    data: listProductCreatorsVideo,
-  } = useInfiniteQuery({
+  const { data: listProductCreatorsVideo } = useInfiniteQuery({
     queryKey: ["keyListProductCreatorsVideo", id, targetId],
     queryFn: async ({ pageParam = 1 }) => {
       const URL = ROUTES_CREATORS.GET({
@@ -162,6 +161,10 @@ const useCreatorsDescription = (id: string) => {
     targetId: targetId,
     keyListProductCreators: ["keyListProductCreators", id, targetId],
   });
+  const { postFollowUser } = usePostFollow({
+    keyDescriptionUser: ["keyTargetCreatorDescription", id, targetId],
+    targetId: targetId,
+  });
 
   const creatorDescriptionData: TTargetCreatorsDescription[] = useMemo(
     () => creatorDescription ?? [],
@@ -172,7 +175,7 @@ const useCreatorsDescription = (id: string) => {
     [listProductCreators?.pages]
   );
 
-  // console.log(listCreatorProductData);
+  // console.log(creatorDescriptionData);
 
   return {
     creatorDescriptionData,
@@ -185,8 +188,9 @@ const useCreatorsDescription = (id: string) => {
     open,
     setOpen,
 
-    // ? child
+    // ! ACTION
     postLikePhoto,
+    postFollowUser,
   };
 };
 

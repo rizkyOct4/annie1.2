@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useState, useContext } from "react";
 import { FaEnvelope, FaFlag, FaLink, FaCheckCircle } from "react-icons/fa";
 import { TTargetCreatorsDescription } from "../../../types/type";
 import {
@@ -14,6 +14,11 @@ import {
   FaUserPlus,
   FaUserCheck,
 } from "react-icons/fa";
+import { creatorsContext, profileContext } from "@/app/context";
+import { showToast } from "@/_util/Toast";
+import { handleUnauthorized } from "@/_util/Unauthorized";
+import { useRouter, useParams } from "next/navigation";
+import type { TPostActionFollow } from "../../../types/type";
 
 const CreatorDesc = ({
   data,
@@ -22,6 +27,13 @@ const CreatorDesc = ({
   data: TTargetCreatorsDescription[];
   setRenderAction: any;
 }) => {
+  const { postFollowUser } = useContext(creatorsContext);
+  const { data: getData } = useContext(profileContext);
+  const sessionId = getData?.id;
+
+  const router = useRouter();
+  const { id: targetId } = useParams<{ id: string }>();
+
   const creator = data?.[0];
 
   const [isFollowed, setIsFollowed] = useState(false);
@@ -56,17 +68,29 @@ const CreatorDesc = ({
           navigator.clipboard.writeText(window.location.href);
           break;
         case "follow": {
-          setIsFollowed(!isFollowed);
-          const payload = {
-            idReceiver: creator.publicId,
-            status: isFollowed === true ? false : true,
-          };
-          console.log(payload);
+          try {
+            if (sessionId === targetId) return;
+            setIsFollowed(!isFollowed);
+            const payload: TPostActionFollow = {
+              idReceiver: targetId,
+              status: isFollowed,
+            };
+            console.log(payload)
+            // await postFollowUser(payload);
+            // showToast({ type: "success", fallback: "Follow Success!" });
+          } catch (err: any) {
+            if (err.status === 401) {
+              if (handleUnauthorized(err, router)) return;
+              setIsFollowed(false);
+              console.error(err);
+            }
+            console.error(err);
+          }
           break;
         }
       }
     },
-    [isFollowed, creator]
+    [sessionId, targetId, isFollowed, postFollowUser, router]
   );
 
   return (
@@ -187,19 +211,23 @@ const CreatorDesc = ({
 
             <button
               onClick={() => handleAction("follow")}
-              title={isFollowed ? "Unfollow Creator" : "Follow Creator"}
+              title={
+                isFollowed !== creator?.statusFollow
+                  ? "Unfollow Creator"
+                  : "Follow Creator"
+              }
               className={`
     p-2 rounded-lg
     bg-white/5
     border border-white/10
     transition
     ${
-      isFollowed
+      isFollowed !== creator?.statusFollow
         ? "text-green-400 bg-green-500/10"
         : "text-gray-400 hover:text-green-400 hover:bg-green-500/10"
     }
   `}>
-              {isFollowed ? (
+              {isFollowed !== creator?.statusFollow ? (
                 <FaUserCheck className="w-4 h-4" />
               ) : (
                 <FaUserPlus className="w-4 h-4" />
@@ -290,3 +318,6 @@ const CreatorDesc = ({
 };
 
 export default memo(CreatorDesc);
+
+
+// todo bug di toogle itu, kondisikan besok !!!

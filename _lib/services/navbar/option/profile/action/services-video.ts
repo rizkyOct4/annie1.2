@@ -137,8 +137,29 @@ export const PostDbVideo = async ({
   createdAt: Date;
 }) => {
   return prisma.$transaction(async (tx) => {
-    // ? users_product_video DB
+    // * POST STATS ================
+    const checkPost = await tx.$queryRaw<{ ref_id_user: number }[]>`
+      SELECT ref_id_user FROM users_stats WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
+    `;
+    if (checkPost.length === 0) {
+      await tx.$executeRaw`
+        INSERT INTO users_stats (ref_id_user, total_image)
+        VALUES (
+          (SELECT id FROM users WHERE public_id = ${id}),
+          CASE WHEN ${type} = 'video' THEN 1 ELSE 0 END
+        )
+        ON CONFLICT (ref_id_user)
+          DO UPDATE SET
+          total_video = users_stats.total_video + 1`;
+    } else {
+      await tx.$executeRaw`
+        UPDATE users_stats SET
+          total_video = users_stats.total_video + CASE WHEN ${type} = 'video' THEN 1 ELSE 0 END
+        WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
+      `;
+    }
 
+    // ? users_product_video DB
     await tx.$executeRaw`
         INSERT INTO users_product (ref_id, type, folder_name, status, created_at, id_product)
         VALUES((SELECT id FROM users WHERE public_id = ${id}),
@@ -148,6 +169,18 @@ export const PostDbVideo = async ({
         INSERT INTO users_product_video (description, url, thumbnail_url, duration, hashtag, category, ref_id_product, cloud_public_id, format, height, width)
         VALUES (${description}, ${url}, ${thumbnailUrl}, ${duration}, ${hashtag}::varchar[], ${category}::varchar[], ${idProduct}, ${publicId}, ${format}, ${height}, ${width})
     `;
+
+     // * POST VIDEO STATS ================
+    const checkProductStats = await tx.$queryRaw<{ ref_id_product: number }[]>`
+      SELECT ref_id_product
+        FROM users_video_stats WHERE ref_id_product = ${idProduct}
+    `;
+    if (checkProductStats.length === 0) {
+      await tx.$executeRaw`
+        INSERT INTO users_video_stats (ref_id_product)
+        VALUES (${idProduct})
+      `;
+    }
   });
 };
 

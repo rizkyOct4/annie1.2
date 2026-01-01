@@ -12,7 +12,7 @@ model users {
   public_id                                                                               String                            @unique
   first_name                                                                             String                            @db.VarChar(50)
   last_name                                                                              String                            @db.VarChar(50)
-  email                                                                                  String                            @unique @db.VarChar(255)
+  email                                                                                  String                            @db.VarChar(255)
   password                                                                               String?                           @db.VarChar(255)
   role                                                                                   user_role?                        @default(creator)
   created_at                                                                             DateTime?                         @default(now()) @db.Timestamp(6)
@@ -25,6 +25,8 @@ model users {
   ref_table_interaction_vote_sender                                                      users_interactions_vote[]           @relation("video_vote_sender")
   ref_table_interaction_comment                                                          users_interactions_comment[]
   ref_table_interaction_bookmark                                                         users_interactions_bookmark[]
+  ref_table_interaction_report_sender                                                           users_interactions_report[]          @relation("report_sender")
+  ref_table_interaction_report_receiver                                                           users_interactions_report[]          @relation("report_receiver")
 
   @@index([role])
   @@index([created_at])
@@ -51,6 +53,7 @@ model users_stats {
   total_image  Int      @default(0)
   total_video  Int      @default(0)
   total_music  Int      @default(0)
+  total_report  Int      @default(0)
 
   this_ref_user   users   @relation(fields: [ref_id_user], references: [id], onDelete: Cascade)
 
@@ -74,6 +77,7 @@ model users_product {
   ref_table_users_interaction_vote    users_interactions_vote[]
   ref_table_users_interaction_comment   users_interactions_comment[]
   ref_table_users_interaction_bookmark   users_interactions_bookmark[]
+  ref_table_users_interaction_report   users_interactions_report[]
 
   @@index([ref_id], name: "idx_ref_id")
   @@index([created_at], name: "idx_created_at")
@@ -117,6 +121,7 @@ model users_photo_stats {
   dislike             Int?      @default(0)
   share               Int?      @default(0)
   bookmark            Int?      @default(0)
+  report              Int?      @default(0)
 
   this_ref_stats      users_product       @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
 
@@ -125,6 +130,7 @@ model users_photo_stats {
   @@index([like, dislike])
   @@index([share])
   @@index([bookmark])
+  @@index([report])
 }
 
 model users_video_stats {
@@ -134,6 +140,7 @@ model users_video_stats {
   dislike             Int?      @default(0)
   share               Int?      @default(0)
   bookmark            Int?      @default(0)
+  report              Int?      @default(0)
 
   this_ref_stats      users_product       @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
 
@@ -142,6 +149,7 @@ model users_video_stats {
   @@index([like, dislike])
   @@index([share])
   @@index([bookmark])
+  @@index([report])
 }
 
 
@@ -201,6 +209,23 @@ model users_interactions_followers {
   @@index([ref_id_sender])
 }
 
+model users_interactions_report {
+  ref_id_sender       String         @db.Uuid 
+  ref_id_receiver     String         @db.Uuid
+  ref_id_product      Int?
+  type                type_report   
+  text                Json?          @default("[]")
+  created_at          DateTime?      @default(now()) @db.Timestamp(6)
+
+  @@unique([ref_id_sender, ref_id_receiver])
+  @@index([ref_id_sender])
+  @@index([type])
+
+  this_ref_sender     users      @relation("report_sender", fields: [ref_id_sender], references: [id], onDelete: Cascade)    
+  this_ref_receiver   users      @relation("report_receiver", fields: [ref_id_receiver], references: [id], onDelete: Cascade)    
+  this_ref_product    users_product?   @relation(fields: [ref_id_product], references: [id_product], onDelete: Cascade)
+
+}
 
 
 
@@ -229,4 +254,11 @@ enum user_gender {
 enum user_role {
   admin
   creator
+}
+
+enum type_report {
+  users
+  image
+  video
+  music
 }

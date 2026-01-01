@@ -69,8 +69,29 @@ export const PostDb = async ({
   createdAt: Date;
 }) => {
   return prisma.$transaction(async (tx) => {
-    // ? users_product DB
+    // * POST STATS ================
+    const checkPost = await tx.$queryRaw<{ ref_id_user: number }[]>`
+      SELECT ref_id_user FROM users_stats WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
+    `;
+    if (checkPost.length === 0) {
+      await tx.$executeRaw`
+        INSERT INTO users_stats (ref_id_user, total_image)
+        VALUES (
+          (SELECT id FROM users WHERE public_id = ${id}),
+          CASE WHEN ${type} = 'photo' THEN 1 ELSE 0 END
+        )
+        ON CONFLICT (ref_id_user)
+          DO UPDATE SET
+          total_image = users_stats.total_image + 1`;
+    } else {
+      await tx.$executeRaw`
+        UPDATE users_stats SET
+          total_image = users_stats.total_image + CASE WHEN ${type} = 'photo' THEN 1 ELSE 0 END
+        WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
+      `;
+    }
 
+    // ? users_product DB
     const [user_product] = await tx.$queryRaw<any>`
       INSERT INTO users_product
         (ref_id, id_product, type, folder_name, status, created_at)
@@ -85,10 +106,23 @@ export const PostDb = async ({
       RETURNING id_product
     `;
 
+    // ? users_product_image DB
     await tx.$executeRaw`
         INSERT INTO users_product_image 
         (ref_id_product, description, image_name, url, hashtag, category)
         VALUES (${user_product.id_product}, ${description}, ${webpName}, ${cloudUrl}, ${hashtag}::varchar[], ${category}::varchar[])`;
+
+    // * POST PHOTO STATS ================
+    const checkProductStats = await tx.$queryRaw<{ ref_id_product: number }[]>`
+      SELECT ref_id_product
+        FROM users_photo_stats WHERE ref_id_product = ${idProduct}
+    `;
+    if (checkProductStats.length === 0) {
+      await tx.$executeRaw`
+        INSERT INTO users_photo_stats (ref_id_product)
+        VALUES (${idProduct})
+      `;
+    }
   });
 };
 // * RESULT POST DB ===========================
