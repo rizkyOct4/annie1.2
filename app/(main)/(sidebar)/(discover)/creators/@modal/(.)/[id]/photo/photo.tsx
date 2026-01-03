@@ -28,7 +28,7 @@ interface ListProductState {
   idProduct: null | number;
 }
 
-const ListProducts = ({ creatorId }: { creatorId: string }) => {
+const ImageContainer = ({ creatorId }: { creatorId: string }) => {
   const {
     listCreatorProductData,
     fetchNextPageProduct,
@@ -245,4 +245,4 @@ const ListProducts = ({ creatorId }: { creatorId: string }) => {
   );
 };
 
-export default memo(ListProducts);
+export default memo(ImageContainer);

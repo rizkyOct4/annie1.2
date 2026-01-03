@@ -5,9 +5,8 @@ import {
   FaImage,
   FaVideo,
   FaMusic,
-  FaBoxOpen,
 } from "react-icons/fa";
-import { ModalState } from "../../types/interface";
+import type { ModalState } from "../../../types/interface";
 import { memo } from "react";
 
 const OptionsMenu = ({
@@ -34,10 +33,10 @@ const OptionsMenu = ({
       label: "Music",
       icon: <FaMusic size={18} />,
     },
-    {
-      label: "Products",
-      icon: <FaBoxOpen size={18} />,
-    },
+    // {
+    //   label: "Products",
+    //   icon: <FaBoxOpen size={18} />,
+    // },
   ];
 
   return (
@@ -60,7 +59,7 @@ const OptionsMenu = ({
             type="button"
             key={i.label}
             onClick={() =>
-              setOpen((prev) => ({
+              setOpen((prev: any) => ({
                 ...prev,
                 isValue: i.label,
               }))

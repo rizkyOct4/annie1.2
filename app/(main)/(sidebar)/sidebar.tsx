@@ -18,19 +18,9 @@ import { BiLogoDailymotion, BiCategory } from "react-icons/bi";
 import { SiGooglemeet } from "react-icons/si";
 import { TbUserStar } from "react-icons/tb";
 import Link from "next/link";
-import { FiHome } from "react-icons/fi";
-import { FiSliders } from "react-icons/fi";
 import { TbAtom } from "react-icons/tb";
 
-
-
-const Sidebar = ({
-  children,
-  intAuth,
-}: {
-  children: React.ReactNode;
-  intAuth: React.ReactNode;
-}) => {
+const Sidebar = () => {
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
   const sidebarItems = [
@@ -90,10 +80,8 @@ const Sidebar = ({
   ];
 
   return (
-    <div className="w-full fixed h-screen z-100 flex">
-      {/* ===== SIDEBAR ===== */}
-      <aside
-        className="
+    <aside
+      className="
       w-20
       bg-black/80
       backdrop-blur-md
@@ -101,12 +89,13 @@ const Sidebar = ({
       flex flex-col items-center
       pt-6
       overflow-y-auto
+      fixed h-screen z-100
     ">
-        <div className="w-full flex flex-col items-center mb-5">
-          <Link
-            href="/"
-            title="Next Prototype 1.2"
-            className="
+      <div className="w-full flex flex-col items-center mb-5">
+        <Link
+          href="/"
+          title="Next Prototype 1.2"
+          className="
       w-14 h-14
       flex items-center justify-center
       rounded-2xl
@@ -119,19 +108,17 @@ const Sidebar = ({
       hover:scale-105
       active:scale-95
     ">
-            <TbAtom className="text-4xl" />
-          </Link>
-        </div>
-        {sidebarItems.map((item) => (
-          <div
-            key={item.key}
-            className="w-full flex flex-col items-center mb-5">
-            <button
-              title={item.title}
-              onClick={() =>
-                setActivePanel(activePanel === item.key ? null : item.key)
-              }
-              className={`
+          <TbAtom className="text-4xl" />
+        </Link>
+      </div>
+      {sidebarItems.map((item) => (
+        <div key={item.key} className="w-full flex flex-col items-center mb-5">
+          <button
+            title={item.title}
+            onClick={() =>
+              setActivePanel(activePanel === item.key ? null : item.key)
+            }
+            className={`
       w-12 h-12
       flex items-center justify-center
       rounded-xl
@@ -143,23 +130,22 @@ const Sidebar = ({
           : "bg-white/5 border-white/10 text-gray-200 hover:bg-white/10 hover:border-white/20"
       }
     `}>
-              {item.icon}
-            </button>
+            {item.icon}
+          </button>
 
-            {/* SUB MENU */}
-            {activePanel === item.key && (
-              <div
-                className="
+          {activePanel === item.key && (
+            <div
+              className="
               w-full
               mt-3
               flex flex-col items-center gap-2
             ">
-                {item.menus.map((m, i) => (
-                  <Link
-                    key={i}
-                    href={m.to}
-                    title={m.label}
-                    className="
+              {item.menus.map((m, i) => (
+                <Link
+                  key={i}
+                  href={m.to}
+                  title={m.label}
+                  className="
       w-10 h-10
       flex items-center justify-center
       rounded-lg
@@ -169,30 +155,14 @@ const Sidebar = ({
       hover:bg-white/10 hover:text-emerald-500 hover:border-white/20
       transition
     ">
-                    <span className="text-lg">{m.icon}</span>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </aside>
-
-      {/* ===== MAIN CONTENT ===== */}
-      <main
-        className="
-      flex-1
-      min-h-screen
-      pb-20
-      overflow-y-auto
-      bg-black/60
-      pt-4
-      px-10
-    ">
-        {intAuth}
-        {children}
-      </main>
-    </div>
+                  <span className="text-lg">{m.icon}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </aside>
   );
 };
 

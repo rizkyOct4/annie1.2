@@ -17,8 +17,9 @@ import { ModalState } from "../types/interface";
 import type {
   TTargetCreatorsDescription,
   TListCreatorProduct,
+  TListCreatorVideo,
 } from "../types/type";
-
+import { SortASC } from "@/_util/GenerateData";
 
 const useCreators = (id: string) => {
   const currentPath = "creators";
@@ -65,11 +66,13 @@ const useCreatorsDescription = (id: string) => {
   // const queryClient = useQueryClient();
   const { id: targetId } = useParams<{ id: string }>();
 
+  // * STATE ==============
   const [open, setOpen] = useState<ModalState>({
     isOpen: true,
     isValue: "Profile",
     isPublicId: null,
   });
+  const [sortVideo, setSortVideo] = useState<"latest" | "oldest">("latest")
 
   // * Creators Description
   const { data: creatorDescription } = useQuery({
@@ -124,7 +127,6 @@ const useCreatorsDescription = (id: string) => {
     retry: false,
   });
 
-  // console.log(listProductCreators)
   // * List Creators Videos
   const { data: listProductCreatorsVideo } = useInfiniteQuery({
     queryKey: ["keyListProductCreatorsVideo", id, targetId],
@@ -153,8 +155,6 @@ const useCreatorsDescription = (id: string) => {
     retry: false,
   });
 
-  // console.log(listProductCreatorsVideo)
-
   // ? child hook
   const { postLikePhoto } = usePost({
     id: id,
@@ -175,6 +175,16 @@ const useCreatorsDescription = (id: string) => {
     [listProductCreators?.pages]
   );
 
+  // * VIDEO LIST
+  const ListCreatorVideoData: TListCreatorVideo[] = useMemo(
+    () => listProductCreatorsVideo?.pages.flatMap((page) => page.data) ?? [],
+    [listProductCreatorsVideo?.pages]
+  );
+  const sortItemVideo = useMemo(
+    () => SortASC(ListCreatorVideoData),
+    [ListCreatorVideoData]
+  );
+
   // console.log(creatorDescriptionData);
 
   return {
@@ -184,9 +194,15 @@ const useCreatorsDescription = (id: string) => {
     hasNextPageProduct,
     isFetchingNextPageProduct,
 
+    // ? VIDEO
+    ListCreatorVideoData,
+    sortItemVideo,
+
     // ? state
     open,
     setOpen,
+    sortVideo,
+    setSortVideo,
 
     // ! ACTION
     postLikePhoto,

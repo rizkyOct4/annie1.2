@@ -36,9 +36,6 @@ const CreatorsCard = ({ currentPath }: { currentPath: string }) => {
         flex-wrap
         gap-4
         p-4
-        overflow-y-auto
-        w-full
-        h-screen
   ">
       {Array.isArray(listCreatorsData) && listCreatorsData.length > 0
         ? listCreatorsData.map((i, idx) => {

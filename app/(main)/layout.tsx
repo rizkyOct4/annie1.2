@@ -1,5 +1,5 @@
-import Navbar from "@/app/(main)/(navbar)/Navbar";
-import Sidebar from "@/app/(main)/(sidebar)/side-bar";
+import Navbar from "./(navbar)/navbar";
+import Sidebar from "./(sidebar)/sidebar";
 
 export default function MainLayout({
   children,
@@ -11,8 +11,15 @@ export default function MainLayout({
   return (
     <>
       <Navbar />
-      <Sidebar intAuth={intAuth} children={children} />
+      <section className="flex">
+        <Sidebar />
+        <main
+          className="flex-1 h-screen bg-black/60 py-4 px-10 w-full ml-20
+    ">
+          {intAuth}
+          {children}
+        </main>
+      </section>
     </>
   );
 }
-

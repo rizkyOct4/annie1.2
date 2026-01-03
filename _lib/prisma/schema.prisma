@@ -48,7 +48,6 @@ model users_description {
 model users_stats {
   ref_id_user     String   @db.Uuid @unique
   total_views     Int      @default(0)
-  total_likes     Int      @default(0)
   total_followers Int      @default(0)
   total_image  Int      @default(0)
   total_video  Int      @default(0)

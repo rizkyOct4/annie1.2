@@ -31,12 +31,13 @@ const CreatorDesc = ({
   const { data: getData } = useContext(profileContext);
   const sessionId = getData?.id;
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const router = useRouter();
   const { id: targetId } = useParams<{ id: string }>();
 
   const creator = data?.[0];
-
-  const [isFollowed, setIsFollowed] = useState(false);
+  // console.log(creator)
 
   const dummySocialLink = [
     {
@@ -70,27 +71,42 @@ const CreatorDesc = ({
         case "follow": {
           try {
             if (sessionId === targetId) return;
-            setIsFollowed(!isFollowed);
+            setIsLoading(true)
             const payload: TPostActionFollow = {
               idReceiver: targetId,
-              status: isFollowed,
+              status: true,
             };
-            console.log(payload)
-            // await postFollowUser(payload);
-            // showToast({ type: "success", fallback: "Follow Success!" });
+            console.log(payload);
+            await postFollowUser(payload);
+            showToast({ type: "success", fallback: "Follow Success!" });
           } catch (err: any) {
             if (err.status === 401) {
               if (handleUnauthorized(err, router)) return;
-              setIsFollowed(false);
               console.error(err);
             }
             console.error(err);
           }
           break;
         }
+        case "unfollow": {
+          try {
+            if (sessionId === targetId) return;
+            setIsLoading(true)
+            const payload: TPostActionFollow = {
+              idReceiver: targetId,
+              status: false,
+            };
+            // console.log(payload);
+            await postFollowUser(payload);
+            showToast({ type: "success", fallback: "Unfollow Success!" });
+          } catch (err: any) {
+            console.error(err);
+          }
+          break;
+        }
       }
     },
-    [sessionId, targetId, isFollowed, postFollowUser, router]
+    [sessionId, targetId, router, postFollowUser]
   );
 
   return (
@@ -107,6 +123,7 @@ const CreatorDesc = ({
           src={creator?.picture ?? "/"}
           alt="#"
           fill
+          priority
           sizes="(max-width: 768px) 100vw"
           className="object-cover"
         />
@@ -148,6 +165,7 @@ const CreatorDesc = ({
             {/* {creator?.email && ( */}
             <button
               // href={`mailto:${creator?.email}`}
+              type="button"
               onClick={() => setRenderAction("email")}
               title="Send Email"
               className="
@@ -161,24 +179,10 @@ const CreatorDesc = ({
                 ">
               <FaEnvelope className="w-4 h-4" />
             </button>
-            {/* <a
-              // href={`mailto:${creator?.email}`}
-              title="Send Email"
-              className="
-                  p-2 rounded-lg
-                  bg-white/5
-                  border border-white/10
-                  text-gray-300
-                  hover:text-emerald-400
-                  hover:bg-white/10
-                  transition
-                ">
-              <FaEnvelope className="w-4 h-4" />
-            </a> */}
-            {/* )} */}
 
             {/* COPY PROFILE */}
             <button
+              type="button"
               onClick={() => handleAction("copyProfile")}
               title="Copy Profile Link"
               className="
@@ -193,7 +197,6 @@ const CreatorDesc = ({
               <FaLink className="w-4 h-4" />
             </button>
 
-            {/* REPORT */}
             <button
               onClick={() => setRenderAction("report")}
               title="Report Creator"
@@ -210,24 +213,27 @@ const CreatorDesc = ({
             </button>
 
             <button
-              onClick={() => handleAction("follow")}
+              type="button"
+              disabled={isLoading}
+              onClick={() =>
+                handleAction(creator?.statusFollow ? "unfollow" : "follow")
+              }
               title={
-                isFollowed !== creator?.statusFollow
-                  ? "Unfollow Creator"
-                  : "Follow Creator"
+                creator?.statusFollow ? "Unfollow Creator" : "Follow Creator"
               }
               className={`
     p-2 rounded-lg
     bg-white/5
     border border-white/10
-    transition
+    transition flex-center gap-2
     ${
-      isFollowed !== creator?.statusFollow
-        ? "text-green-400 bg-green-500/10"
+      creator?.statusFollow
+        ? " text-green-400 bg-green-500/10"
         : "text-gray-400 hover:text-green-400 hover:bg-green-500/10"
     }
   `}>
-              {isFollowed !== creator?.statusFollow ? (
+              <p>{creator?.totalFollowers}</p>
+              {creator?.statusFollow ? (
                 <FaUserCheck className="w-4 h-4" />
               ) : (
                 <FaUserPlus className="w-4 h-4" />
@@ -318,6 +324,3 @@ const CreatorDesc = ({
 };
 
 export default memo(CreatorDesc);
-
-
-// todo bug di toogle itu, kondisikan besok !!!

@@ -99,6 +99,8 @@ const PostVideoForm = ({
       // ! DIRECT CLOUDINARY
       const cloudinaryRes = await uploadVideoToCloudinary(videoFile, id);
 
+      // console.log(cloudinaryRes)
+
       // === 2. INSERT DATABASE (JSON) ===
       const payload: TPostVideo = {
         idProduct: RandomId(),

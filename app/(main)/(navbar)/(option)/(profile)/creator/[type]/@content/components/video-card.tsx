@@ -5,7 +5,7 @@ import { useCallback, useState, useContext } from "react";
 import OptionBtn from "./options/option-btn";
 import { MdCheck, MdClose } from "react-icons/md";
 import { creatorContext } from "@/app/context";
-import Loading from "@/app/loading";
+import Loading from "@/app/(main)/loading";
 
 export type VideoItem = {
   idProduct: number;

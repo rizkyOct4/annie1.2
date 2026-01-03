@@ -11,7 +11,6 @@ const Layout = ({
     <CreatorsContext>
       {modal}
       {creators}
-      {/* <section className="w-full h-auto">{children}</section> */}
     </CreatorsContext>
   );
 };

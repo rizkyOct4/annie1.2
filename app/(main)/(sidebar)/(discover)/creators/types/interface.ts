@@ -1,5 +1,5 @@
 export interface ModalState {
   isOpen: boolean;
-  isValue: string;
+  isValue: "Profile" | "Photos" | "Videos" | "Music" ;
   isPublicId: number | null;
 }

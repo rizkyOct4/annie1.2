@@ -28,7 +28,7 @@ export const ROUTES_CREATORS = {
   POST: ({ key, params }: { key: "like" | "follow"; params: string }) => {
     switch (key) {
       case "like":
-        return `/creators/${params}/api?key=${key}action=post`;
+        return `/creators/${params}/api?key=${key}&action=post`;
       case "follow":
         return `/creators/${params}/api?key=${key}&action=post`;
       default:

@@ -3,10 +3,6 @@
 import { VideoItem } from "../video-card";
 import { memo } from "react";
 
-// interface Props {
-//   video: VideoItem;
-//   onClose: () => void;
-// }
 
 const VideoPlayerModal = ({
   data,

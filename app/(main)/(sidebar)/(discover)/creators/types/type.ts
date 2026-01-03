@@ -50,6 +50,20 @@ export type TListCreatorProduct = {
   status: string | null;
 };
 
+export type TListCreatorVideo = {
+  category: string[];
+  createdAt: Date;
+  description: string;
+  duration: number;
+  hashtag: string[]
+  idProduct: number;
+  status: null | boolean;
+  thumbnailUrl: string;
+  totalLike: number;
+  totalDislike: number;
+  url: string
+}
+
 // ? POST ACTION LIKE / DISLIKE
 export type TPostActionLikeOrDislike = {
   idVote: number;

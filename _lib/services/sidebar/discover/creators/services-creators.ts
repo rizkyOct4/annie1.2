@@ -4,6 +4,7 @@ import camelcaseKeys from "camelcase-keys";
 import type {
   TAllCreators,
   TListCreatorVideo,
+  TListCreatorPhoto,
   TTargetCreatorsDescription,
 } from "./type";
 
@@ -46,11 +47,11 @@ export const GetAllCreators = async ({
 
 // * CREATOR DESCRIPTION
 export const GetTargetCreatorsDescription = async ({
-  // selfId,
   idTargetCreator,
+  idSender,
 }: {
-  // selfId: string;
   idTargetCreator: string;
+  idSender: string | undefined;
 }) => {
   "use cache";
   cacheLife("minutes");
@@ -63,7 +64,7 @@ export const GetTargetCreatorsDescription = async ({
     FROM users u 
     LEFT JOIN users_description ud ON (ud.ref_id = u.id)
     JOIN users_stats us ON (us.ref_id_user = u.id)
-    LEFT JOIN users_interactions_followers uif ON (uif.ref_id_receiver = (SELECT id FROM users WHERE public_id = ${idTargetCreator}))
+    LEFT JOIN users_interactions_followers uif ON (uif.ref_id_sender = (SELECT id FROM users WHERE public_id = ${idSender}))
     WHERE u.public_id = ${idTargetCreator}
     `;
 
@@ -78,23 +79,24 @@ export const GetListCreatorsProduct = async ({
   offset,
 }: {
   idTarget: string;
-  idSender: string;
+  idSender: string | undefined;
   limit: number;
   offset: number;
 }) => {
-  const query = await prisma.$queryRaw<
-    any[]
-  >`SELECT upi.ref_id_product AS id_product, upi.description, upi.url, upi.hashtag, upi.category, up.created_at, ups.like AS total_like, ups.dislike AS total_dislike, uiv.action_vote::status_action_vote AS status
+  const query =
+    await prisma.$queryRaw<TListCreatorPhoto>`
+    SELECT upi.ref_id_product AS id_product, upi.description, upi.url, upi.hashtag, upi.category, up.created_at, ups.like AS total_like, ups.dislike AS total_dislike,
+    uiv.action_vote::status_action_vote AS status
     FROM users u
     JOIN users_product up ON (up.ref_id = u.id)
     JOIN users_product_image upi ON (upi.ref_id_product = up.id_product)
-    LEFT JOIN users_photo_stats ups ON (ups.ref_id_product = up.id_product)
+    JOIN users_photo_stats ups ON (ups.ref_id_product = up.id_product)
     LEFT JOIN (
-      SELECT ref_id_product, action_vote FROM users_interactions_vote WHERE ref_id_sender = (SELECT id FROM users WHERE public_id = ${idSender})
+      SELECT ref_id_product, action_vote FROM users_interactions_vote
+      WHERE ref_id_sender = (SELECT id FROM users WHERE public_id = ${idSender})
     ) uiv ON (uiv.ref_id_product = up.id_product)
     WHERE u.public_id = ${idTarget}
-    GROUP BY
-      upi.ref_id_product, upi.description, upi.url, upi.hashtag, upi.category, up.created_at, ups.like,ups.dislike,uiv.action_vote
+    ORDER BY up.created_at DESC
     LIMIT ${limit}
     OFFSET ${offset}
     `;
@@ -102,11 +104,9 @@ export const GetListCreatorsProduct = async ({
   if (!query) return [];
 
   const queryTotal = await prisma.$queryRaw<{ amount_products: number }[]>`
-    SELECT COALESCE(COUNT(upi.ref_id_product), 0) AS amount_products 
-    FROM users_product_image upi
-    JOIN users_product up ON (up.id_product = upi.ref_id_product)
-    JOIN users u ON (u.id = up.ref_id)
-    WHERE u.public_id = ${idTarget}
+    SELECT total_image AS amount_products 
+    FROM users_stats
+    WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${idTarget})
     `;
 
   const hasMore = offset + limit < Number(queryTotal[0].amount_products);
@@ -135,18 +135,19 @@ export const GetListCreatorsVideo = async ({
       JOIN users_product up ON (up.id_product = upv.ref_id_product)
       LEFT JOIN users_video_stats uvs ON (uvs.ref_id_product = up.id_product)
       LEFT JOIN (
-        SELECT ref_id_product, action_vote FROM users_interactions_vote WHERE ref_id_sender = (SELECT id FROM users WHERE public_id = ${idSender})
+        SELECT ref_id_product, action_vote FROM users_interactions_vote
+        WHERE ref_id_sender = (SELECT id FROM users WHERE public_id = ${idSender})
       ) uiv ON (uiv.ref_id_product = up.id_product)
-        WHERE up.ref_id = (SELECT id FROM users WHERE public_id = ${idTarget}) AND up.type = ${type}::type_product
-      GROUP BY
-      upv.ref_id_product, upv.description, upv.url, upv.hashtag, upv.category, upv.thumbnail_url, upv.duration, up.created_at, uvs.like, uvs.dislike, uiv.action_vote
-    
+    WHERE up.ref_id = (SELECT id FROM users WHERE public_id = ${idTarget}) AND up.type = ${type}::type_product
+    ORDER BY up.created_at DESC
+    LIMIT ${limit}
+    OFFSET ${offset}
     `;
 
   const checkAmount = await prisma.$queryRaw<{ amount_video: number }[]>`
-    SELECT COALESCE(COUNT(id_product), 0) AS amount_video
-    FROM users_product
-    WHERE ref_id = (SELECT id FROM users WHERE public_id = ${idTarget}) AND type = ${type}::type_product
+    SELECT total_video AS amount_video
+    FROM users_stats
+    WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${idTarget})
   `;
 
   const hasMore = offset + limit < Number(checkAmount[0].amount_video);
@@ -171,33 +172,32 @@ export const PostLikeImage = async (
       `;
     if (queryCheck.length === 0) {
       await tx.$executeRaw`
-          INSERT INTO users_interactions_vote (created_at, ref_id_product, ref_id_sender, action_vote)
+          INSERT INTO users_interactions_vote
+          (created_at, ref_id_product, ref_id_sender, action_vote)
           VALUES (${createdAt}::timestamp, ${refIdProduct},
           (SELECT id FROM users WHERE public_id = ${id}), ${status}::status_action_vote)
         `;
       // ? INSERT IMAGE STATS
       await tx.$executeRaw`
-          INSERT INTO users_photo_stats (ref_id_product, "like", dislike)
-          VALUES (${refIdProduct},
-            CASE WHEN ${status} = 'like' THEN 1 ELSE 0 END,
-            CASE WHEN ${status} = 'dislike' THEN 1 ELSE 0 END
-          )
-          ON CONFLICT (ref_id_product)
-          DO UPDATE SET
-            "like" = users_photo_stats."like" + CASE WHEN ${status} = 'like' THEN 1 ELSE 0 END,
-            dislike = users_photo_stats.dislike + CASE WHEN ${status} = 'dislike' THEN 1 ELSE 0 END;
+          UPDATE users_photo_stats SET
+            "like" = users_photo_stats."like" + 
+              CASE WHEN ${status} = 'like' THEN 1 ELSE 0 END,
+            dislike = users_photo_stats.dislike + 
+              CASE WHEN ${status} = 'dislike' THEN 1 ELSE 0 END
+          WHERE ref_id_product = ${refIdProduct}
         `;
 
-      // ? UPDATE USERS STATS
-      await tx.$executeRaw`
-          UPDATE users_stats SET
-            total_like = users_stats.total_like + CASE WHEN ${status} = 'like'
-          WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
-        `;
+      // // ? UPDATE USERS STATS
+      // await tx.$executeRaw`
+      //     UPDATE users_stats SET
+      //       total_like = users_stats.total_like + CASE WHEN ${status} = 'like'
+      //     WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
+      //   `;
     } else {
       await tx.$executeRaw`
             UPDATE users_interactions_vote SET created_at = ${createdAt}::timestamp, action_vote = ${status}::status_action_vote
-            WHERE ref_id_product = ${refIdProduct} AND ref_id_sender = (SELECT id FROM users WHERE public_id = ${id})
+            WHERE ref_id_product = ${refIdProduct}
+            AND ref_id_sender = (SELECT id FROM users WHERE public_id = ${id})
           `;
       // ! UPDATE IMAGE STATS
       await tx.$executeRaw`
@@ -217,21 +217,21 @@ export const PostLikeImage = async (
               END
           WHERE ref_id_product = ${refIdProduct};
         `;
-      // ! UPDATE USERS STATS
-      await tx.$executeRaw`
-        UPDATE users_stats SET 
-          total_like = 
-            GREATEST(
-              users_stats.total_like
-              + CASE
-                  WHEN ${status} = 'like' THEN 1
-                  WHEN ${status} = 'dislike' THEN -1
-                  ELSE 0
-                END,
-              0
-            )
-        WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
-      `;
+      // // ! UPDATE USERS STATS
+      // await tx.$executeRaw`
+      //   UPDATE users_stats SET 
+      //     total_like = 
+      //       GREATEST(
+      //         users_stats.total_like
+      //         + CASE
+      //             WHEN ${status} = 'like' THEN 1
+      //             WHEN ${status} = 'dislike' THEN -1
+      //             ELSE 0
+      //           END,
+      //         0
+      //       )
+      //   WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${id})
+      // `;
 
       // ! "like" = ("like" + 1) -> nilai saat ini mau ditambah 1
       // ?   UPDATE users_photo_stats
@@ -279,9 +279,16 @@ export const PostFollowUsers = async ({
       // ? UPDATE USERS STATS
       await tx.$executeRaw`
         UPDATE users_stats SET 
-          total_followers = users_stats.total_followers + CASE WHEN ${status} = false THEN -1 ELSE 0 END
+          total_followers = users_stats.total_followers + 
+            CASE 
+              WHEN ${status} = true THEN 1
+              WHEN ${status} = false THEN -1
+            ELSE 0 END
         WHERE ref_id_user = (SELECT id FROM users WHERE public_id = ${idReceiver})
       `;
     }
   });
 };
+
+
+// TODO KONDISIKAN BESOK LAGI SAMA KAU QUERY !!! 

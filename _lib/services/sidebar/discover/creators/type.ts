@@ -20,8 +20,8 @@ export interface TTargetCreatorsDescription {
 }
 
 // ? PHOTO
-export interface ListCreatorProductType {
-  tar_iu_product: number;
+export interface TListCreatorPhoto {
+  id_product: number;
   description: string;
   url: string;
   hashtag: string[];
@@ -30,7 +30,7 @@ export interface ListCreatorProductType {
   total_like: number;
   total_dislike: number;
   status: boolean;
-}
+}[]
 
 // ? VIDEO
 export type TListCreatorVideo = {

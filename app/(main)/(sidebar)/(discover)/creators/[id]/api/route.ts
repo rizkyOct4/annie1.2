@@ -7,6 +7,7 @@ import {
   PostFollowUsers,
 } from "@/_lib/services/sidebar/discover/creators/services-creators";
 import GetToken from "@/_lib/middleware/get-token";
+import { revalidateTag } from "next/cache";
 
 export async function GET(
   req: NextRequest,
@@ -24,6 +25,7 @@ export async function GET(
     if (idTarget && !section) {
       const resultdesc = await GetTargetCreatorsDescription({
         idTargetCreator: idTarget,
+        idSender: idSender,
       });
       return NextResponse.json(resultdesc);
     }
@@ -74,6 +76,8 @@ export async function POST(req: NextRequest) {
           idReceiver: idReceiver,
           status: status,
         });
+
+        revalidateTag(`target-creators-description-${idReceiver}`, "max");
         return NextResponse.json({ success: true });
       }
     }

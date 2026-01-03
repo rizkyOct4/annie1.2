@@ -28,7 +28,3 @@ export default function RootLayout({
 }
 
 // ? Root Layout adalah “entry point” untuk seluruh aplikasi
-
-// ? Di Next.js 13+, app/layout.tsx itu layout root, yang merangkum seluruh aplikasi.
-
-// ? Jadi setiap kali URL berubah, root layout di-render ulang dari awal untuk melakukan SSR dan hydrate client.

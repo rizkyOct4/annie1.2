@@ -5,7 +5,7 @@ import { creatorContext } from "@/app/context";
 import { ChartSpline, ChevronDown } from "lucide-react";
 import { MdDelete } from "react-icons/md";
 import { TListItemFolder } from "../../types/content/type";
-import Loading from "@/app/loading";
+import Loading from "@/app/(main)/loading";
 import PutFolderNameForm from "../../form/photo/put-name-folder-form";
 import PutPhotoForm from "../../form/photo/put-photo-form";
 import PhotoCard from "./photo-card";

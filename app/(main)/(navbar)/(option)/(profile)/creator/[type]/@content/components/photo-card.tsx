@@ -12,7 +12,7 @@ import { useInView } from "react-intersection-observer";
 import { TItemFolderPhoto } from "../../types/content/type";
 import OptionBtn from "./options/option-btn";
 import { MdCheck, MdClose } from "react-icons/md";
-import Loading from "@/app/loading";
+import Loading from "@/app/(main)/loading";
 
 const btnList = [
   { name: "update", icon: <MdUpdate />, title: "Update" },

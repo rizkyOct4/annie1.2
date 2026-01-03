@@ -93,38 +93,6 @@ export const usePost = ({
 
       return { prevListProductCreators };
     },
-    // onMutate: async (mutate: any) => {
-    //   await queryClient.cancelQueries({
-    //     queryKey: listCreatorKey,
-    //   });
-
-    //   const prevListProductData = queryClient.getQueryData(listCreatorKey);
-
-    //   queryClient.setQueryData<InfiniteData<OriginalCreatorListData>>(
-    //     listCreatorKey,
-    //     (oldData) => {
-    //       if (!oldData) return oldData;
-
-    //       return {
-    //         ...oldData,
-    //         pages: oldData.pages.flatMap((page) => ({
-    //           ...page,
-    //           data: page?.data.map((i: { iuProduct: number; totalLike: number }) =>
-    //             i.iuProduct === mutate.tar_iu_product
-    //               ? {
-    //                   ...i,
-    //                   totalLike: (i.totalLike ?? 0) + mutate.like,
-    //                   status: mutate.status,
-    //                 }
-    //               : i
-    //           ),
-    //         })),
-    //       };
-    //     }
-    //   );
-
-    //   return { prevListProductData };
-    // },
     onError: (error, _variables, context) => {
       console.error(error);
       if (context?.prevListProductCreators) {

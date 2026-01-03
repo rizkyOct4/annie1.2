@@ -3,7 +3,8 @@
 import { creatorsContext } from "@/app/context";
 import { useContext, useCallback, useState } from "react";
 import CreatorDesc from "./creator-description";
-import ListProducts from "./products";
+import ImageContainer from "./photo/photo";
+import VideoContainer from "./video/video";
 import OptionsMenu from "./option-menu";
 import FormEmail from "../../../form/form-email";
 import FormReport from "../../../form/form-report";
@@ -12,14 +13,27 @@ import { useParams } from "next/navigation";
 const ModalPopup = () => {
   const { id } = useParams<{ id: string }>();
 
-  const { open, setOpen, creatorDescriptionData } = useContext(creatorsContext);
+  const {
+    open,
+    setOpen,
+    creatorDescriptionData,
+    ListCreatorVideoData,
+    sortItemVideo,
+    sortVideo,
+  } = useContext(creatorsContext);
 
   const [renderAction, setRenderAction] = useState<string>("");
 
   const renderContent = useCallback(() => {
     switch (open.isValue) {
       case "Photos":
-        return <ListProducts creatorId={id} />;
+        return <ImageContainer creatorId={id} />;
+      case "Videos":
+        return (
+          <VideoContainer
+            data={sortVideo === "latest" ? sortItemVideo : ListCreatorVideoData}
+          />
+        );
       case "Profile":
         return (
           <CreatorDesc
@@ -28,7 +42,14 @@ const ModalPopup = () => {
           />
         );
     }
-  }, [id, open.isValue, creatorDescriptionData]);
+  }, [
+    open.isValue,
+    id,
+    sortVideo,
+    sortItemVideo,
+    ListCreatorVideoData,
+    creatorDescriptionData,
+  ]);
 
   const renderActions = useCallback(() => {
     switch (renderAction) {
