@@ -99,7 +99,7 @@ const PostVideoForm = ({
       // ! DIRECT CLOUDINARY
       const cloudinaryRes = await uploadVideoToCloudinary(videoFile, id);
 
-      console.log(cloudinaryRes)
+      // console.log(cloudinaryRes)
 
       // === 2. INSERT DATABASE (JSON) ===
       const payload: TPostVideo = {
