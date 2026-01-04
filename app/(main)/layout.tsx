@@ -14,7 +14,7 @@ export default function MainLayout({
       <section className="flex">
         <Sidebar />
         <main
-          className="flex-1 h-screen bg-black/60 py-4 px-10 w-full ml-20
+          className="flex-1 min-h-screen bg-black/60 py-4 px-10 w-full ml-20
     ">
           {intAuth}
           {children}
